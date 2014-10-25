@@ -1,5 +1,5 @@
 jsonp_handler([
   {"dbid":"yinshun","title":"印順法師佛學著作集","url":"http://tipitaka.github.io/yinshun/"}
- ,{dbid:"cbeta",title:"CBETA大正藏",path:"cbeta2014","url":"http://tipitaka.github.io/cbeta2014/"}
-,{dbid:"tipitaka",title:"Pali Tipitaka",path:"tipitaka","url":"http://tipitaka.github.io/tipitaka/"}
+ ,{"dbid":"cbeta","title":"CBETA大正藏","url":"http://tipitaka.github.io/cbeta2014/"}
+,{"dbid":"tipitaka","title":"Pali Tipitaka","url":"http://tipitaka.github.io/tipitaka/"}
 ]);
