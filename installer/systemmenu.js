@@ -19,7 +19,7 @@ var createMenu=function(apps) {
   var gui = nodeRequire('nw.gui');
   var mb = new gui.Menu({type:"menubar"});
   var appsMenu= new gui.Menu();
-  var appsItem = new gui.MenuItem({ label: 'Apps' });
+  var appsItem = new gui.MenuItem({ label: 'Database' });
 
   apps.map(function(app) {
     if (app.path=="installer") return;
@@ -33,7 +33,7 @@ var createMenu=function(apps) {
   if (mb.createMacBuiltin) mb.createMacBuiltin("node-webkit");
   mb.append(appsItem);
 
-  var downloadItem = new gui.MenuItem({ label: 'Download App' ,click:goAccelonWebsite});
+  var downloadItem = new gui.MenuItem({ label: 'Get Accelon Database' ,click:goAccelonWebsite});
   mb.append(downloadItem);
 
   gui.Window.get().menu = mb; 

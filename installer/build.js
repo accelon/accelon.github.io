@@ -255,6 +255,9 @@ if (typeof process!="undefined") {
 	rootPath=process.cwd();
 	rootPath=nodeRequire("path").resolve(rootPath,"..").replace(/\\/g,"/")+'/';
 }
+var deleteApp=function(app) {
+	console.error("not allow on PC, do it in File Explorer/ Finder");
+}
 var ksanagap={
 	platform:"node-webkit",
 	startDownload:downloader.startDownload,
@@ -263,7 +266,8 @@ var ksanagap={
 	cancelDownload:downloader.cancelDownload,
 	doneDownload:downloader.doneDownload,
 	switchApp:switchApp,
-	rootPath:rootPath
+	rootPath:rootPath,
+	deleteApp: deleteApp
 }
 
 
@@ -416,11 +420,9 @@ var listApps=function() {
 	return JSON.stringify(out);
 }
 
-var deleteApp=function(app) {
-	console.error("not allow on PC, do it in File Explorer/ Finder");
-}
 
-var kfs={readDir:readDir,listApps:listApps, deleteApp: deleteApp};
+
+var kfs={readDir:readDir,listApps:listApps};
 
 module.exports=kfs;
 });
@@ -3729,7 +3731,7 @@ var installed = React.createClass({displayName: 'installed',
   },
   renderWelcome:function() {
     //if (this.state.installed && this.state.installed.length<2)  
-    return ( React.DOM.div(null, React.DOM.hr(null), React.DOM.a({onClick: this.goAccelonWebsite, href: "#"}, "Download Accelon Apps")) );
+    return ( React.DOM.div(null, React.DOM.hr(null), React.DOM.a({onClick: this.goAccelonWebsite, href: "#"}, "Get Accelon Database")) );
     //else return <span></span>;
   },
   goAccelonWebsite:function() {
@@ -3898,8 +3900,8 @@ var download = React.createClass({displayName: 'download',
     return (
       React.DOM.div(null, 
         React.DOM.a({onClick: this.backFromDownload, className: "btn btn-warning"}, "Back"), React.DOM.br(null), 
-        "App to download:", this.props.app.title, " (", this.props.app.dbid, ") ", React.DOM.br(null), 
-        "Total size: ", React.DOM.span(null, this.humanSize()), React.DOM.br(null), 
+        this.props.app.title, " (", this.props.app.dbid, ")", React.DOM.br(null), 
+        "Download Size: ", React.DOM.span(null, this.humanSize()), React.DOM.br(null), 
         React.DOM.div(null, 
             React.DOM.div({className: "col-sm-2 col-sm-offset-5"}, 
               React.DOM.a({onClick: this.startDownload, className: "btn btn-primary btn-lg"}, "Download")
@@ -3917,7 +3919,7 @@ var download = React.createClass({displayName: 'download',
       React.DOM.div(null, 
         React.DOM.a({onClick: this.backFromDownload, className: "btn btn-warning"}, "Back"), React.DOM.br(null), 
 
-        React.DOM.div(null, "Download Finished ", this.props.app.title), 
+        React.DOM.div(null, "Download Completed ", this.props.app.title), 
         React.DOM.div(null, "Status : ", this.state.done, " "), 
         React.DOM.div({className: "col-sm-2 col-sm-offset-5"}, 
             React.DOM.a({onClick: this.openapp, className: "btn btn-success btn-lg"}, "Start"), React.DOM.br(null)
