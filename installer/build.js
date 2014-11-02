@@ -218,6 +218,13 @@ if (typeof process !="undefined") {
 	window.ksanagap.platform="chrome";
 	window.kfs=require("./kfs_html5");
 	ksana.platform="chrome";
+} else {
+	if (typeof ksanagap!="undefined" ) {
+		ksana.platform=ksanagap.platform;
+		if (typeof ksanagap.android !="undefined") {
+			ksana.platform="android";
+		}
+	}
 }
 
 //if (typeof React=="undefined") window.React=require('../react');
@@ -409,7 +416,11 @@ var listApps=function() {
 	return JSON.stringify(out);
 }
 
-var kfs={readDir:readDir,listApps:listApps};
+var deleteApp=function(app) {
+	console.error("not allow on PC, do it in File Explorer/ Finder");
+}
+
+var kfs={readDir:readDir,listApps:listApps, deleteApp: deleteApp};
 
 module.exports=kfs;
 });
@@ -3675,7 +3686,7 @@ var installed = React.createClass({displayName: 'installed',
 
     //delete button is distracting, wait for 3 second
     clearTimeout(this.timer);
-    if (ksanagap.platform=="ios" || ksanagap.platform=="android") {
+    if (ksana.platform=="ios" || ksana.platform=="android") {
       this.timer=setTimeout(this.showDeleteButton,3000);
     }
     this.props.action("select",this.state.installed[target.dataset.i]);
@@ -3690,9 +3701,13 @@ var installed = React.createClass({displayName: 'installed',
       return React.DOM.a({'data-n': idx, onClick: this.askDownload, className: "btn btn-warning"}, "Update")
     }
   },
+  deleteApp:function(e) {
+    var path=e.target.dataset['path'];
+    if (path && path!="installer") kfs.deleteApp(path);
+  },
   renderDeleteButton:function(item,idx) {
-    if (idx==this.state.selected && this.state.deletable) {
-      return React.DOM.a({className: "btn btn-danger pull-right"}, "×")
+    if (idx==this.state.selected && this.state.deletable && item.path!="installer") {
+      return React.DOM.a({'data-path': item.path, onClick: this.deleteApp, className: "btn btn-danger pull-right"}, "×")
     }
   },
   renderCaption:function(item,idx) {
