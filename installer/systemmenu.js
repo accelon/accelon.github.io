@@ -33,9 +33,6 @@ var createMenu=function(apps) {
   if (mb.createMacBuiltin) mb.createMacBuiltin("node-webkit");
   mb.append(appsItem);
 
-  var downloadItem = new gui.MenuItem({ label: 'Get Accelon Database' ,click:goAccelonWebsite});
-  mb.append(downloadItem);
-
   gui.Window.get().menu = mb; 
 }
 var createAppMenu=function(){
@@ -49,9 +46,4 @@ var timer1=setTimeout(function(){
             clearInterval(timer1);
       }
 },200);
-
-var goAccelonWebsite=function() {
-  var gui = nodeRequire('nw.gui'); 
-  gui.Shell.openExternal('http://accelon.github.io'); 
-};
 

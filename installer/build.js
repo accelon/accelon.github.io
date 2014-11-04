@@ -267,7 +267,9 @@ var ksanagap={
 	doneDownload:downloader.doneDownload,
 	switchApp:switchApp,
 	rootPath:rootPath,
-	deleteApp: deleteApp
+	deleteApp: deleteApp,
+	username:"", //not support on PC
+	useremail:""
 }
 
 
@@ -297,6 +299,7 @@ var startDownload=function(dbid,_baseurl,_files) { //return download id
 	nextFile();
 	downloading=true;
 	baseurl=_baseurl;
+	if (baseurl[baseurl.length-1]!='/')baseurl+='/';
 	targetPath=ksanagap.rootPath+dbid+'/';
 	tempPath=ksanagap.rootPath+".tmp/";
 	result="";
@@ -324,8 +327,7 @@ var downloadFile=function(nfile) {
 	var request = http.get(url, function(response) {
 		response.on('data',function(chunk){
 			writeStream.write(chunk);
-			datalength+=chunk.length;
-			totalDownloadByte+=datalength;
+			totalDownloadByte+=chunk.length;
 			if (userCancel) {
 				writeStream.end();
 				setTimeout(function(){nextFile();},100);
@@ -562,7 +564,9 @@ var needToUpdate=function(fromjson,tojson) {
         //file removed in new version
         removed.push(from.files[idx]);
       } else {
-        if (f<to.filedates[newidx]) {
+        var fromdate=Date.parse(f);
+        var todate=Date.parse(to.filedates[newidx]);
+        if (fromdate<todate) {
           newfiles.push( to.files[newidx] );
           newfilesizes.push(to.filesizes[newidx]);
         }        
@@ -3534,7 +3538,6 @@ require.register("installer-main/index.js", function(exports, require, module){
       check no network or no update available 
       switch to the app directly
 */
-
 Require("bootstrap");
 //var othercomponent=Require("other"); 
 /*
@@ -3593,11 +3596,14 @@ var main = React.createClass({displayName: 'main',
     var args=Array.prototype.slice.call(arguments);
     var type=args.shift();
     if (type=="select") {
-      this.setState({image:"../"+args[0].dbid+"/banner.png"});
+      this.setState({image:"../"+args[0].dbid+"/banner.png", dbid:args[0].dbid});
     } else if (type=="askdownload") {
       this.askDownload(args[0]);
     } else if (type=="backFromDownload") {
       this.setState({askingDownload:false,app:null});  
+    } else if (type=="bannerclick") {
+      var app=stores.findAppById(this.state.dbid);
+      if (app && app.homepage)  window.open(app.homepage);
     }
   },
   
@@ -3610,7 +3616,7 @@ var main = React.createClass({displayName: 'main',
   render: function() {
     return (
       React.DOM.div({className: "main"}, 
-        banner({image: this.state.image}), 
+        banner({action: this.action, image: this.state.image}), 
         this.state.askingDownload?this.renderAskDownload():this.renderInstalled()
       )
     );    
@@ -3729,22 +3735,40 @@ var installed = React.createClass({displayName: 'installed',
       React.DOM.td(null, this.renderDeleteButton(item,idx))
     ));
   },
-  renderWelcome:function() {
+  renderAccelon:function() {
     //if (this.state.installed && this.state.installed.length<2)  
-    return ( React.DOM.div(null, React.DOM.hr(null), React.DOM.a({onClick: this.goAccelonWebsite, href: "#"}, "Get Accelon Database")) );
+    return ( React.DOM.footer({className: "footer accelon text-center"}, React.DOM.br(null), React.DOM.br(null), React.DOM.hr(null), 
+      "Powered by ", React.DOM.a({onClick: this.goWebsite, href: "#"}, "Accelon"), ", Ksanaforge 2014" 
+      ) );
     //else return <span></span>;
   },
-  goAccelonWebsite:function() {
+  goWebsite:function() {
     window.open("http://accelon.github.io");
+  },
+  renderEmpty:function() {
+    if (this.state.installed.length) {
+      return ( React.DOM.span(null) );
+    } else {
+      return ( React.DOM.div(null, 
+        React.DOM.a({onClick: this.goWebsite, href: "http://accelon.github.io"}, "Get Accelon Database")
+      ) );
+    }
   },
   render: function() {
     return (
       React.DOM.div(null, 
+      React.DOM.div({className: "row"}, 
+        React.DOM.div({className: "col-md-2"}), 
+        React.DOM.div({className: "col-md-10"}, 
         React.DOM.table({className: "table table-hover"}, 
-        this.state.installed.map(this.renderItem)
+          this.state.installed.map(this.renderItem)
         ), 
-        this.renderWelcome()
+          this.renderEmpty()
+        )
+      ), 
+              this.renderAccelon()
       )
+
     );
   }
 });
@@ -3763,10 +3787,13 @@ var banner = React.createClass({displayName: 'banner',
   imageNotFound:function() {
     this.refs.banner.getDOMNode().src="banner.png";
   },
+  imgclick:function() {
+    this.props.action("bannerclick");
+  },
   render: function() {
     return (
       React.DOM.div(null, 
-        React.DOM.img({ref: "banner", className: "banner", src: this.props.image, 
+        React.DOM.img({onClick: this.imgclick, ref: "banner", className: "banner", src: this.props.image, 
         onError: this.imageNotFound})
       )
     );
@@ -3824,7 +3851,7 @@ var downloaded = Reflux.createStore({
     }
 });
 
-var stores={downloaded:downloaded,updatables:updatables};
+var stores={downloaded:downloaded,updatables:updatables,findAppById:findAppById};
 
 module.exports=stores;
 });
