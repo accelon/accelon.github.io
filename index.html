@@ -1,12 +1,16 @@
 <html>
 <head>
+<script src="jsonp.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=1"/>
 <style>
 	p {font-size:150%}
 </style>
 </head>
-
 <H1>Accelon Databases</H1>
+<H3>
+Github Repo:<input id="repouser"></input>/<input id="reponame"></input><button onClick="getRepo()">Get</button>
+
+<a href="#" id="customurl"></a></H3>
 
 <H3><a href="https://play.google.com/store/apps/details?id=ksanaforge.accelon">Accelon for Android</a></H3>
 
@@ -16,5 +20,28 @@
 
 <p>click to download <a href="accelon://ya.ksana.tw/6law/">6law</a></p>
 
+<script>
+	var repouser=document.getElementById("repouser");
+	var reponame=document.getElementById("reponame");
+	var customurl=document.getElementById("customurl");
+	repouser.value=localStorage.getItem("repouser");
+	reponame.value=localStorage.getItem("reponame");
+
+	var getRepo=function() {
+		localStorage.setItem("repouser",repouser.value);
+		localStorage.setItem("reponame",reponame.value);
+		customurl.innerHTML="";
+		var url="rawgit.com/"+repouser.value+"/"+reponame.value+"/master/";
+		jsonp("http:"+url+"ksana.js",reponame.value,function(ksana){
+			if (ksana) {
+				customurl.href="accelon://"+url;
+				customurl.innerHTML="download "+ksana.title;
+			} else {
+				customurl.href="#";
+				customurl.innerHTML="<font color=red>invalid repo</font>";
+			}
+		});
+	}
+</script>
 
 </html>
