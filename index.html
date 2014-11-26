@@ -32,7 +32,7 @@ Github Repo:<input id="repouser"></input>/<input id="reponame"></input><button o
 		localStorage.setItem("reponame",reponame.value);
 		customurl.innerHTML="";
 		var url="rawgit.com/"+repouser.value+"/"+reponame.value+"/master/";
-		jsonp("http:"+url+"ksana.js",reponame.value,function(ksana){
+		jsonp("http://"+url+"ksana.js",reponame.value,function(ksana){
 			if (ksana) {
 				customurl.href="accelon://"+url;
 				customurl.innerHTML="download "+ksana.title;
