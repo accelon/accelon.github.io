@@ -3775,8 +3775,8 @@ var installed = React.createClass({displayName: 'installed',
     if (item.path=="installer" && !item.hasUpdate) return null;
     if (idx==this.state.selected) classes="info";
     return (React.createElement("tr", {'data-i': idx, onClick: this.select, key: "i"+idx, className: classes}, 
-      React.createElement("td", null, this.renderCaption(item,idx), " ", this.renderUpdateButton(item,idx)), 
-      React.createElement("td", null, this.renderDate(item,idx), " ", this.renderDeleteButton(item,idx))
+      React.createElement("td", null, this.renderCaption(item,idx), " ", this.renderUpdateButton(item,idx), " ", this.renderDate(item,idx)), 
+      React.createElement("td", null, " ", this.renderDeleteButton(item,idx))
     ));
   },
   renderAccelon:function() {
