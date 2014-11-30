@@ -3692,7 +3692,7 @@ var actions=Require("actions");
 var installed = React.createClass({displayName: 'installed',
   getInitialState: function() {
     return {
-      installed: [], selected:0, deletable:false
+      installed: [], selected:0, deletable:false, showextra:false
     };
   },
   switchApp:function(path){
@@ -3721,20 +3721,21 @@ var installed = React.createClass({displayName: 'installed',
     var path=e.target.dataset['path'];
     this.switchApp(path);
   },
-  showDeleteButton:function() {
-    this.setState({deletable:true});
+  showExtraInfo:function() {
+    if (ksana.platform=="ios" || ksana.platform=="android") {
+      this.setState({deletable:true});
+    }
+    this.setState({showextra:true});
   },
-
   select:function(e) {
     var target=e.target;
     while (target && target.nodeName!="TR")target=target.parentElement;
-    this.setState({selected:target.dataset.i,deletable:false});
+    this.setState({selected:target.dataset.i,deletable:false,showextra:false});
 
     //delete button is distracting, wait for 3 second
     clearTimeout(this.timer);
-    if (ksana.platform=="ios" || ksana.platform=="android") {
-      this.timer=setTimeout(this.showDeleteButton,3000);
-    }
+  
+    setTimeout(this.showExtraInfo,3000);
     this.props.action("select",this.state.installed[target.dataset.i]);
   },
   askDownload:function(e) {
@@ -3756,6 +3757,11 @@ var installed = React.createClass({displayName: 'installed',
       return React.createElement("a", {'data-path': item.path, onClick: this.deleteApp, className: "btn btn-danger pull-right"}, "×")
     }
   },
+  renderDate:function(item,idx) {
+    if (idx==this.state.selected && this.state.showextra) {
+      return React.createElement("span", null, item.date)
+    }
+  },
   renderCaption:function(item,idx) {
     if (idx==this.state.selected) {
       return React.createElement("button", {title: item.version +"-"+ item.build, className: "caption", 'data-path': item.path, onClick: this.opendb}, item.title)
@@ -3770,7 +3776,7 @@ var installed = React.createClass({displayName: 'installed',
     if (idx==this.state.selected) classes="info";
     return (React.createElement("tr", {'data-i': idx, onClick: this.select, key: "i"+idx, className: classes}, 
       React.createElement("td", null, this.renderCaption(item,idx), " ", this.renderUpdateButton(item,idx)), 
-      React.createElement("td", null, this.renderDeleteButton(item,idx))
+      React.createElement("td", null, this.renderDate(item,idx), " ", this.renderDeleteButton(item,idx))
     ));
   },
   renderAccelon:function() {
@@ -3966,6 +3972,7 @@ var download = React.createClass({displayName: 'download',
       React.createElement("div", null, 
         React.createElement("a", {onClick: this.backFromDownload, className: "btn btn-warning"}, "Back"), React.createElement("br", null), 
         this.props.app.title, " (", this.props.app.dbid, ")", React.createElement("br", null), 
+        "Build Date:", this.props.date, 
         "Download Size: ", React.createElement("span", null, this.humanSize()), React.createElement("br", null), 
         React.createElement("div", null, 
             React.createElement("div", {className: "col-sm-2 col-sm-offset-5"}, 
