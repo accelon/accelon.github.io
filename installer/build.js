@@ -205,6 +205,7 @@ require.relative = function(parent) {
 };
 require.register("ksanaforge-boot/index.js", function(exports, require, module){
 var ksana={"platform":"remote"};
+window.ksana=ksana;
 
 if (typeof process !="undefined") {
 	if (process.versions["node-webkit"]) {
@@ -219,7 +220,9 @@ if (typeof process !="undefined") {
 	window.kfs=require("./kfs_html5");
 	ksana.platform="chrome";
 } else {
-	if (typeof ksanagap!="undefined" ) {
+	if (typeof ksanagap!="undefined" ) {//mobile
+		var ksanajs=fs.readFileSync("ksana.js","utf8").trim(); //android extra \n at the end
+		ksana.js=JSON.parse(ksanajs.substring(14,ksanajs.length-1));
 		ksana.platform=ksanagap.platform;
 		if (typeof ksanagap.android !="undefined") {
 			ksana.platform="android";
@@ -231,30 +234,40 @@ if (typeof process !="undefined") {
 
 //require("../cortex");
 var Require=function(arg){return require("../"+arg)};
-var boot=function(appId,main,maindiv) {
-	main=main||"main";
-	maindiv=maindiv||"main";
-	ksana.appId=appId;
+var timer=null;
+var enterMainComponent=function() {
+	var main=main||"main";
+	var maindiv=maindiv||"main";
 	ksana.mainComponent=React.render(Require(main)(),document.getElementById(maindiv));
 }
-window.ksana=ksana;
+var boot=function(appId,main,maindiv) {
+	ksana.appId=appId;
+	if (ksanagap.platform=="chrome") { //need to wait for jsonp ksana.js
+		timer=setInterval(function(){
+			if (ksana.ready){
+				clearInterval(timer);
+				enterMainComponent();
+			}
+		},300);
+	} else {
+		enterMainComponent();
+	}
+}
 window.Require=Require;
 module.exports=boot;
 });
 require.register("ksanaforge-boot/ksanagap.js", function(exports, require, module){
+var appname="installer";
 var switchApp=function(path) {
 	var fs=nodeRequire("fs");
 	path="../"+path;
+	appname=path;
 	document.location.href= path+"/index.html"; 
 	process.chdir(path);
 }
 var downloader={};
 var rootPath="";
-if (typeof process!="undefined") {
-	downloader=require("./downloader");
-	rootPath=process.cwd();
-	rootPath=nodeRequire("path").resolve(rootPath,"..").replace(/\\/g,"/")+'/';
-}
+
 var deleteApp=function(app) {
 	console.error("not allow on PC, do it in File Explorer/ Finder");
 }
@@ -265,8 +278,33 @@ var useremail=function() {
 	return ""
 }
 var runtime_version=function() {
-	return "1.2";
+	return "1.4";
 }
+
+//copy from liveupdate
+var jsonp=function(url,dbid,callback,context) {
+  var script=document.getElementById("jsonp2");
+  if (script) {
+    script.parentNode.removeChild(script);
+  }
+  window.jsonp_handler=function(data) {
+    if (typeof data=="object") {
+      data.dbid=dbid;
+      callback.apply(context,[data]);    
+    }  
+  }
+  window.jsonp_error_handler=function() {
+    console.error("url unreachable",url);
+    callback.apply(context,[null]);
+  }
+  script=document.createElement('script');
+  script.setAttribute('id', "jsonp2");
+  script.setAttribute('onerror', "jsonp_error_handler()");
+  url=url+'?'+(new Date().getTime());
+  script.setAttribute('src', url);
+  document.getElementsByTagName('head')[0].appendChild(script); 
+}
+
 var ksanagap={
 	platform:"node-webkit",
 	startDownload:downloader.startDownload,
@@ -279,10 +317,24 @@ var ksanagap={
 	deleteApp: deleteApp,
 	username:username, //not support on PC
 	useremail:username,
-	runtime_version:runtime_version
+	runtime_version:runtime_version,
+	
 }
 
-
+if (typeof process!="undefined") {
+	var ksanajs=nodeRequire("fs").readFileSync("./ksana.js","utf8");
+	downloader=require("./downloader");
+	ksana.js=JSON.parse(ksanajs.substring(14,ksanajs.length-1));
+	rootPath=process.cwd();
+	rootPath=nodeRequire("path").resolve(rootPath,"..").replace(/\\/g,"/")+'/';
+	ksana.ready=true;
+} else{
+	var url=window.location.origin+window.location.pathname+"ksana.js";
+	jsonp(url,appname,function(data){
+		ksana.js=data;
+		ksana.ready=true;
+	});
+}
 module.exports=ksanagap;
 });
 require.register("ksanaforge-boot/downloader.js", function(exports, require, module){
@@ -566,6 +618,7 @@ var runtime_version_ok=function(minruntime) {
   var min=parseFloat(minruntime);
   var runtime=parseFloat( ksanagap.runtime_version()||"1.0");
   if (min>runtime) return false;
+  return true;
 }
 
 var needToUpdate=function(fromjson,tojson) {
@@ -618,8 +671,13 @@ var getRemoteJson=function(apps,cb,context) {
   var makecb=function(app){
     return function(data){
         if (!(data && typeof data =='object' && data.__empty)) output.push(data);
-        var url=(app.baseurl||"http://127.0.0.1:8080/"+app.dbid) +"/ksana.js";
-        jsonp( url ,app.dbid,taskqueue.shift(), context);
+        if (!app.baseurl) {
+          taskqueue.shift({__empty:true});
+        } else {
+          var url=app.baseurl+"/ksana.js";    
+          console.log(url);
+          jsonp( url ,app.dbid,taskqueue.shift(), context);           
+        }
     };
   };
   apps.forEach(function(app){taskqueue.push(makecb(app))});
@@ -3585,7 +3643,7 @@ var Download=Require("download");
 var liveupdate=Require("liveupdate");
 var main = React.createClass({displayName: 'main',
   getInitialState: function() {
-    return {dirs:[],message:"",image:"banner.png",app:null,askingDownload:false};
+    return {dirs:[],message:"",image:"banner.png",app:null,askingDownload:false,autoCheckUpdate:true};
   },
   checkHashTag:function(hash) {
     var idx=hash.indexOf("installfrom=");
@@ -3603,9 +3661,8 @@ var main = React.createClass({displayName: 'main',
         if (dbid2) dbid=dbid2[1];
         console.log("dbid2",dbid);
       }
-
       console.log("install from",installurl);
-      this.setState({message:"checking "+installurl});
+      this.setState({message:"checking "+installurl, autoCheckUpdate:false});
       liveupdate.jsonp(installurl,dbid,function(app){
         console.log("asking download");
         this.askDownload(app);
@@ -3647,7 +3704,7 @@ var main = React.createClass({displayName: 'main',
     return React.createElement(Download, {app: this.state.app, action: this.action})
   },
   renderInstalled:function() {
-    return React.createElement(Installed, {action: this.action})
+    return React.createElement(Installed, {action: this.action, autoCheckUpdate: this.state.autoCheckUpdate})
   },
   render: function() {
     return (
@@ -3705,7 +3762,8 @@ var installed = React.createClass({displayName: 'installed',
     this.setState({installed:downloads});
     this.props.action("select",this.state.installed[0]);
     //wait one minute before checking update, avoid conflict with update from url
-    setTimeout(actions.checkHasUpdate,30000); 
+    console.log("ondownloadchanged",this.props.autoCheckUpdate);
+    if (this.props.autoCheckUpdate) setTimeout(actions.checkHasUpdate,3000);
   },
   componentDidMount:function() {
     this.unsubscribe1 = stores.downloaded.listen(this.onDownloadsChanged);
@@ -3960,13 +4018,19 @@ var download = React.createClass({displayName: 'download',
           ), 
           React.createElement("div", null, "Remaining ", this.remainHumanSize(), " ", React.createElement("br", null), React.createElement("hr", null))
       ), 
-
       React.createElement("div", {className: "col-sm-2 col-sm-offset-5"}, 
             React.createElement("a", {onClick: this.cancelDownload, className: "btn btn-danger"}, "Cancel Download")
         )
     )
     );
   },
+  candownload:function() {
+    if (typeof ksanagap.runtime=="string") return true;//old format
+    
+    var tooold= (this.props.app.minruntime && this.props.app.minruntime>ksanagap.runtime_version);
+    if (tooold) return React.createElement("span", null, "Accelon version too old, please update") ;
+    else return React.createElement("a", {onClick: this.startDownload, className: "btn btn-primary btn-lg"}, "Download") ;
+  },  
   renderAsking:function() {
     return (
       React.createElement("div", null, 
@@ -3976,7 +4040,7 @@ var download = React.createClass({displayName: 'download',
         "Download Size: ", React.createElement("span", null, this.humanSize()), React.createElement("br", null), 
         React.createElement("div", null, 
             React.createElement("div", {className: "col-sm-2 col-sm-offset-5"}, 
-              React.createElement("a", {onClick: this.startDownload, className: "btn btn-primary btn-lg"}, "Download")
+              this.candownload()
             )
         )
         
