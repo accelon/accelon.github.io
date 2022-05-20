@@ -1,52 +1,10 @@
-<html>
+﻿<html lang="en" translate="no">
 <head>
-<script src="jsonp.js"></script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=1"/>
-<style>
-	body {font-size:150%}
-	button, input{font-size:125%;}
-</style>
+	<title>Accelon</title>
+	<meta charset='utf-8'>
+	<meta name="google" content="notranslate">
+	<meta name='viewport' content='width=device-width,initial-scale=1'>
 </head>
-
-<a href="http://ksanaforge.github.io"><img  height="100px" src="installer/banner.png"></img></a>
-<p>You need to install <a href="https://play.google.com/store/apps/details?id=ksanaforge.accelon">Accelon for Android</a>.
-Accelon for iOS is not on AppStore yet, please email <a href="mailto:yapcheahshen@gmail.com">yapcheahshen@gmail.com</a> for  testflight invitation.</p>
-
-<p>Install Database from Github Repo:<input size="8" id="repouser"></input>/<input size="8" id="reponame"></input><button onClick="getRepo()">Get</button><br/>
-<a href="#" id="customurl"></a></p>
-
-<p>Download <a href="accelon://ya.ksana.tw/nanchuan/">Nanchuan 南傳大藏經</a> (30MB)</p>
-<p>Download <a href="accelon://ya.ksana.tw/cbeta2014">CBETA 2014 Taisho 大正藏</a> (300MB)</p>
-
-<H3>test area</H3>
-<p>Download <a href="accelon://rawgit.com/ahsyuyu/moedict-yu/master/">點典 (教育部國語辭典)</a> </p>
-<p>Download <a href="accelon://rawgit.com/yapcheahshen/mebagidx/master/">引得市 公益版</a> </p>
-<p>Download <a href="accelon://ya.ksana.tw/6law/">Slink 六法全書</a> </p>
-<p>Download <a href="accelon://ya.ksana.tw/ccs/">Chinese Classical Serials</a> </p>
-
-
-<script>
-	var repouser=document.getElementById("repouser");
-	var reponame=document.getElementById("reponame");
-	var customurl=document.getElementById("customurl");
-	repouser.value=localStorage.getItem("repouser");
-	reponame.value=localStorage.getItem("reponame");
-
-	var getRepo=function() {
-		localStorage.setItem("repouser",repouser.value);
-		localStorage.setItem("reponame",reponame.value);
-		customurl.innerHTML="";
-		var url="rawgit.com/"+repouser.value+"/"+reponame.value+"/master/";
-		jsonp("http://"+url+"ksana.js",reponame.value,function(ksana){
-			if (ksana) {
-				customurl.href="accelon://"+url;
-				customurl.innerHTML="download "+ksana.title;
-			} else {
-				customurl.href="#";
-				customurl.innerHTML="<font color=red>invalid repo</font>";
-			}
-		});
-	}
-</script>
-
+<H1>Accelon 21</H1>
+<a href="https://github.com/accelon/accelon21">Source code</a>
 </html>
