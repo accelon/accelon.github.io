@@ -914,19 +914,23 @@
 
   // src/webui.js
   var adbbuffer = null;
+  var lblmessage = document.querySelector("#message");
+  var btndownload = document.querySelector("#btndownload");
   window.doconvert = async function() {
     const adb = new openADB(adbbuffer);
     if (!adb || adb.error) {
       console.error(adb.error || "wrong adb");
       return;
     }
-    const files = dumpAll(adb);
-    const zipbuf = storeZip(files);
-    const outfn = adb.header.dbname + ".zip";
-    createBrowserDownload(outfn, zipbuf);
+    lblmessage.innerHTML = "\u8F49\u63DB\u4E2D...";
+    setTimeout(function() {
+      const files = dumpAll(adb);
+      const zipbuf = storeZip(files);
+      const outfn = adb.header.dbname + ".zip";
+      createBrowserDownload(outfn, zipbuf);
+      lblmessage.innerHTML = "";
+    }, 0);
   };
-  var lblmessage = document.querySelector("#message");
-  var btndownload = document.querySelector("#btndownload");
   document.querySelector("input").addEventListener("change", function() {
     var reader = new FileReader();
     reader.onload = function() {
