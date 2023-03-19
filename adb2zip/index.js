@@ -750,20 +750,27 @@
   };
 
   // src/dump.js
-  var breakxml = (s) => {
-    let prev = 0, at = s.indexOf("<\u6A94"), prevname = "";
+  var breakxml = (s, dbname) => {
+    let prev = 0, at = s.indexOf("<\u6A94"), prevname = dbname + ".xml";
     const encoder = new TextEncoder();
     const out = [];
+    let count = 0;
     while (at >= 0) {
       let tagline = s.slice(at, at + 200);
       const at2 = tagline.indexOf('">');
       if (~at2)
         tagline = tagline.slice(0, at2 + 2);
-      const name = tagline.match(/n="(.+?)"/)[1];
+      let name = tagline.match(/n="(.+?)"/);
+      if (!name) {
+        name = dbname + "." + count + ".xml";
+      } else {
+        name = name[1];
+      }
       if (at > prev) {
         const content2 = encoder.encode(s.slice(prev, at));
         out.push({ name: prevname, content: content2 });
       }
+      count++;
       prev = at;
       prevname = name;
       at = s.indexOf("<\u6A94", prev + 3);
@@ -773,7 +780,7 @@
     return out;
   };
   var dumpXML = (adb) => {
-    const files = breakxml(adb.getXML());
+    const files = breakxml(adb.getXML(), adb.header.dbname);
     if (files.length > 1) {
       const content = new TextEncoder().encode(files.map((it) => it.name).join("\n"));
       files.push({ name: adb.header.dbname + ".lst", content });
@@ -829,7 +836,7 @@
   function fileHeader(encodedname, size, modDate, crc) {
     const header = makeBuffer(30 /* fileHeaderLength */);
     header.setUint32(0, 1347093252 /* fileHeaderSignature */);
-    header.setUint32(4, 167772160);
+    header.setUint32(4, 167772168);
     formatDOSDateTime(modDate || /* @__PURE__ */ new Date(), header, 10);
     header.setUint32(14, crc, true);
     header.setUint32(18, size, true);
@@ -841,6 +848,7 @@
     const header = makeBuffer(46 /* centralHeaderLength */);
     header.setUint32(0, 1347092738 /* centralHeaderSignature */);
     header.setUint32(4, 335546880);
+    header.setUint16(8, 8);
     formatDOSDateTime(modDate, header, 12);
     header.setUint32(16, crc, true);
     header.setUint32(20, clampInt32(size), true);
