@@ -1,0 +1,97 @@
+/* fakecss:D:/2023/foliocrop/src/inputnumber.esbuild-svelte-fake-css */
+.numinput.svelte-5fv0ws {
+  user-select: none;
+}
+.stepper.svelte-5fv0ws {
+  cursor: pointer;
+}
+.disabled.svelte-5fv0ws {
+  color: var(--button-unselected);
+  cursor: default;
+}
+
+/* fakecss:D:/2023/foliocrop/src/cropper.esbuild-svelte-fake-css */
+.vstrip1.svelte-6vgw58 {
+  fill: rgba(189, 189, 189, 0.3);
+}
+.vstrip0.svelte-6vgw58 {
+  fill: rgba(255, 136, 62, 0.3);
+}
+.step.svelte-6vgw58 {
+  fill: rgba(128, 128, 128, 0.3);
+}
+.hstrip.svelte-6vgw58 {
+  stroke: black;
+  stroke-width: 1;
+}
+.pointerpos.svelte-6vgw58 {
+  font: 16 courier;
+  fill: purple;
+  stroke: purple;
+}
+.caption.svelte-6vgw58 {
+  font: bold 30px courier;
+  fill: rgba(255, 23, 236, 0.4);
+  stroke: rgba(255, 23, 236, 0.4);
+}
+.step.svelte-6vgw58 {
+  cursor: move;
+  fill: rgba(128, 128, 128, 0.5);
+}
+.grip.svelte-6vgw58 {
+  cursor: grabbing;
+  fill: #fff0;
+}
+.gripx.svelte-6vgw58 {
+  cursor: col-resize;
+  fill: #fff0;
+}
+.gripy.svelte-6vgw58 {
+  cursor: row-resize;
+  fill: #fff0;
+}
+.grip.active.svelte-6vgw58,
+.grip.svelte-6vgw58:hover {
+  fill: #2288;
+}
+.gripx.active.svelte-6vgw58,
+.gripy.active.svelte-6vgw58,
+.gripx.svelte-6vgw58:hover,
+.gripy.svelte-6vgw58:hover {
+  fill: rgba(185, 33, 13, 0.533);
+}
+
+/* fakecss:D:/2023/foliocrop/src/croppers.esbuild-svelte-fake-css */
+.expanding.svelte-4qb2td {
+  fill: rgba(128, 128, 128, 0.3);
+}
+
+/* fakecss:D:/2023/foliocrop/src/imageviewer.esbuild-svelte-fake-css */
+.image.svelte-12dqgwg {
+  width: 100%;
+}
+.croppers.svelte-12dqgwg {
+  position: absolute;
+}
+
+/* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */
+.done.svelte-2pgw5y {
+  color: yellowgreen;
+}
+.filelist.svelte-2pgw5y {
+  cursor: pointer;
+  overflow-y: auto;
+  height: 95vh;
+}
+.selected.svelte-2pgw5y {
+  background-color: rgb(72, 72, 72);
+}
+
+/* fakecss:D:/2023/foliocrop/src/app.esbuild-svelte-fake-css */
+.ImageViewer.svelte-1ssg1eu {
+  width: 75%;
+}
+.FileList.svelte-1ssg1eu {
+  width: 25%;
+  vertical-align: top;
+}
