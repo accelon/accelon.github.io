@@ -619,13 +619,13 @@
           /*$totalframe*/
           ctx[1]
         );
-        attr(button0, "title", "Alt O");
+        attr(button0, "title", "Alt O, Open Folder");
         button0.disabled = /*$dirty*/
         ctx[0];
-        attr(button1, "title", "Alt Z");
+        attr(button1, "title", "Alt Z, Open Zip");
         button1.disabled = /*$dirty*/
         ctx[0];
-        attr(button2, "title", "Alt S");
+        attr(button2, "title", "Alt S, Save");
         button2.disabled = button2_disabled_value = !/*$dirty*/
         ctx[0];
         attr(button3, "title", "Alt R");
@@ -872,6 +872,10 @@
     function handleKeydown(evt) {
       const key = evt.key.toLowerCase();
       const alt = evt.altKey;
+      if (key == "f5") {
+        evt.preventDefault();
+        return;
+      }
       if (evt.srcElement.nodeName == "INPUT" || evt.srcElement.nodeName == "TEXTAREA" || evt.srcElement.nodeName == "BUTTON")
         return;
       if (alt && key == "n")
@@ -904,6 +908,7 @@
       const frms = $frames;
       frms.pop();
       frames.set(frms);
+      selectedframe.set(0);
     };
     return [$dirty, $totalframe, getDir, getZip, handleKeydown, save, reset, deleteframe];
   }
@@ -2327,9 +2332,11 @@
       c() {
         pre = element("pre");
         pre.innerHTML = `
-<span class="title svelte-ntp3ka">\u5716\u6846\u8A2D\u5B9A</span>
+<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
 \u{1F4C1} \u6253\u958B\u6587\u4EF6\u593E(Alt-O)  Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-d)
 \u2796 \u6E1B\u5C11\u4E00\u5716\u6846(Alt-D)  \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)      \u76EE\u524D\u5716\u6846\u6578
+
+<a href="https://www.youtube.com/watch?v=9EoWwk7g-so" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5EA7\u6A19\u986F\u793A\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u9EDE\u5716\u6A94\u5916\u53D6\u6D88\u9078\u53D6\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u4E00\u500B\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u6700\u5C0F\u79FB\u52D5\uFF0C\u6309Ctrl\u66F4\u5FEB\u79FB\u52D5\u3002
@@ -2339,9 +2346,9 @@
 \u9650 Full HD \u89E3\u6790\u5EA6(1920x1080)\u3002
 \u5EFA\u8B70 F11 \u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u5148\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u4E4B\u5F8C\u5C31\u4E0D\u8981\u518D\u4FEE\u6539\u3002
 
-2023.5.9 \uFF08\u6C38\u6A02\u5317\u85CF\uFF09
+2023.5.9 \uFF08\u6A21\u7248\u6C38\u6A02\u5317\u85CF\uFF09
 `;
-        attr(pre, "class", "svelte-ntp3ka");
+        attr(pre, "class", "svelte-yd22m9");
       },
       m(target, anchor) {
         insert(target, pre, anchor);
@@ -2864,6 +2871,8 @@
       let ctx = canvas1.getContext("2d");
       const r = $ratio;
       const frame = frms[nframe];
+      if (!frame)
+        return;
       const vert = $verticalstrip;
       let x = frame[0], y = frame[1], w = frame[2] / vert, h = frame[3], w2 = w * 0.5, h2 = h * 0.5;
       $$invalidate(0, canvas1.width = w2, canvas1);
