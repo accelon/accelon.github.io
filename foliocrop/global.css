@@ -3,7 +3,7 @@ html {
     overflow-x:hidden;
     overflow-y:hidden; 
     /* width: 100%; */
-   height: 100%; 
+   height: 95%; 
    background:#333333;
    color:silver;
    stroke: silver;
@@ -12,6 +12,5 @@ html {
 body {
    font-family:"Tahoma","San-Serif" , "Microsoft Yahei UI Light";
    font-size: 100%;
-   margin: 0px;
+   margin: 10px 5px 5px 0px;
 }
-.parallelptk {padding-right:2px ; padding-left:2px;border:dotted 1px white}
