@@ -524,7 +524,7 @@
   var verticalstrip = writable(5);
   var horizontalstrip = writable(17);
   function defaultframe(idx = 0) {
-    return [1030 * (2 - idx) + 186, 139, 950, 2120];
+    return [1030 * (2 - idx) + 186, 139, 950, 2180];
   }
   var caltotalframe = () => {
     const imgs = get_store_value(images);
@@ -878,7 +878,7 @@
       }
       if (evt.srcElement.nodeName == "INPUT" || evt.srcElement.nodeName == "TEXTAREA" || evt.srcElement.nodeName == "BUTTON")
         return;
-      if (alt && key == "n")
+      if (alt && key == "n" || key == "enter")
         nextimage();
       else if (alt && key == "p")
         previmage();
@@ -893,7 +893,7 @@
       selectimage(0);
       const data = genjson();
       dirty.set(false);
-      const outfn = fileprefix + ".json";
+      const outfn = fileprefix.replace(/\.[a-z]+$/, "") + ".json";
       createBrowserDownload(outfn, data);
     };
     const reset = () => {
@@ -964,7 +964,7 @@
         attr(rect, "class", rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx[11] * /*verticalstrip*/
         ctx[7] + /*idx*/
-        ctx[15]) % 2) + " svelte-1ucpfvh");
+        ctx[15]) % 2) + " svelte-6svlme");
       },
       m(target, anchor) {
         insert(target, rect, anchor);
@@ -1006,7 +1006,7 @@
         2176 && rect_class_value !== (rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx2[11] * /*verticalstrip*/
         ctx2[7] + /*idx*/
-        ctx2[15]) % 2) + " svelte-1ucpfvh")) {
+        ctx2[15]) % 2) + " svelte-6svlme")) {
           attr(rect, "class", rect_class_value);
         }
       },
@@ -1043,7 +1043,7 @@
         (ctx[15] + 1) * /*h*/
         (ctx[4] / /*horizontalstrip*/
         ctx[8]));
-        attr(line, "class", "hstrip svelte-1ucpfvh");
+        attr(line, "class", "hstrip svelte-6svlme");
       },
       m(target, anchor) {
         insert(target, line, anchor);
@@ -1183,8 +1183,8 @@
           ctx[1]
         );
         attr(text0, "y", text0_y_value = /*y*/
-        ctx[2] - 10);
-        attr(text0, "class", "caption svelte-1ucpfvh");
+        ctx[2] - 5);
+        attr(text0, "class", "caption svelte-6svlme");
         toggle_class(
           text0,
           "selected",
@@ -1194,8 +1194,8 @@
         attr(text1, "x", text1_x_value = /*x*/
         ctx[1] + 30);
         attr(text1, "y", text1_y_value = /*y*/
-        ctx[2] - 20);
-        attr(text1, "class", "pointerpos svelte-1ucpfvh");
+        ctx[2] - 5);
+        attr(text1, "class", "pointerpos svelte-6svlme");
         attr(
           rect0,
           "x",
@@ -1220,7 +1220,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect0, "class", "step svelte-1ucpfvh");
+        attr(rect0, "class", "step svelte-6svlme");
         toggle_class(
           rect0,
           "active",
@@ -1246,7 +1246,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect1, "class", "grip svelte-1ucpfvh");
+        attr(rect1, "class", "grip svelte-6svlme");
         toggle_class(
           rect1,
           "active",
@@ -1269,7 +1269,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect2, "class", "gripx svelte-1ucpfvh");
+        attr(rect2, "class", "gripx svelte-6svlme");
         toggle_class(
           rect2,
           "active",
@@ -1295,7 +1295,7 @@
           ctx[3]
         );
         attr(rect3, "height", grabberHeight);
-        attr(rect3, "class", "grip svelte-1ucpfvh");
+        attr(rect3, "class", "grip svelte-6svlme");
         toggle_class(
           rect3,
           "active",
@@ -1318,7 +1318,7 @@
           ctx[3]
         );
         attr(rect4, "height", grabberHeight);
-        attr(rect4, "class", "gripy svelte-1ucpfvh");
+        attr(rect4, "class", "gripy svelte-6svlme");
         toggle_class(
           rect4,
           "active",
@@ -1465,7 +1465,7 @@
         }
         if (dirty2 & /*y*/
         4 && text0_y_value !== (text0_y_value = /*y*/
-        ctx[2] - 10)) {
+        ctx[2] - 5)) {
           attr(text0, "y", text0_y_value);
         }
         if (dirty2 & /*selected*/
@@ -1512,7 +1512,7 @@
         }
         if (dirty2 & /*y*/
         4 && text1_y_value !== (text1_y_value = /*y*/
-        ctx[2] - 20)) {
+        ctx[2] - 5)) {
           attr(text1, "y", text1_y_value);
         }
         if (dirty2 & /*x, w, verticalstrip, y, h, frameidx*/
@@ -2334,14 +2334,15 @@
         pre.innerHTML = `
 <span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
 \u{1F4C1} \u6253\u958B\u6587\u4EF6\u593E(Alt-O)  Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-d)
-\u2796 \u6E1B\u5C11\u4E00\u5716\u6846(Alt-D)  \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)      \u76EE\u524D\u5716\u6846\u6578
+\u2796 \u522A\u9664\u5716\u6846(Alt-D)    \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)      \u76EE\u524D\u5716\u6846\u6578
 
 <a href="https://www.youtube.com/watch?v=9EoWwk7g-so" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5EA7\u6A19\u986F\u793A\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u9EDE\u5716\u6A94\u5916\u53D6\u6D88\u9078\u53D6\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u4E00\u500B\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u6700\u5C0F\u79FB\u52D5\uFF0C\u6309Ctrl\u66F4\u5FEB\u79FB\u52D5\u3002
-\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002
-\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u61C9\u5C0D\u9F4A\u3002
+\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u61C9\u5C0D\u9F4A\u3002
+\u6C92\u6709\u5167\u6587\u548C\u6CE8\u91CB\u7684\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002
+\u8A2D\u7F6E\u597D\u5716\u6846\u5F8C\uFF0CEnter \u5230\u4E0B\u4E00\u62CD\u3002
 
 \u9650 Full HD \u89E3\u6790\u5EA6(1920x1080)\u3002
 \u5EFA\u8B70 F11 \u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u5148\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u4E4B\u5F8C\u5C31\u4E0D\u8981\u518D\u4FEE\u6539\u3002
@@ -2829,7 +2830,7 @@
         canvas0 = element("canvas");
         br = element("br");
         canvas1_1 = element("canvas");
-        attr(div, "class", "thumbnails svelte-1jlbqxo");
+        attr(div, "class", "thumbnails svelte-q44kwf");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -2866,9 +2867,14 @@
       if ($selectedframe)
         nframe = Math.log2($selectedframe);
       const frms = $frames;
+      if (!canvas1 || !canvas2)
+        return;
+      let ctx1 = canvas1.getContext("2d");
+      ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
+      let ctx2 = canvas2.getContext("2d");
+      ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
       if (!~nframe || !img1)
         return;
-      let ctx = canvas1.getContext("2d");
       const r = $ratio;
       const frame = frms[nframe];
       if (!frame)
@@ -2877,12 +2883,11 @@
       let x = frame[0], y = frame[1], w = frame[2] / vert, h = frame[3], w2 = w * 0.5, h2 = h * 0.5;
       $$invalidate(0, canvas1.width = w2, canvas1);
       $$invalidate(0, canvas1.height = h2, canvas1);
-      ctx.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
-      ctx = canvas2.getContext("2d");
+      ctx1.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
       x = frame[0] + w * (vert - 1);
       $$invalidate(1, canvas2.width = w2, canvas2);
       $$invalidate(1, canvas2.height = h2, canvas2);
-      ctx.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
+      ctx2.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
     };
     onMount(() => updateThumbnail());
     function canvas0_binding($$value) {
