@@ -886,6 +886,8 @@
         getDir();
       else if (alt && key == "s" && $dirty)
         save();
+      else if (alt && key == "d")
+        deleteframe();
       else if (key == "arrowdown" || key == "arrowup" || key == "arrowright" || key == "arrowleft")
         handleFrameMove(evt);
     }
@@ -2333,7 +2335,7 @@
         pre = element("pre");
         pre.innerHTML = `
 <span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
-\u{1F4C1} \u6253\u958B\u6587\u4EF6\u593E(Alt-O)  Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-d)
+\u{1F4C1} \u6253\u958B\u6587\u4EF6\u593E(Alt-O)  Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-S)
 \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)        \u76EE\u524D\u5716\u6846\u6578
 
 <a href="https://www.youtube.com/watch?v=9EoWwk7g-so" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
