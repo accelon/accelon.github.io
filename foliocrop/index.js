@@ -618,7 +618,7 @@
         button1.disabled = button1_disabled_value = !/*$dirty*/
         ctx[0];
         attr(button2, "title", "Alt R");
-        attr(button3, "title", "Alt D");
+        attr(button3, "title", "Alt F");
       },
       m(target, anchor) {
         insert(target, button0, anchor);
@@ -854,22 +854,36 @@
         evt.preventDefault();
         return;
       }
-      if (alt && key == "n" || key == "enter")
+      if (alt && key == "n" || key == "enter") {
         nextimage();
-      else if (alt && key == "p")
+        ;
+        evt.preventDefault();
+      } else if (alt && key == "p") {
         previmage();
-      else if (alt && key == "o" && !$dirty)
+        ;
+        evt.preventDefault();
+      } else if (alt && key == "o" && !$dirty) {
         getDir();
-      else if (alt && key == "s" && $dirty)
+        ;
+        evt.preventDefault();
+      } else if (alt && key == "s" && $dirty) {
         save();
-      else if (alt && key == "l" && !$dirty)
+        ;
+        evt.preventDefault();
+      } else if (alt && key == "l" && !$dirty) {
         load();
-      else if (alt && key == "d")
+        ;
+        evt.preventDefault();
+      } else if (alt && key == "d") {
         deleteframe();
+        evt.preventDefault();
+      }
       if (evt.srcElement.nodeName == "INPUT" || evt.srcElement.nodeName == "TEXTAREA" || evt.srcElement.nodeName == "BUTTON")
         return;
-      if (key == "arrowdown" || key == "arrowup" || key == "arrowright" || key == "arrowleft")
+      if (key == "arrowdown" || key == "arrowup" || key == "arrowright" || key == "arrowleft") {
         handleFrameMove(evt);
+        evt.preventDefault();
+      }
     }
     const load = async () => {
       if (!$images.length) {
