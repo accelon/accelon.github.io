@@ -521,6 +521,7 @@
   var dirty = writable(false);
   var pageframe = writable(3);
   var selectedframe = writable(0);
+  var fileprefix = writable("");
   var verticalstrip = writable(5);
   var horizontalstrip = writable(17);
   function defaultframe(idx = 0) {
@@ -588,9 +589,7 @@
     let t3;
     let button2;
     let t5;
-    let button3;
-    let t7;
-    let t8;
+    let t6;
     let mounted;
     let dispose;
     return {
@@ -602,12 +601,9 @@
         t2 = text("\u{1F4BE}");
         t3 = space();
         button2 = element("button");
-        button2.textContent = "\u267B\uFE0F";
+        button2.textContent = "\u2796";
         t5 = space();
-        button3 = element("button");
-        button3.textContent = "\u2796";
-        t7 = space();
-        t8 = text(
+        t6 = text(
           /*$totalframe*/
           ctx[1]
         );
@@ -617,8 +613,7 @@
         attr(button1, "title", "Alt S, Save");
         button1.disabled = button1_disabled_value = !/*$dirty*/
         ctx[0];
-        attr(button2, "title", "Alt R");
-        attr(button3, "title", "Alt F");
+        attr(button2, "title", "Alt F");
       },
       m(target, anchor) {
         insert(target, button0, anchor);
@@ -629,9 +624,7 @@
         insert(target, t3, anchor);
         insert(target, button2, anchor);
         insert(target, t5, anchor);
-        insert(target, button3, anchor);
-        insert(target, t7, anchor);
-        insert(target, t8, anchor);
+        insert(target, t6, anchor);
         if (!mounted) {
           dispose = [
             listen(
@@ -655,14 +648,8 @@
             listen(
               button2,
               "click",
-              /*reset*/
-              ctx[5]
-            ),
-            listen(
-              button3,
-              "click",
               /*deleteframe*/
-              ctx[6]
+              ctx[5]
             )
           ];
           mounted = true;
@@ -682,7 +669,7 @@
         if (dirty2 & /*$totalframe*/
         2)
           set_data(
-            t8,
+            t6,
             /*$totalframe*/
             ctx2[1]
           );
@@ -703,11 +690,7 @@
         if (detaching)
           detach(t5);
         if (detaching)
-          detach(button3);
-        if (detaching)
-          detach(t7);
-        if (detaching)
-          detach(t8);
+          detach(t6);
         mounted = false;
         run_all(dispose);
       }
@@ -717,18 +700,20 @@
     let $frames;
     let $pageframe;
     let $ratio;
+    let $fileprefix;
     let $images;
     let $dirty;
     let $selectedframe;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(8, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(9, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(10, $ratio = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(11, $images = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(6, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(7, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(8, $ratio = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(9, $fileprefix = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(10, $images = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(12, $selectedframe = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(13, $nimage = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(11, $selectedframe = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(12, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
     const previmage = () => {
@@ -758,7 +743,6 @@
       excludeAcceptAllOption: true,
       multiple: false
     };
-    let fileprefix = "noname";
     const sortfilename = (a, b) => {
       if (parseInt(a) && parseInt(b)) {
         return parseInt(a) - parseInt(b);
@@ -783,7 +767,7 @@
         out[out.length - 1].frames = [];
       nimage.set(0);
       images.set(out);
-      fileprefix = dirHandle.name;
+      fileprefix.set(dirHandle.name);
     }
     async function getZip() {
       const filehandles = await window.showOpenFilePicker(zipOpts);
@@ -807,7 +791,7 @@
         out[out.length - 1].frames = [];
       nimage.set(0);
       images.set(out);
-      fileprefix = file.name;
+      fileprefix.set(file.name.replace(".zip", ""));
     }
     const nextimage = () => {
       let n = $nimage;
@@ -866,6 +850,10 @@
         previmage();
         ;
         evt.preventDefault();
+      } else if (alt && key == "r") {
+        reset();
+        ;
+        evt.preventDefault();
       } else if (alt && key == "o" && !$dirty) {
         getDir();
         ;
@@ -911,7 +899,7 @@
       selectimage(0);
       const data = genjson();
       dirty.set(false);
-      const outfn = fileprefix.replace(/\.[a-z]+$/, "") + ".json";
+      const outfn = $fileprefix + ".json";
       createBrowserDownload(outfn, data);
     };
     const reset = () => {
@@ -924,11 +912,11 @@
     };
     const deleteframe = () => {
       const frms = $frames;
-      frms.pop();
+      frms.shift();
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [$dirty, $totalframe, getZip, handleKeydown, save, reset, deleteframe];
+    return [$dirty, $totalframe, getZip, handleKeydown, save, deleteframe];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -2349,12 +2337,10 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u6846\u5C0D\u9F4A</span>
-Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Alt-S) \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
+        pre.innerHTML = `<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u6846\u5C0D\u9F4A</span> 2023.5.12
+Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 
-\u9AD8\u7D1A\u64CD\u4F5C\uFF1A
-Alt-O \u6253\u958B\u542B\u5716\u6A94\u6587\u4EF6\u593E
-Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716\u6A94)
+\u9032\u968E\u64CD\u4F5C\uFF1A \u6253\u958B\u6587\u4EF6\u593E (Alt-O) \u91CD\u7F6E\u5716\u6846 (Alt-R)   \u8F09\u5165\u5EA7\u6A19\u6A94 (Alt-L)
 
 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
@@ -2370,8 +2356,6 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
 \u9650 Full HD \u89E3\u6790\u5EA6(1920x1080)\u3002
 \u5EFA\u8B70\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002
 \u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
-
-2023.5.11 \uFF08\u6A21\u7248\u6C38\u6A02\u5317\u85CF\uFF1A\u719F\u7DF4\u5DE5\u6BCF\u5C0F\u6642\u7D04500\u62CD\uFF09
 `;
         attr(pre, "class", "svelte-yd22m9");
       },
@@ -2668,14 +2652,14 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
         t1 = space();
         span1 = element("span");
         t2 = text(t2_value);
-        attr(span0, "class", "svelte-2k62az");
+        attr(span0, "class", "svelte-10y0ufl");
         toggle_class(
           span0,
           "done",
           /*image*/
           ctx[3].frames
         );
-        attr(div, "class", "svelte-2k62az");
+        attr(div, "class", "svelte-10y0ufl");
         toggle_class(
           div,
           "selected",
@@ -2799,7 +2783,7 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
       c() {
         div = element("div");
         key_block.c();
-        attr(div, "class", "filelist svelte-2k62az");
+        attr(div, "class", "filelist svelte-10y0ufl");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -2844,12 +2828,19 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
 
   // src/thumbnail.svelte
   function create_fragment7(ctx) {
+    let t0;
+    let t1;
     let div;
     let canvas0;
     let br;
     let canvas1_1;
     return {
       c() {
+        t0 = text(
+          /*$fileprefix*/
+          ctx[2]
+        );
+        t1 = space();
         div = element("div");
         canvas0 = element("canvas");
         br = element("br");
@@ -2857,21 +2848,35 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
         attr(div, "class", "thumbnails svelte-q44kwf");
       },
       m(target, anchor) {
+        insert(target, t0, anchor);
+        insert(target, t1, anchor);
         insert(target, div, anchor);
         append(div, canvas0);
-        ctx[3](canvas0);
+        ctx[4](canvas0);
         append(div, br);
         append(div, canvas1_1);
-        ctx[4](canvas1_1);
+        ctx[5](canvas1_1);
       },
-      p: noop,
+      p(ctx2, [dirty2]) {
+        if (dirty2 & /*$fileprefix*/
+        4)
+          set_data(
+            t0,
+            /*$fileprefix*/
+            ctx2[2]
+          );
+      },
       i: noop,
       o: noop,
       d(detaching) {
         if (detaching)
+          detach(t0);
+        if (detaching)
+          detach(t1);
+        if (detaching)
           detach(div);
-        ctx[3](null);
         ctx[4](null);
+        ctx[5](null);
       }
     };
   }
@@ -2880,10 +2885,12 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
     let $verticalstrip;
     let $ratio;
     let $selectedframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(2, $frames = $$value));
-    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(5, $verticalstrip = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(6, $ratio = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(7, $selectedframe = $$value));
+    let $fileprefix;
+    component_subscribe($$self, frames, ($$value) => $$invalidate(3, $frames = $$value));
+    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(6, $verticalstrip = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(7, $ratio = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(8, $selectedframe = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(2, $fileprefix = $$value));
     let canvas1, canvas2;
     const updateThumbnail = () => {
       const img1 = document.getElementById("image1");
@@ -2928,12 +2935,12 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
     }
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*$frames*/
-      4) {
+      8) {
         $:
           updateThumbnail($frames);
       }
     };
-    return [canvas1, canvas2, $frames, canvas0_binding, canvas1_1_binding];
+    return [canvas1, canvas2, $fileprefix, $frames, canvas0_binding, canvas1_1_binding];
   }
   var Thumbnail = class extends SvelteComponent {
     constructor(options) {
