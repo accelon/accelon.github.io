@@ -4710,7 +4710,7 @@
       }
     }
     const tryit = async () => {
-      const response = await fetch("https://raw.githubusercontent.com/accelon/cb-n/main/off/dn3.yh.off");
+      const response = await fetch("dn3.yh.off");
       loadText(await response.text(), "dn3.yh.off");
     };
     const click_handler = (idx2) => loadReference(idx2);
