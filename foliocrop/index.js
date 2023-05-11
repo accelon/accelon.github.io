@@ -779,6 +779,8 @@
         }
       }
       out.sort(sortfilename);
+      if (out.length > 2)
+        out[out.length - 1].frames = [];
       nimage.set(0);
       images.set(out);
       fileprefix = dirHandle.name;
@@ -801,6 +803,8 @@
         }
       });
       out.sort(sortfilename);
+      if (out.length > 2)
+        out[out.length - 1].frames = [];
       nimage.set(0);
       images.set(out);
       fileprefix = file.name;
@@ -2664,14 +2668,14 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
         t1 = space();
         span1 = element("span");
         t2 = text(t2_value);
-        attr(span0, "class", "svelte-2pgw5y");
+        attr(span0, "class", "svelte-2k62az");
         toggle_class(
           span0,
           "done",
           /*image*/
           ctx[3].frames
         );
-        attr(div, "class", "svelte-2pgw5y");
+        attr(div, "class", "svelte-2k62az");
         toggle_class(
           div,
           "selected",
@@ -2795,7 +2799,7 @@ Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716
       c() {
         div = element("div");
         key_block.c();
-        attr(div, "class", "filelist svelte-2pgw5y");
+        attr(div, "class", "filelist svelte-2k62az");
       },
       m(target, anchor) {
         insert(target, div, anchor);

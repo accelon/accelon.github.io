@@ -78,15 +78,15 @@ a.svelte-yd22m9 {
 }
 
 /* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */
-.done.svelte-2pgw5y {
+.done.svelte-2k62az {
   color: yellowgreen;
 }
-.filelist.svelte-2pgw5y {
+.filelist.svelte-2k62az {
   cursor: pointer;
   overflow-y: auto;
-  height: 95vh;
+  height: 94vh;
 }
-.selected.svelte-2pgw5y {
+.selected.svelte-2k62az {
   background-color: rgb(72, 72, 72);
 }
 
