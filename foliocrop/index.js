@@ -717,17 +717,17 @@
     let $frames;
     let $pageframe;
     let $ratio;
+    let $images;
     let $dirty;
     let $selectedframe;
-    let $images;
     let $nimage;
     let $totalframe;
     component_subscribe($$self, frames, ($$value) => $$invalidate(8, $frames = $$value));
     component_subscribe($$self, pageframe, ($$value) => $$invalidate(9, $pageframe = $$value));
     component_subscribe($$self, ratio, ($$value) => $$invalidate(10, $ratio = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(11, $images = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(11, $selectedframe = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(12, $images = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(12, $selectedframe = $$value));
     component_subscribe($$self, nimage, ($$value) => $$invalidate(13, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
@@ -738,11 +738,21 @@
         n = 0;
       selectimage(n);
     };
-    const pickerOpts = {
+    const zipOpts = {
       types: [
         {
           description: "Zip",
           accept: { "zip/*": [".zip"] }
+        }
+      ],
+      excludeAcceptAllOption: true,
+      multiple: false
+    };
+    const jsonOpts = {
+      types: [
+        {
+          description: "json",
+          accept: { "json/*": [".json"] }
         }
       ],
       excludeAcceptAllOption: true,
@@ -774,7 +784,7 @@
       fileprefix = dirHandle.name;
     }
     async function getZip() {
-      const filehandles = await window.showOpenFilePicker(pickerOpts);
+      const filehandles = await window.showOpenFilePicker(zipOpts);
       const file = await filehandles[0].getFile();
       const zip2 = new ZipReader(new BlobReader(file));
       const entries = await zip2.getEntries();
@@ -844,8 +854,6 @@
         evt.preventDefault();
         return;
       }
-      if (evt.srcElement.nodeName == "INPUT" || evt.srcElement.nodeName == "TEXTAREA" || evt.srcElement.nodeName == "BUTTON")
-        return;
       if (alt && key == "n" || key == "enter")
         nextimage();
       else if (alt && key == "p")
@@ -854,11 +862,33 @@
         getDir();
       else if (alt && key == "s" && $dirty)
         save();
+      else if (alt && key == "l" && !$dirty)
+        load();
       else if (alt && key == "d")
         deleteframe();
-      else if (key == "arrowdown" || key == "arrowup" || key == "arrowright" || key == "arrowleft")
+      if (evt.srcElement.nodeName == "INPUT" || evt.srcElement.nodeName == "TEXTAREA" || evt.srcElement.nodeName == "BUTTON")
+        return;
+      if (key == "arrowdown" || key == "arrowup" || key == "arrowright" || key == "arrowleft")
         handleFrameMove(evt);
     }
+    const load = async () => {
+      if (!$images.length) {
+        alert("need images");
+        return;
+      }
+      const filehandles = await window.showOpenFilePicker(jsonOpts);
+      const file = await filehandles[0].getFile();
+      const json = JSON.parse(await file.text());
+      const imgs = $images;
+      if (json.length !== imgs.length) {
+        alert("zip json missmatch");
+        return;
+      }
+      for (let i = 0; i < imgs.length; i++) {
+        imgs[i].frames = json[i].frames;
+      }
+      images.set(imgs);
+    };
     const save = () => {
       selectimage(0);
       const data = genjson();
@@ -2302,8 +2332,11 @@
       c() {
         pre = element("pre");
         pre.innerHTML = `<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
-Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-S) \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D) \u76EE\u524D\u5716\u6846\u6578
-Alt-O \u6253\u958B\u6587\u4EF6\u593E
+Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Alt-S) \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D) \u76EE\u524D\u5716\u6846\u6578
+
+\u9AD8\u7D1A\u64CD\u4F5C\uFF1A
+Alt-O \u6253\u958B\u542B\u5716\u6A94\u6587\u4EF6\u593E 
+Alt-L \u8B80\u5EA7\u6A19\u6A94 (\u5FC5\u9808\u5148\u958B\u5C0D\u61C9\u4E4B\u58D3\u7E2E\u5716\u6A94)
 
 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
