@@ -4336,15 +4336,15 @@
   // src/toolbar.svelte
   function get_each_context(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[13] = list[i];
-    child_ctx[15] = i;
+    child_ctx[15] = list[i];
+    child_ctx[17] = i;
     return child_ctx;
   }
   function create_each_block(ctx) {
     let span;
     let t0_value = (
       /*reference*/
-      ctx[13].name + ""
+      ctx[15].name + ""
     );
     let t0;
     let t1;
@@ -4353,9 +4353,9 @@
     function click_handler() {
       return (
         /*click_handler*/
-        ctx[7](
+        ctx[9](
           /*idx*/
-          ctx[15]
+          ctx[17]
         )
       );
     }
@@ -4369,8 +4369,8 @@
           span,
           "selectedRef",
           /*$selectedRef*/
-          ctx[3] == /*idx*/
-          ctx[15]
+          ctx[4] == /*idx*/
+          ctx[17]
         );
       },
       m(target, anchor) {
@@ -4385,17 +4385,17 @@
       p(new_ctx, dirty2) {
         ctx = new_ctx;
         if (dirty2 & /*$references*/
-        4 && t0_value !== (t0_value = /*reference*/
-        ctx[13].name + ""))
+        8 && t0_value !== (t0_value = /*reference*/
+        ctx[15].name + ""))
           set_data(t0, t0_value);
         if (dirty2 & /*$selectedRef*/
-        8) {
+        16) {
           toggle_class(
             span,
             "selectedRef",
             /*$selectedRef*/
-            ctx[3] == /*idx*/
-            ctx[15]
+            ctx[4] == /*idx*/
+            ctx[17]
           );
         }
       },
@@ -4411,20 +4411,45 @@
   }
   function create_if_block2(ctx) {
     let a;
+    let t1;
+    let button;
+    let mounted;
+    let dispose;
     return {
       c() {
         a = element("a");
         a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
+        t1 = space();
+        button = element("button");
+        button.textContent = "\u8A66\u8A66\u770B";
         attr(a, "href", "https://www.youtube.com/watch?v=huCbF8bAx-8");
         attr(a, "target", "_new");
         attr(a, "class", "svelte-1fm8z6a");
       },
       m(target, anchor) {
         insert(target, a, anchor);
+        insert(target, t1, anchor);
+        insert(target, button, anchor);
+        if (!mounted) {
+          dispose = listen(
+            button,
+            "click",
+            /*tryit*/
+            ctx[8]
+          );
+          mounted = true;
+        }
       },
+      p: noop,
       d(detaching) {
         if (detaching)
           detach(a);
+        if (detaching)
+          detach(t1);
+        if (detaching)
+          detach(button);
+        mounted = false;
+        dispose();
       }
     };
   }
@@ -4438,6 +4463,7 @@
     let span2;
     let button0;
     let t5;
+    let button0_disabled_value;
     let t6;
     let button1;
     let t7;
@@ -4450,31 +4476,31 @@
     let dispose;
     let each_value = (
       /*$references*/
-      ctx[2]
+      ctx[3]
     );
     let each_blocks = [];
     for (let i = 0; i < each_value.length; i += 1) {
       each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     }
     let if_block = !/*$references*/
-    ctx[2].length && create_if_block2(ctx);
+    ctx[3].length && create_if_block2(ctx);
     function inputnumber_value_binding(value) {
-      ctx[8](value);
+      ctx[10](value);
     }
     let inputnumber_props = {
       onChange: setCursorLine,
       min: 1,
       max: (
         /*max*/
-        ctx[0]
+        ctx[1]
       )
     };
     if (
       /*$cursorline*/
-      ctx[1] !== void 0
+      ctx[2] !== void 0
     ) {
       inputnumber_props.value = /*$cursorline*/
-      ctx[1];
+      ctx[2];
     }
     inputnumber = new inputnumber_default({ props: inputnumber_props });
     binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
@@ -4484,7 +4510,7 @@
         span0 = element("span");
         span0.textContent = "\u9010\u53E5\u5C0D\u9F4A";
         span1 = element("span");
-        span1.textContent = "\u3000ver 2023.5.10";
+        span1.textContent = "\u3000ver 2023.5.11";
         t2 = space();
         for (let i = 0; i < each_blocks.length; i += 1) {
           each_blocks[i].c();
@@ -4502,12 +4528,14 @@
         t8 = space();
         create_component(inputnumber.$$.fragment);
         set_style(span0, "font-size", "120%");
-        button0.disabled = /*$dirty*/
-        ctx[4];
+        button0.disabled = button0_disabled_value = /*$dirty*/
+        ctx[5] && /*filehandle*/
+        ctx[0];
         attr(button0, "title", "alt-p");
         attr(button0, "class", "clickable");
         button1.disabled = button1_disabled_value = !/*$dirty*/
-        ctx[4];
+        ctx[5] || !/*filehandle*/
+        ctx[0];
         attr(button1, "title", "alt-s");
         set_style(span2, "float", "right");
         attr(div, "class", "Toolbar svelte-1fm8z6a");
@@ -4541,13 +4569,13 @@
               button0,
               "click",
               /*openOff*/
-              ctx[5]
+              ctx[6]
             ),
             listen(
               button1,
               "click",
               /*save*/
-              ctx[6]
+              ctx[7]
             )
           ];
           mounted = true;
@@ -4555,9 +4583,9 @@
       },
       p(ctx2, [dirty2]) {
         if (dirty2 & /*$selectedRef, loadReference, $references*/
-        12) {
+        24) {
           each_value = /*$references*/
-          ctx2[2];
+          ctx2[3];
           let i;
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context(ctx2, each_value, i);
@@ -4575,8 +4603,9 @@
           each_blocks.length = each_value.length;
         }
         if (!/*$references*/
-        ctx2[2].length) {
+        ctx2[3].length) {
           if (if_block) {
+            if_block.p(ctx2, dirty2);
           } else {
             if_block = create_if_block2(ctx2);
             if_block.c();
@@ -4586,26 +4615,28 @@
           if_block.d(1);
           if_block = null;
         }
-        if (!current || dirty2 & /*$dirty*/
-        16) {
-          button0.disabled = /*$dirty*/
-          ctx2[4];
+        if (!current || dirty2 & /*$dirty, filehandle*/
+        33 && button0_disabled_value !== (button0_disabled_value = /*$dirty*/
+        ctx2[5] && /*filehandle*/
+        ctx2[0])) {
+          button0.disabled = button0_disabled_value;
         }
-        if (!current || dirty2 & /*$dirty*/
-        16 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
-        ctx2[4])) {
+        if (!current || dirty2 & /*$dirty, filehandle*/
+        33 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
+        ctx2[5] || !/*filehandle*/
+        ctx2[0])) {
           button1.disabled = button1_disabled_value;
         }
         const inputnumber_changes = {};
         if (dirty2 & /*max*/
-        1)
+        2)
           inputnumber_changes.max = /*max*/
-          ctx2[0];
+          ctx2[1];
         if (!updating_value && dirty2 & /*$cursorline*/
-        2) {
+        4) {
           updating_value = true;
           inputnumber_changes.value = /*$cursorline*/
-          ctx2[1];
+          ctx2[2];
           add_flush_callback(() => updating_value = false);
         }
         inputnumber.$set(inputnumber_changes);
@@ -4638,11 +4669,11 @@
     let $references;
     let $selectedRef;
     let $dirty;
-    component_subscribe($$self, cursorline, ($$value) => $$invalidate(1, $cursorline = $$value));
-    component_subscribe($$self, cm2, ($$value) => $$invalidate(11, $cm2 = $$value));
-    component_subscribe($$self, references, ($$value) => $$invalidate(2, $references = $$value));
-    component_subscribe($$self, selectedRef, ($$value) => $$invalidate(3, $selectedRef = $$value));
-    component_subscribe($$self, dirty, ($$value) => $$invalidate(4, $dirty = $$value));
+    component_subscribe($$self, cursorline, ($$value) => $$invalidate(2, $cursorline = $$value));
+    component_subscribe($$self, cm2, ($$value) => $$invalidate(12, $cm2 = $$value));
+    component_subscribe($$self, references, ($$value) => $$invalidate(3, $references = $$value));
+    component_subscribe($$self, selectedRef, ($$value) => $$invalidate(4, $selectedRef = $$value));
+    component_subscribe($$self, dirty, ($$value) => $$invalidate(5, $dirty = $$value));
     const pickerOpts = {
       types: [
         {
@@ -4653,17 +4684,23 @@
       excludeAcceptAllOption: true,
       multiple: false
     };
-    let workingfile, filehandle, max = 0;
+    let workingfile, filehandle = null, max = 0;
+    const loadText = (text2, filename) => {
+      $$invalidate(1, max = loadCMText(text2));
+      references.set(referencesOf(filename));
+      loadReference(0);
+      setCursorLine(parseInt(localStorage.getItem("aligner_" + filename)) || 1);
+    };
     async function openOff() {
       const filehandles = await window.showOpenFilePicker(pickerOpts);
-      filehandle = filehandles[0];
+      $$invalidate(0, filehandle = filehandles[0]);
       workingfile = await filehandle.getFile();
-      $$invalidate(0, max = loadCMText(await workingfile.text()));
-      references.set(referencesOf(filehandle.name));
-      loadReference(0);
-      setCursorLine(parseInt(localStorage.getItem("aligner_" + filehandle.name)) || 1);
+      const text2 = await workingfile.text();
+      loadText(text2, filehandle.name);
     }
     async function save() {
+      if (!filehandle)
+        return;
       if (await verifyPermission(filehandle, true)) {
         const writable2 = await filehandle.createWritable();
         await writable2.write($cm2.getValue());
@@ -4672,12 +4709,17 @@
         localStorage.setItem("aligner_" + filehandle.name, $cursorline);
       }
     }
+    const tryit = async () => {
+      const response = await fetch("https://raw.githubusercontent.com/accelon/cb-n/main/off/dn3.yh.off");
+      loadText(await response.text(), "dn3.yh.off");
+    };
     const click_handler = (idx2) => loadReference(idx2);
     function inputnumber_value_binding(value) {
       $cursorline = value;
       cursorline.set($cursorline);
     }
     return [
+      filehandle,
       max,
       $cursorline,
       $references,
@@ -4685,6 +4727,7 @@
       $dirty,
       openOff,
       save,
+      tryit,
       click_handler,
       inputnumber_value_binding
     ];
