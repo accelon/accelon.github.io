@@ -4364,7 +4364,7 @@
         span = element("span");
         t0 = text(t0_value);
         t1 = space();
-        attr(span, "class", "clickable svelte-tasznj");
+        attr(span, "class", "clickable svelte-1fm8z6a");
         toggle_class(
           span,
           "selectedRef",
@@ -4409,20 +4409,40 @@
       }
     };
   }
+  function create_if_block2(ctx) {
+    let a;
+    return {
+      c() {
+        a = element("a");
+        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
+        attr(a, "href", "https://www.youtube.com/watch?v=huCbF8bAx-8");
+        attr(a, "target", "_new");
+        attr(a, "class", "svelte-1fm8z6a");
+      },
+      m(target, anchor) {
+        insert(target, a, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(a);
+      }
+    };
+  }
   function create_fragment2(ctx) {
     let div;
     let span0;
     let span1;
     let t2;
     let t3;
+    let t4;
     let span2;
     let button0;
-    let t4;
     let t5;
-    let button1;
     let t6;
-    let button1_disabled_value;
+    let button1;
     let t7;
+    let button1_disabled_value;
+    let t8;
     let inputnumber;
     let updating_value;
     let current;
@@ -4436,6 +4456,8 @@
     for (let i = 0; i < each_value.length; i += 1) {
       each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     }
+    let if_block = !/*$references*/
+    ctx[2].length && create_if_block2(ctx);
     function inputnumber_value_binding(value) {
       ctx[8](value);
     }
@@ -4468,13 +4490,16 @@
           each_blocks[i].c();
         }
         t3 = space();
+        if (if_block)
+          if_block.c();
+        t4 = space();
         span2 = element("span");
         button0 = element("button");
-        t4 = text("\u{1F4C2}");
-        t5 = space();
+        t5 = text("\u{1F4C2}");
+        t6 = space();
         button1 = element("button");
-        t6 = text("\u{1F4BE}");
-        t7 = space();
+        t7 = text("\u{1F4BE}");
+        t8 = space();
         create_component(inputnumber.$$.fragment);
         set_style(span0, "font-size", "120%");
         button0.disabled = /*$dirty*/
@@ -4485,7 +4510,7 @@
         ctx[4];
         attr(button1, "title", "alt-s");
         set_style(span2, "float", "right");
-        attr(div, "class", "Toolbar svelte-tasznj");
+        attr(div, "class", "Toolbar svelte-1fm8z6a");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -4498,13 +4523,16 @@
           }
         }
         append(div, t3);
+        if (if_block)
+          if_block.m(div, null);
+        append(div, t4);
         append(div, span2);
         append(span2, button0);
-        append(button0, t4);
-        append(span2, t5);
+        append(button0, t5);
+        append(span2, t6);
         append(span2, button1);
-        append(button1, t6);
-        append(span2, t7);
+        append(button1, t7);
+        append(span2, t8);
         mount_component(inputnumber, span2, null);
         current = true;
         if (!mounted) {
@@ -4546,6 +4574,18 @@
           }
           each_blocks.length = each_value.length;
         }
+        if (!/*$references*/
+        ctx2[2].length) {
+          if (if_block) {
+          } else {
+            if_block = create_if_block2(ctx2);
+            if_block.c();
+            if_block.m(div, t4);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
         if (!current || dirty2 & /*$dirty*/
         16) {
           button0.disabled = /*$dirty*/
@@ -4584,6 +4624,8 @@
         if (detaching)
           detach(div);
         destroy_each(each_blocks, detaching);
+        if (if_block)
+          if_block.d();
         destroy_component(inputnumber);
         mounted = false;
         run_all(dispose);
@@ -4660,7 +4702,7 @@
   var get_b_slot_context = (ctx) => ({});
   var get_a_slot_changes = (dirty2) => ({});
   var get_a_slot_context = (ctx) => ({});
-  function create_if_block2(ctx) {
+  function create_if_block3(ctx) {
     let div;
     return {
       c() {
@@ -4719,7 +4761,7 @@
     );
     let if_block = (
       /*dragging*/
-      ctx[6] && create_if_block2(ctx)
+      ctx[6] && create_if_block3(ctx)
     );
     return {
       c() {
@@ -4891,7 +4933,7 @@
         ) {
           if (if_block) {
           } else {
-            if_block = create_if_block2(ctx2);
+            if_block = create_if_block3(ctx2);
             if_block.c();
             if_block.m(if_block_anchor.parentNode, if_block_anchor);
           }
@@ -5106,6 +5148,7 @@ Enter \u6298\u884C
 
 Ctrl-Home \u5230\u7B2C\u4E00\u884C  Ctrl-End  \u5230\u6700\u672B\u884C
 \u9801\u78BC\u8F38\u5165 \u6309\u4F4FCtrl\u53F3\u524D\u7BAD\u982D\u8DF3\u5230\u6700\u5F8C\u4E00\u884C
+
 
 `;
 

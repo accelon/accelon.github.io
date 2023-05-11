@@ -11,12 +11,15 @@
 }
 
 /* fakecss:D:/2023/aligner/src/toolbar.esbuild-svelte-fake-css */
-.Toolbar.svelte-tasznj {
+.Toolbar.svelte-1fm8z6a {
   height: 1.5em;
 }
-.selectedRef.svelte-tasznj {
+.selectedRef.svelte-1fm8z6a {
   background: lightyellow;
   color: black;
+}
+a.svelte-1fm8z6a {
+  color: darkcyan;
 }
 
 /* fakecss:D:/2023/aligner/src/3rdparty/splitpane.esbuild-svelte-fake-css */
