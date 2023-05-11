@@ -584,52 +584,41 @@
     let t1;
     let button1;
     let t2;
+    let button1_disabled_value;
     let t3;
     let button2;
-    let t4;
-    let button2_disabled_value;
     let t5;
-    let br;
     let button3;
     let t7;
-    let button4;
-    let t9;
-    let t10;
+    let t8;
     let mounted;
     let dispose;
     return {
       c() {
         button0 = element("button");
-        t0 = text("\u{1F4C1}");
+        t0 = text("Zip");
         t1 = space();
         button1 = element("button");
-        t2 = text("Zip");
+        t2 = text("\u{1F4BE}");
         t3 = space();
         button2 = element("button");
-        t4 = text("\u{1F4BE}");
+        button2.textContent = "\u267B\uFE0F";
         t5 = space();
-        br = element("br");
         button3 = element("button");
-        button3.textContent = "\u267B\uFE0F";
+        button3.textContent = "\u2796";
         t7 = space();
-        button4 = element("button");
-        button4.textContent = "\u2796";
-        t9 = space();
-        t10 = text(
+        t8 = text(
           /*$totalframe*/
           ctx[1]
         );
-        attr(button0, "title", "Alt O, Open Folder");
+        attr(button0, "title", "Alt Z, Open Zip");
         button0.disabled = /*$dirty*/
         ctx[0];
-        attr(button1, "title", "Alt Z, Open Zip");
-        button1.disabled = /*$dirty*/
+        attr(button1, "title", "Alt S, Save");
+        button1.disabled = button1_disabled_value = !/*$dirty*/
         ctx[0];
-        attr(button2, "title", "Alt S, Save");
-        button2.disabled = button2_disabled_value = !/*$dirty*/
-        ctx[0];
-        attr(button3, "title", "Alt R");
-        attr(button4, "title", "Alt D");
+        attr(button2, "title", "Alt R");
+        attr(button3, "title", "Alt D");
       },
       m(target, anchor) {
         insert(target, button0, anchor);
@@ -639,51 +628,41 @@
         append(button1, t2);
         insert(target, t3, anchor);
         insert(target, button2, anchor);
-        append(button2, t4);
         insert(target, t5, anchor);
-        insert(target, br, anchor);
         insert(target, button3, anchor);
         insert(target, t7, anchor);
-        insert(target, button4, anchor);
-        insert(target, t9, anchor);
-        insert(target, t10, anchor);
+        insert(target, t8, anchor);
         if (!mounted) {
           dispose = [
             listen(
               window_1,
               "keydown",
               /*handleKeydown*/
-              ctx[4]
+              ctx[3]
             ),
             listen(
               button0,
               "click",
-              /*getDir*/
+              /*getZip*/
               ctx[2]
             ),
             listen(
               button1,
               "click",
-              /*getZip*/
-              ctx[3]
+              /*save*/
+              ctx[4]
             ),
             listen(
               button2,
               "click",
-              /*save*/
+              /*reset*/
               ctx[5]
             ),
             listen(
               button3,
               "click",
-              /*reset*/
-              ctx[6]
-            ),
-            listen(
-              button4,
-              "click",
               /*deleteframe*/
-              ctx[7]
+              ctx[6]
             )
           ];
           mounted = true;
@@ -696,19 +675,14 @@
           ctx2[0];
         }
         if (dirty2 & /*$dirty*/
-        1) {
-          button1.disabled = /*$dirty*/
-          ctx2[0];
-        }
-        if (dirty2 & /*$dirty*/
-        1 && button2_disabled_value !== (button2_disabled_value = !/*$dirty*/
+        1 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
         ctx2[0])) {
-          button2.disabled = button2_disabled_value;
+          button1.disabled = button1_disabled_value;
         }
         if (dirty2 & /*$totalframe*/
         2)
           set_data(
-            t10,
+            t8,
             /*$totalframe*/
             ctx2[1]
           );
@@ -729,17 +703,11 @@
         if (detaching)
           detach(t5);
         if (detaching)
-          detach(br);
-        if (detaching)
           detach(button3);
         if (detaching)
           detach(t7);
         if (detaching)
-          detach(button4);
-        if (detaching)
-          detach(t9);
-        if (detaching)
-          detach(t10);
+          detach(t8);
         mounted = false;
         run_all(dispose);
       }
@@ -754,13 +722,13 @@
     let $images;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(9, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(10, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(11, $ratio = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(8, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(9, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(10, $ratio = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(12, $selectedframe = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(13, $images = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(14, $nimage = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(11, $selectedframe = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(12, $images = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(13, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
     const previmage = () => {
@@ -912,7 +880,7 @@
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [$dirty, $totalframe, getDir, getZip, handleKeydown, save, reset, deleteframe];
+    return [$dirty, $totalframe, getZip, handleKeydown, save, reset, deleteframe];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -2333,23 +2301,23 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `
-<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
-\u{1F4C1} \u6253\u958B\u6587\u4EF6\u593E(Alt-O)  Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-S)
-\u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)        \u76EE\u524D\u5716\u6846\u6578
+        pre.innerHTML = `<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u5207</span>
+Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u4E0B\u8F09\u5EA7\u6A19\u6A94(Alt-S) \u267B\uFE0F  \u91CD\u7F6E\u5716\u6846 (Alt-R)  \u2796 \u522A\u9664\u5716\u6846(Alt-D) \u76EE\u524D\u5716\u6846\u6578
+Alt-O \u6253\u958B\u6587\u4EF6\u593E
 
 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
-\u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u4E00\u500B\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u6700\u5C0F\u79FB\u52D5\uFF0C\u6309Ctrl\u66F4\u5FEB\u79FB\u52D5\u3002
-\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u61C9\u5C0D\u9F4A\u3002
-\u6C92\u6709\u5167\u6587\u548C\u6CE8\u91CB\u7684\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002
+\u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u6700\u5C0F\u79FB\u52D5\uFF0C\u6309Ctrl\u66F4\u5FEB\u79FB\u52D5\u3002
+\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u61C9\u5C0D\u9F4A\uFF08\u5377\u672B\u6821\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\uFF09\u3002
+\u6C92\u6709\u5167\u6587\u548C\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002
 \u8A2D\u7F6E\u597D\u5716\u6846\u5F8C\uFF0CEnter \u5230\u4E0B\u4E00\u62CD\u3002
 
 \u9650 Full HD \u89E3\u6790\u5EA6(1920x1080)\u3002
-\u5EFA\u8B70 F11 \u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u5148\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u4E4B\u5F8C\u5C31\u4E0D\u8981\u518D\u4FEE\u6539\u3002
+\u5EFA\u8B70\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002
+\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
 
-2023.5.9 \uFF08\u6A21\u7248\u6C38\u6A02\u5317\u85CF\uFF1A\u719F\u7DF4\u5DE5\u6BCF\u5206\u94188\u62CD\uFF0C24\u6846\uFF09
+2023.5.11 \uFF08\u6A21\u7248\u6C38\u6A02\u5317\u85CF\uFF1A\u719F\u7DF4\u5DE5\u6BCF\u5C0F\u6642\u7D04500\u62CD\uFF09
 `;
         attr(pre, "class", "svelte-yd22m9");
       },
