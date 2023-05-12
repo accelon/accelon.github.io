@@ -524,9 +524,20 @@
   var fileprefix = writable("");
   var verticalstrip = writable(5);
   var horizontalstrip = writable(17);
-  function defaultframe(idx = 0) {
-    return [1030 * (2 - idx) + 186, 139, 950, 2180];
-  }
+  var defaultframe;
+  var setTemplate = (name) => {
+    if (name == "shandong") {
+      defaultframe = function(idx) {
+        return [1030 * (2 - idx) + 186, 139, 950, 2180];
+      };
+      pageframe.set(3);
+    } else if (name == "qindinglongcang") {
+      pageframe.set(2);
+      defaultframe = function(idx) {
+        return [385 * (1 - idx) + 18, 148, 364, 810];
+      };
+    }
+  };
   var caltotalframe = () => {
     const imgs = get_store_value(images);
     let out = 0;
@@ -595,7 +606,7 @@
     return {
       c() {
         button0 = element("button");
-        t0 = text("Zip");
+        t0 = text("\u{1F4C1}");
         t1 = space();
         button1 = element("button");
         t2 = text("\u{1F4BE}");
@@ -607,7 +618,7 @@
           /*$totalframe*/
           ctx[1]
         );
-        attr(button0, "title", "Alt Z, Open Zip");
+        attr(button0, "title", "Alt O, Open Image Zip/PDF");
         button0.disabled = /*$dirty*/
         ctx[0];
         attr(button1, "title", "Alt S, Save");
@@ -636,7 +647,7 @@
             listen(
               button0,
               "click",
-              /*getZip*/
+              /*openImageFiles*/
               ctx[2]
             ),
             listen(
@@ -706,14 +717,14 @@
     let $selectedframe;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(6, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(7, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(8, $ratio = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(9, $fileprefix = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(10, $images = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(7, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(8, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(9, $ratio = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(10, $fileprefix = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(11, $images = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(11, $selectedframe = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(12, $nimage = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(12, $selectedframe = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(13, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
     const previmage = () => {
@@ -726,8 +737,8 @@
     const zipOpts = {
       types: [
         {
-          description: "Zip",
-          accept: { "zip/*": [".zip"] }
+          description: "Images Zip/PDF",
+          accept: { "zip/*": [".zip", ".pdf"] }
         }
       ],
       excludeAcceptAllOption: true,
@@ -750,9 +761,10 @@
         return a.name > b.name ? 1 : -1;
       }
     };
-    async function getDir() {
+    async function getFolder() {
       const dirHandle = await window.showDirectoryPicker();
       const out = [];
+      setTemplate("shandong");
       for await (const entry of dirHandle.values()) {
         if (entry.kind == "file" && (entry.name.endsWith(".png") || entry.name.endsWith(".jpg"))) {
           out.push({
@@ -769,15 +781,16 @@
       images.set(out);
       fileprefix.set(dirHandle.name);
     }
-    async function getZip() {
-      const filehandles = await window.showOpenFilePicker(zipOpts);
-      const file = await filehandles[0].getFile();
+    async function openZip(file) {
       const zip2 = new ZipReader(new BlobReader(file));
       const entries = await zip2.getEntries();
       const out = [];
+      setTemplate("shandong");
       entries.forEach((entry) => {
         if (entry.filename.endsWith(".jpg")) {
-          const at = entry.filename.lastIndexOf("/");
+          let at = entry.filename.lastIndexOf("/");
+          if (at == -1)
+            at = entry.filename.lastIndexOf("\\");
           out.push({
             name: entry.filename.slice(at + 1),
             entry,
@@ -789,9 +802,41 @@
       out.sort(sortfilename);
       if (out.length > 2)
         out[out.length - 1].frames = [];
+      return out;
+    }
+    let pdf;
+    async function openPDF(file) {
+      setTemplate("qindinglongcang");
+      const arraybuffer = await file.arrayBuffer();
+      const typedarray = new Uint8Array(arraybuffer);
+      pdf = await pdfjsLib.getDocument(typedarray).promise;
+      const out = [];
+      for (let i = 1; i <= pdf.numPages; i++) {
+        out.push({
+          name: i,
+          pdf,
+          page: i,
+          frames: out.length ? null : []
+        });
+      }
+      if (out.length > 2)
+        out[out.length - 1].frames = [];
+      return out;
+    }
+    async function openImageFiles() {
+      const filehandles = await window.showOpenFilePicker(zipOpts);
+      const file = await filehandles[0].getFile();
+      const filename = file.name.toLowerCase();
+      let out = [];
+      if (filename.endsWith(".zip"))
+        out = await openZip(file);
+      else if (filename.endsWith(".pdf"))
+        out = await openPDF(file);
+      else
+        return;
       nimage.set(0);
       images.set(out);
-      fileprefix.set(file.name.replace(".zip", ""));
+      fileprefix.set(filename.replace(/\.[a-z]+$/, ""));
     }
     const nextimage = () => {
       let n = $nimage;
@@ -850,12 +895,15 @@
         previmage();
         ;
         evt.preventDefault();
-      } else if (alt && key == "r") {
-        reset();
+      } else if (alt && key == "o") {
+        openImageFiles();
+        evt.preventDefault();
+      } else if (alt && key == "f" && !$dirty) {
+        getFolder();
         ;
         evt.preventDefault();
-      } else if (alt && key == "o" && !$dirty) {
-        getDir();
+      } else if (alt && key == "r") {
+        reset();
         ;
         evt.preventDefault();
       } else if (alt && key == "s" && $dirty) {
@@ -883,7 +931,7 @@
         return;
       }
       const filehandles = await window.showOpenFilePicker(jsonOpts);
-      const file = await filehandles[0].getFile();
+      const file = await filehandles[0].openImageFiles();
       const json = JSON.parse(await file.text());
       const imgs = $images;
       if (json.length !== imgs.length) {
@@ -916,7 +964,7 @@
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [$dirty, $totalframe, getZip, handleKeydown, save, deleteframe];
+    return [$dirty, $totalframe, openImageFiles, handleKeydown, save, deleteframe];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -2338,15 +2386,16 @@
       c() {
         pre = element("pre");
         pre.innerHTML = `<span class="title svelte-yd22m9">Folio Crop \u5716\u7248\u88C1\u6846\u5C0D\u9F4A</span> 2023.5.12
-Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
+\u6253\u958BZip\u6216PDF(Alt-O)  \u{1F4BE} \u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796 \u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 
 \u9032\u968E\u64CD\u4F5C\uFF1A \u6253\u958B\u6587\u4EF6\u593E (Alt-O) \u91CD\u7F6E\u5716\u6846 (Alt-R)   \u8F09\u5165\u5EA7\u6A19\u6A94 (Alt-L)
+\u9EDE \u7E2E\u5716 \u4E0A\u4E0B\u5C0D\u8ABF\u3002
 
 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-yd22m9">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u6700\u5C0F\u79FB\u52D5\uFF0C\u6309Ctrl\u66F4\u5FEB\u79FB\u52D5\u3002
-\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u61C9\u5C0D\u9F4A
+\u6309\u5716\u6846\u5DE6\u908A\u548C\u4E0A\u908A\u55AE\u7368\u79FB\u52D5\u3002\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u90FD\u5728\u7E2E\u5716\u5167\uFF0C\u4E26\u76E1\u91CF\u5C45\u4E2D\u5C0D\u9F4A\u3002
 \u6846\u5167\u5C11\u65BC\u4E94\u884C\uFF0C\u4E0D\u8981\u6539\u8B8A\u5716\u6846\u5927\u5C0F\uFF0C\u5377\u672B\u6821\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u56E0\u5B57\u9AD4\u8F03\u5C0F\uFF09\u3002
 \u6C92\u6709\u5167\u6587\u548C\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002
 \u8A2D\u7F6E\u597D\u5716\u6846\u5F8C\uFF0CEnter \u5230\u4E0B\u4E00\u62CD\u3002
@@ -2438,12 +2487,12 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
         create_component(croppers.$$.fragment);
         t = space();
         img = element("img");
-        attr(div, "class", "croppers svelte-1mbcg4r");
+        attr(div, "class", "croppers svelte-1m12dk7");
         attr(img, "id", "image1");
         if (!src_url_equal(img.src, img_src_value = /*imageurl*/
         ctx[0]))
           attr(img, "src", img_src_value);
-        attr(img, "class", "image svelte-1mbcg4r");
+        attr(img, "class", "image svelte-1m12dk7");
         attr(img, "alt", "noimage");
       },
       m(target, anchor) {
@@ -2573,6 +2622,18 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
       const item = $images[$nimage];
       if (item.zip) {
         $$invalidate(0, imageurl = URL.createObjectURL(await item.entry.getData(new zip.BlobWriter())));
+      } else if (item.pdf) {
+        await item.pdf.getPage(item.page).then(async function(page) {
+          const viewport = page.getViewport({ scale: 1 });
+          const canvas = document.createElement("canvas");
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          await page.render({
+            canvasContext: canvas.getContext("2d"),
+            viewport
+          }).promise;
+          $$invalidate(0, imageurl = canvas.toDataURL("image/png"));
+        });
       } else {
         const imagefile = await item.entry.getFile();
         $$invalidate(0, imageurl = URL.createObjectURL(imagefile));
@@ -2652,14 +2713,15 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
         t1 = space();
         span1 = element("span");
         t2 = text(t2_value);
-        attr(span0, "class", "svelte-10y0ufl");
+        attr(span0, "class", "svelte-py5rjz");
         toggle_class(
           span0,
           "done",
           /*image*/
           ctx[3].frames
         );
-        attr(div, "class", "svelte-10y0ufl");
+        attr(span1, "class", "framecount svelte-py5rjz");
+        attr(div, "class", "svelte-py5rjz");
         toggle_class(
           div,
           "selected",
@@ -2783,7 +2845,7 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
       c() {
         div = element("div");
         key_block.c();
-        attr(div, "class", "filelist svelte-10y0ufl");
+        attr(div, "class", "filelist svelte-py5rjz");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -2828,55 +2890,49 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
 
   // src/thumbnail.svelte
   function create_fragment7(ctx) {
-    let t0;
-    let t1;
     let div;
     let canvas0;
     let br;
     let canvas1_1;
+    let mounted;
+    let dispose;
     return {
       c() {
-        t0 = text(
-          /*$fileprefix*/
-          ctx[2]
-        );
-        t1 = space();
         div = element("div");
         canvas0 = element("canvas");
         br = element("br");
         canvas1_1 = element("canvas");
-        attr(div, "class", "thumbnails svelte-q44kwf");
+        attr(canvas0, "class", "svelte-v4ijpf");
+        attr(canvas1_1, "class", "svelte-v4ijpf");
+        attr(div, "class", "thumbnails svelte-v4ijpf");
       },
       m(target, anchor) {
-        insert(target, t0, anchor);
-        insert(target, t1, anchor);
         insert(target, div, anchor);
         append(div, canvas0);
-        ctx[4](canvas0);
+        ctx[5](canvas0);
         append(div, br);
         append(div, canvas1_1);
-        ctx[5](canvas1_1);
-      },
-      p(ctx2, [dirty2]) {
-        if (dirty2 & /*$fileprefix*/
-        4)
-          set_data(
-            t0,
-            /*$fileprefix*/
-            ctx2[2]
+        ctx[6](canvas1_1);
+        if (!mounted) {
+          dispose = listen(
+            canvas0,
+            "click",
+            /*swapthumbnail*/
+            ctx[2]
           );
+          mounted = true;
+        }
       },
+      p: noop,
       i: noop,
       o: noop,
       d(detaching) {
         if (detaching)
-          detach(t0);
-        if (detaching)
-          detach(t1);
-        if (detaching)
           detach(div);
-        ctx[4](null);
         ctx[5](null);
+        ctx[6](null);
+        mounted = false;
+        dispose();
       }
     };
   }
@@ -2885,12 +2941,10 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
     let $verticalstrip;
     let $ratio;
     let $selectedframe;
-    let $fileprefix;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(3, $frames = $$value));
-    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(6, $verticalstrip = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(7, $ratio = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(8, $selectedframe = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(2, $fileprefix = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(4, $frames = $$value));
+    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(7, $verticalstrip = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(8, $ratio = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(9, $selectedframe = $$value));
     let canvas1, canvas2;
     const updateThumbnail = () => {
       const img1 = document.getElementById("image1");
@@ -2898,12 +2952,17 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
       if ($selectedframe)
         nframe = Math.log2($selectedframe);
       const frms = $frames;
-      if (!canvas1 || !canvas2)
+      let c1 = canvas1, c2 = canvas2;
+      if (swap) {
+        c2 = canvas1;
+        c1 = canvas2;
+      }
+      if (!c1 || !c2)
         return;
-      let ctx1 = canvas1.getContext("2d");
-      ctx1.clearRect(0, 0, canvas1.width, canvas1.height);
-      let ctx2 = canvas2.getContext("2d");
-      ctx2.clearRect(0, 0, canvas2.width, canvas2.height);
+      let ctx1 = c1.getContext("2d");
+      let ctx2 = c2.getContext("2d");
+      ctx1.clearRect(0, 0, canvas1.width, c1.height);
+      ctx2.clearRect(0, 0, canvas2.width, c2.height);
       if (!~nframe || !img1)
         return;
       const r = $ratio;
@@ -2911,16 +2970,20 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
       if (!frame)
         return;
       const vert = $verticalstrip;
-      let x = frame[0], y = frame[1], w = frame[2] / vert, h = frame[3], w2 = w * 0.5, h2 = h * 0.5;
-      $$invalidate(0, canvas1.width = w2, canvas1);
-      $$invalidate(0, canvas1.height = h2, canvas1);
-      ctx1.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
+      let x = frame[0], y = frame[1], w = frame[2] / vert, h = frame[3];
+      c1.width = w;
+      c1.height = h;
+      ctx1.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w, h);
       x = frame[0] + w * (vert - 1);
-      $$invalidate(1, canvas2.width = w2, canvas2);
-      $$invalidate(1, canvas2.height = h2, canvas2);
-      ctx2.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w2, h2);
+      c2.width = w;
+      c2.height = h;
+      ctx2.drawImage(img1, x / r, y / r, w / r, h / r, 0, 0, w, h);
     };
     onMount(() => updateThumbnail());
+    let swap = 0;
+    const swapthumbnail = () => {
+      $$invalidate(3, swap = 1 - swap);
+    };
     function canvas0_binding($$value) {
       binding_callbacks[$$value ? "unshift" : "push"](() => {
         canvas2 = $$value;
@@ -2934,13 +2997,21 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
       });
     }
     $$self.$$.update = () => {
-      if ($$self.$$.dirty & /*$frames*/
-      8) {
+      if ($$self.$$.dirty & /*$frames, swap*/
+      24) {
         $:
-          updateThumbnail($frames);
+          updateThumbnail($frames, swap);
       }
     };
-    return [canvas1, canvas2, $fileprefix, $frames, canvas0_binding, canvas1_1_binding];
+    return [
+      canvas1,
+      canvas2,
+      swapthumbnail,
+      swap,
+      $frames,
+      canvas0_binding,
+      canvas1_1_binding
+    ];
   }
   var Thumbnail = class extends SvelteComponent {
     constructor(options) {
@@ -2956,50 +3027,47 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
     let tr;
     let td0;
     let toolbar;
-    let t0;
     let filelist;
-    let t1;
+    let t0;
     let td1;
-    let imageviewer;
-    let t2;
-    let td2;
     let thumbnail;
+    let t1;
+    let td2;
+    let imageviewer;
     let current;
     toolbar = new toolbar_default({});
     filelist = new filelist_default({});
-    imageviewer = new imageviewer_default({});
     thumbnail = new thumbnail_default({});
+    imageviewer = new imageviewer_default({});
     return {
       c() {
         table = element("table");
         tr = element("tr");
         td0 = element("td");
         create_component(toolbar.$$.fragment);
-        t0 = space();
         create_component(filelist.$$.fragment);
-        t1 = space();
+        t0 = space();
         td1 = element("td");
-        create_component(imageviewer.$$.fragment);
-        t2 = space();
-        td2 = element("td");
         create_component(thumbnail.$$.fragment);
-        attr(td0, "class", "FileList svelte-pu3szp");
-        attr(td1, "class", "ImageViewer svelte-pu3szp");
-        attr(td2, "class", "Thumbnail svelte-pu3szp");
+        t1 = space();
+        td2 = element("td");
+        create_component(imageviewer.$$.fragment);
+        attr(td0, "class", "FileList svelte-1czj0lb");
+        attr(td1, "class", "Thumbnail svelte-1czj0lb");
+        attr(td2, "class", "ImageViewer svelte-1czj0lb");
       },
       m(target, anchor) {
         insert(target, table, anchor);
         append(table, tr);
         append(tr, td0);
         mount_component(toolbar, td0, null);
-        append(td0, t0);
         mount_component(filelist, td0, null);
-        append(tr, t1);
+        append(tr, t0);
         append(tr, td1);
-        mount_component(imageviewer, td1, null);
-        append(tr, t2);
+        mount_component(thumbnail, td1, null);
+        append(tr, t1);
         append(tr, td2);
-        mount_component(thumbnail, td2, null);
+        mount_component(imageviewer, td2, null);
         current = true;
       },
       p: noop,
@@ -3008,15 +3076,15 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
           return;
         transition_in(toolbar.$$.fragment, local);
         transition_in(filelist.$$.fragment, local);
-        transition_in(imageviewer.$$.fragment, local);
         transition_in(thumbnail.$$.fragment, local);
+        transition_in(imageviewer.$$.fragment, local);
         current = true;
       },
       o(local) {
         transition_out(toolbar.$$.fragment, local);
         transition_out(filelist.$$.fragment, local);
-        transition_out(imageviewer.$$.fragment, local);
         transition_out(thumbnail.$$.fragment, local);
+        transition_out(imageviewer.$$.fragment, local);
         current = false;
       },
       d(detaching) {
@@ -3024,8 +3092,8 @@ Zip \u6253\u958B\u58D3\u7E2E\u6A94(Alt-Z)  \u{1F4BE} \u5B58\u5EA7\u6A19\u6A94(Al
           detach(table);
         destroy_component(toolbar);
         destroy_component(filelist);
-        destroy_component(imageviewer);
         destroy_component(thumbnail);
+        destroy_component(imageviewer);
       }
     };
   }

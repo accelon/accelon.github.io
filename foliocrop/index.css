@@ -70,42 +70,49 @@ a.svelte-yd22m9 {
 }
 
 /* fakecss:D:/2023/foliocrop/src/imageviewer.esbuild-svelte-fake-css */
-.image.svelte-1mbcg4r {
+.image.svelte-1m12dk7 {
   height: 99vh;
 }
-.croppers.svelte-1mbcg4r {
+.croppers.svelte-1m12dk7 {
   position: absolute;
 }
 
 /* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */
-.done.svelte-10y0ufl {
+.framecount.svelte-py5rjz {
+  font-weight: bold;
+  border-bottom: 1px dotted silver;
+}
+.done.svelte-py5rjz {
   color: yellowgreen;
 }
-.filelist.svelte-10y0ufl {
+.filelist.svelte-py5rjz {
   cursor: pointer;
   overflow-y: auto;
   height: 94vh;
 }
-.selected.svelte-10y0ufl {
+.selected.svelte-py5rjz {
   background-color: rgb(72, 72, 72);
 }
 
 /* fakecss:D:/2023/foliocrop/src/thumbnail.esbuild-svelte-fake-css */
-.thumbnails.svelte-q44kwf {
-  width: 80px;
+canvas.svelte-v4ijpf {
+  width: 100%;
+}
+.thumbnails.svelte-v4ijpf {
   align-items: center;
+  align-content: center;
+  height: 100vh;
 }
 
 /* fakecss:D:/2023/foliocrop/src/app.esbuild-svelte-fake-css */
-.ImageViewer.svelte-pu3szp {
+.ImageViewer.svelte-1czj0lb {
   width: 80%;
   vertical-align: top;
 }
-.FileList.svelte-pu3szp {
-  width: 18%;
+.FileList.svelte-1czj0lb {
+  width: 17%;
   vertical-align: top;
 }
-.Thumbnail.svelte-pu3szp {
-  width: 2%;
+.Thumbnail.svelte-1czj0lb {
   vertical-align: top;
 }
