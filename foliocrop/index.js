@@ -600,7 +600,6 @@
     let t3;
     let button2;
     let t5;
-    let t6;
     let mounted;
     let dispose;
     return {
@@ -613,8 +612,7 @@
         t3 = space();
         button2 = element("button");
         button2.textContent = "\u2796";
-        t5 = space();
-        t6 = text(
+        t5 = text(
           /*$totalframe*/
           ctx[1]
         );
@@ -635,7 +633,6 @@
         insert(target, t3, anchor);
         insert(target, button2, anchor);
         insert(target, t5, anchor);
-        insert(target, t6, anchor);
         if (!mounted) {
           dispose = [
             listen(
@@ -680,7 +677,7 @@
         if (dirty2 & /*$totalframe*/
         2)
           set_data(
-            t6,
+            t5,
             /*$totalframe*/
             ctx2[1]
           );
@@ -700,8 +697,6 @@
           detach(button2);
         if (detaching)
           detach(t5);
-        if (detaching)
-          detach(t6);
         mounted = false;
         run_all(dispose);
       }
@@ -717,14 +712,14 @@
     let $selectedframe;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(7, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(8, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(9, $ratio = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(10, $fileprefix = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(11, $images = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(8, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(9, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(10, $ratio = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(11, $fileprefix = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(12, $images = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(12, $selectedframe = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(13, $nimage = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(13, $selectedframe = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(14, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
     const previmage = () => {
@@ -823,10 +818,11 @@
         out[out.length - 1].frames = [];
       return out;
     }
+    let filename = "";
     async function openImageFiles() {
       const filehandles = await window.showOpenFilePicker(zipOpts);
       const file = await filehandles[0].getFile();
-      const filename = file.name.toLowerCase();
+      filename = file.name.toLowerCase();
       let out = [];
       if (filename.endsWith(".zip"))
         out = await openZip(file);
@@ -2403,8 +2399,10 @@
 \u8ABF\u6574\u8996\u7A97\u5927\u5C0F\u53CA\u89E3\u6790\u5EA6\uFF0C\u6846\u53EF\u80FD\u6703\u5C0D\u4E0D\u6E96\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
 
 \u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F xxx(1).json , xxx(2).json \u3002
-\u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u5373 13139311_37.zip \u7684\u5B58\u6A94\u70BA 13139311_37.json
-\u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07 13139311_37(3).json \u66F4\u540D\u70BA 1313911_37.json \u4E26\u4E0A\u50B3\u3002
+\u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u53730001-001\u592901.zip \u7684\u5B58\u6A94\u70BA 0001-001\u592901.json
+\u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07 0001-001\u592901(3).json \u66F4\u540D\u70BA 0001-001\u592901.json \u4E26\u4E0A\u50B3\u3002
+
+\u5EFA\u8B70\u5C07\u6578\u500B\u5DE5\u4F5C\u6A94\u6848\u8907\u88FD\u5230\u300C\u6587\u4EF6\u300D\uFF0C\u958B\u555F\u5C31\u4E0D\u5FC5\u6BCF\u6B21\u9078\u6587\u4EF6\u593E\u3002
 `;
         attr(pre, "class", "svelte-1tue53g");
       },
@@ -2458,9 +2456,12 @@
     };
   }
   function create_if_block(ctx) {
+    let span;
+    let t0;
+    let t1;
     let div;
     let croppers;
-    let t;
+    let t2;
     let img;
     let img_src_value;
     let current;
@@ -2483,26 +2484,43 @@
     });
     return {
       c() {
+        span = element("span");
+        t0 = text(
+          /*$fileprefix*/
+          ctx[4]
+        );
+        t1 = space();
         div = element("div");
         create_component(croppers.$$.fragment);
-        t = space();
+        t2 = space();
         img = element("img");
-        attr(div, "class", "croppers svelte-1m12dk7");
+        attr(span, "class", "fileprefix svelte-163afnm");
+        attr(div, "class", "croppers svelte-163afnm");
         attr(img, "id", "image1");
         if (!src_url_equal(img.src, img_src_value = /*imageurl*/
         ctx[0]))
           attr(img, "src", img_src_value);
-        attr(img, "class", "image svelte-1m12dk7");
+        attr(img, "class", "image svelte-163afnm");
         attr(img, "alt", "noimage");
       },
       m(target, anchor) {
+        insert(target, span, anchor);
+        append(span, t0);
+        insert(target, t1, anchor);
         insert(target, div, anchor);
         mount_component(croppers, div, null);
-        insert(target, t, anchor);
+        insert(target, t2, anchor);
         insert(target, img, anchor);
         current = true;
       },
       p(ctx2, dirty2) {
+        if (!current || dirty2 & /*$fileprefix*/
+        16)
+          set_data(
+            t0,
+            /*$fileprefix*/
+            ctx2[4]
+          );
         const croppers_changes = {};
         if (dirty2 & /*height*/
         4)
@@ -2535,10 +2553,14 @@
       },
       d(detaching) {
         if (detaching)
+          detach(span);
+        if (detaching)
+          detach(t1);
+        if (detaching)
           detach(div);
         destroy_component(croppers);
         if (detaching)
-          detach(t);
+          detach(t2);
         if (detaching)
           detach(img);
       }
@@ -2613,8 +2635,10 @@
   function instance4($$self, $$props, $$invalidate) {
     let $nimage;
     let $images;
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(4, $nimage = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(5, $images = $$value));
+    let $fileprefix;
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(5, $nimage = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(6, $images = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix = $$value));
     let imageurl = "", r = 1, height = 100, width = 100;
     async function getImageURL() {
       if (!$images?.length)
@@ -2653,7 +2677,7 @@
     }
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*$images, $nimage*/
-      48) {
+      96) {
         $:
           getImageURL($images, $nimage);
       }
@@ -2662,7 +2686,7 @@
       $$invalidate(2, height = document.getElementById("image1")?.height);
     $:
       $$invalidate(3, width = document.getElementById("image1")?.width);
-    return [imageurl, r, height, width, $nimage, $images];
+    return [imageurl, r, height, width, $fileprefix, $nimage, $images];
   }
   var Imageviewer = class extends SvelteComponent {
     constructor(options) {
@@ -2713,15 +2737,15 @@
         t1 = space();
         span1 = element("span");
         t2 = text(t2_value);
-        attr(span0, "class", "svelte-py5rjz");
+        attr(span0, "class", "svelte-12vaa8r");
         toggle_class(
           span0,
           "done",
           /*image*/
           ctx[3].frames
         );
-        attr(span1, "class", "framecount svelte-py5rjz");
-        attr(div, "class", "svelte-py5rjz");
+        attr(span1, "class", "framecount svelte-12vaa8r");
+        attr(div, "class", "svelte-12vaa8r");
         toggle_class(
           div,
           "selected",
@@ -2845,7 +2869,7 @@
       c() {
         div = element("div");
         key_block.c();
-        attr(div, "class", "filelist svelte-py5rjz");
+        attr(div, "class", "filelist svelte-12vaa8r");
       },
       m(target, anchor) {
         insert(target, div, anchor);

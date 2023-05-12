@@ -71,27 +71,36 @@ a.svelte-1tue53g {
 }
 
 /* fakecss:D:/2023/foliocrop/src/imageviewer.esbuild-svelte-fake-css */
-.image.svelte-1m12dk7 {
+.image.svelte-163afnm {
   height: 99vh;
 }
-.croppers.svelte-1m12dk7 {
+.croppers.svelte-163afnm {
   position: absolute;
+}
+.fileprefix.svelte-163afnm {
+  color: goldenrod;
+  font-size: 125%;
+  position: absolute;
+  right: 0px;
+  background: black;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
 }
 
 /* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */
-.framecount.svelte-py5rjz {
+.framecount.svelte-12vaa8r {
   font-weight: bold;
   border-bottom: 1px dotted silver;
 }
-.done.svelte-py5rjz {
+.done.svelte-12vaa8r {
   color: yellowgreen;
 }
-.filelist.svelte-py5rjz {
+.filelist.svelte-12vaa8r {
   cursor: pointer;
   overflow-y: auto;
-  height: 94vh;
+  height: 90vh;
 }
-.selected.svelte-py5rjz {
+.selected.svelte-12vaa8r {
   background-color: rgb(72, 72, 72);
 }
 
