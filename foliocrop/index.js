@@ -927,7 +927,7 @@
         return;
       }
       const filehandles = await window.showOpenFilePicker(jsonOpts);
-      const file = await filehandles[0].openImageFiles();
+      const file = await filehandles[0].getFile();
       const json = JSON.parse(await file.text());
       const imgs = $images;
       if (json.length !== imgs.length) {
@@ -2381,7 +2381,7 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.12 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
+        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.13 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 \u{1F4C1}\u958B\u555FZip\u6216PDF(Alt-O)  \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u91CD\u7F6E\u5716\u6846(Alt-R)   \u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u9EDE \u7E2E\u5716 \u4E0A\u4E0B\u5C0D\u8ABF\u3002

@@ -1,3 +1,15 @@
+/* fakecss:D:/2023/aligner/src/toolbar.esbuild-svelte-fake-css */
+.Toolbar.svelte-1r9xdyl {
+  height: 1.5em;
+}
+.selectedRef.svelte-1r9xdyl {
+  background: lightyellow;
+  color: black;
+}
+a.svelte-1r9xdyl {
+  color: darkcyan;
+}
+
 /* fakecss:D:/2023/aligner/src/inputnumber.esbuild-svelte-fake-css */
 .numinput.svelte-5fv0ws {
   user-select: none;
@@ -8,18 +20,6 @@
 .disabled.svelte-5fv0ws {
   color: var(--button-unselected);
   cursor: default;
-}
-
-/* fakecss:D:/2023/aligner/src/toolbar.esbuild-svelte-fake-css */
-.Toolbar.svelte-1fm8z6a {
-  height: 1.5em;
-}
-.selectedRef.svelte-1fm8z6a {
-  background: lightyellow;
-  color: black;
-}
-a.svelte-1fm8z6a {
-  color: darkcyan;
 }
 
 /* fakecss:D:/2023/aligner/src/3rdparty/splitpane.esbuild-svelte-fake-css */
