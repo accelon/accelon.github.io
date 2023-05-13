@@ -3981,6 +3981,9 @@
       }
       cancel();
     } else if (origin == "+input") {
+      if (text2.length == 1 && text2[0] == " ") {
+        syncScroll(get_store_value(cm1), get_store_value(cm2));
+      }
       if (text2.length == 2 && text2.join("") == "") {
         breakline(cm, from.line, from.ch);
         dirty.set(true);
@@ -4027,15 +4030,15 @@
   // src/toolbar.svelte
   function get_each_context(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[4] = list[i];
-    child_ctx[6] = i;
+    child_ctx[3] = list[i];
+    child_ctx[5] = i;
     return child_ctx;
   }
   function create_each_block(ctx) {
     let span;
     let t0_value = (
       /*reference*/
-      ctx[4].name + ""
+      ctx[3].name + ""
     );
     let t0;
     let t1;
@@ -4044,9 +4047,9 @@
     function click_handler() {
       return (
         /*click_handler*/
-        ctx[3](
+        ctx[2](
           /*idx*/
-          ctx[6]
+          ctx[5]
         )
       );
     }
@@ -4055,13 +4058,13 @@
         span = element("span");
         t0 = text(t0_value);
         t1 = space();
-        attr(span, "class", "clickable svelte-1r9xdyl");
+        attr(span, "class", "clickable svelte-2aqs7u");
         toggle_class(
           span,
           "selectedRef",
           /*$selectedRef*/
           ctx[1] == /*idx*/
-          ctx[6]
+          ctx[5]
         );
       },
       m(target, anchor) {
@@ -4077,7 +4080,7 @@
         ctx = new_ctx;
         if (dirty2 & /*$references*/
         1 && t0_value !== (t0_value = /*reference*/
-        ctx[4].name + ""))
+        ctx[3].name + ""))
           set_data(t0, t0_value);
         if (dirty2 & /*$selectedRef*/
         2) {
@@ -4086,7 +4089,7 @@
             "selectedRef",
             /*$selectedRef*/
             ctx[1] == /*idx*/
-            ctx[6]
+            ctx[5]
           );
         }
       },
@@ -4100,56 +4103,13 @@
       }
     };
   }
-  function create_if_block(ctx) {
-    let a;
-    let t1;
-    let button;
-    let mounted;
-    let dispose;
-    return {
-      c() {
-        a = element("a");
-        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
-        t1 = space();
-        button = element("button");
-        button.textContent = "\u8A66\u8A66\u770B";
-        attr(a, "href", "https://www.youtube.com/watch?v=huCbF8bAx-8");
-        attr(a, "target", "_new");
-        attr(a, "class", "svelte-1r9xdyl");
-      },
-      m(target, anchor) {
-        insert(target, a, anchor);
-        insert(target, t1, anchor);
-        insert(target, button, anchor);
-        if (!mounted) {
-          dispose = listen(
-            button,
-            "click",
-            /*tryit*/
-            ctx[2]
-          );
-          mounted = true;
-        }
-      },
-      p: noop,
-      d(detaching) {
-        if (detaching)
-          detach(a);
-        if (detaching)
-          detach(t1);
-        if (detaching)
-          detach(button);
-        mounted = false;
-        dispose();
-      }
-    };
-  }
   function create_fragment(ctx) {
     let div;
     let span0;
     let span1;
     let t2;
     let t3;
+    let a;
     let each_value = (
       /*$references*/
       ctx[0]
@@ -4158,13 +4118,11 @@
     for (let i = 0; i < each_value.length; i += 1) {
       each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     }
-    let if_block = !/*$references*/
-    ctx[0].length && create_if_block(ctx);
     return {
       c() {
         div = element("div");
         span0 = element("span");
-        span0.textContent = "\u9010\u53E5\u5C0D\u9F4A";
+        span0.textContent = "\u9010\u53E5\u5C0D\u7167";
         span1 = element("span");
         span1.textContent = "\u3000ver 2023.5.13";
         t2 = space();
@@ -4172,10 +4130,13 @@
           each_blocks[i].c();
         }
         t3 = space();
-        if (if_block)
-          if_block.c();
+        a = element("a");
+        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
         set_style(span0, "font-size", "120%");
-        attr(div, "class", "Toolbar svelte-1r9xdyl");
+        attr(a, "href", "https://www.youtube.com/watch?v=huCbF8bAx-8");
+        attr(a, "target", "_new");
+        attr(a, "class", "svelte-2aqs7u");
+        attr(div, "class", "Toolbar svelte-2aqs7u");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -4188,8 +4149,7 @@
           }
         }
         append(div, t3);
-        if (if_block)
-          if_block.m(div, null);
+        append(div, a);
       },
       p(ctx2, [dirty2]) {
         if (dirty2 & /*$selectedRef, loadReference, $references*/
@@ -4212,19 +4172,6 @@
           }
           each_blocks.length = each_value.length;
         }
-        if (!/*$references*/
-        ctx2[0].length) {
-          if (if_block) {
-            if_block.p(ctx2, dirty2);
-          } else {
-            if_block = create_if_block(ctx2);
-            if_block.c();
-            if_block.m(div, null);
-          }
-        } else if (if_block) {
-          if_block.d(1);
-          if_block = null;
-        }
       },
       i: noop,
       o: noop,
@@ -4232,8 +4179,6 @@
         if (detaching)
           detach(div);
         destroy_each(each_blocks, detaching);
-        if (if_block)
-          if_block.d();
       }
     };
   }
@@ -4242,12 +4187,8 @@
     let $selectedRef;
     component_subscribe($$self, references, ($$value) => $$invalidate(0, $references = $$value));
     component_subscribe($$self, selectedRef, ($$value) => $$invalidate(1, $selectedRef = $$value));
-    const tryit = async () => {
-      const response = await fetch("dn3.yh.off");
-      loadText(await response.text(), "dn3.yh.off");
-    };
     const click_handler = (idx2) => loadReference(idx2);
-    return [$references, $selectedRef, tryit, click_handler];
+    return [$references, $selectedRef, click_handler];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -4308,7 +4249,7 @@
       }
     };
   }
-  function create_if_block2(ctx) {
+  function create_if_block(ctx) {
     let span;
     let mounted;
     let dispose;
@@ -4370,7 +4311,7 @@
     );
     let if_block1 = (
       /*stepper*/
-      ctx[1] && create_if_block2(ctx)
+      ctx[1] && create_if_block(ctx)
     );
     return {
       c() {
@@ -4456,7 +4397,7 @@
           if (if_block1) {
             if_block1.p(ctx2, dirty2);
           } else {
-            if_block1 = create_if_block2(ctx2);
+            if_block1 = create_if_block(ctx2);
             if_block1.c();
             if_block1.m(span, null);
           }
@@ -4569,6 +4510,36 @@
 
   // src/editortoolbar.svelte
   var { window: window_1 } = globals;
+  function create_if_block2(ctx) {
+    let button;
+    let mounted;
+    let dispose;
+    return {
+      c() {
+        button = element("button");
+        button.textContent = "\u8A66\u8A66\u770B";
+      },
+      m(target, anchor) {
+        insert(target, button, anchor);
+        if (!mounted) {
+          dispose = listen(
+            button,
+            "click",
+            /*tryit*/
+            ctx[8]
+          );
+          mounted = true;
+        }
+      },
+      p: noop,
+      d(detaching) {
+        if (detaching)
+          detach(button);
+        mounted = false;
+        dispose();
+      }
+    };
+  }
   function create_fragment3(ctx) {
     let button0;
     let t0;
@@ -4586,11 +4557,13 @@
       (ctx[0]?.name || "") + ""
     );
     let t5;
+    let t6;
+    let if_block_anchor;
     let current;
     let mounted;
     let dispose;
     function inputnumber_value_binding(value) {
-      ctx[7](value);
+      ctx[9](value);
     }
     let inputnumber_props = {
       onChange: setCursorLine,
@@ -4609,6 +4582,8 @@
     }
     inputnumber = new inputnumber_default({ props: inputnumber_props });
     binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
+    let if_block = !/*$references*/
+    ctx[4].length && create_if_block2(ctx);
     return {
       c() {
         button0 = element("button");
@@ -4620,6 +4595,10 @@
         create_component(inputnumber.$$.fragment);
         t4 = space();
         t5 = text(t5_value);
+        t6 = space();
+        if (if_block)
+          if_block.c();
+        if_block_anchor = empty();
         button0.disabled = button0_disabled_value = /*$dirty*/
         ctx[3] && /*filehandle*/
         ctx[0];
@@ -4640,6 +4619,10 @@
         mount_component(inputnumber, target, anchor);
         insert(target, t4, anchor);
         insert(target, t5, anchor);
+        insert(target, t6, anchor);
+        if (if_block)
+          if_block.m(target, anchor);
+        insert(target, if_block_anchor, anchor);
         current = true;
         if (!mounted) {
           dispose = [
@@ -4647,19 +4630,19 @@
               window_1,
               "keydown",
               /*handleKeydown*/
-              ctx[6]
+              ctx[7]
             ),
             listen(
               button0,
               "click",
               /*openOff*/
-              ctx[4]
+              ctx[5]
             ),
             listen(
               button1,
               "click",
               /*save*/
-              ctx[5]
+              ctx[6]
             )
           ];
           mounted = true;
@@ -4695,6 +4678,19 @@
         1) && t5_value !== (t5_value = /*filehandle*/
         (ctx2[0]?.name || "") + ""))
           set_data(t5, t5_value);
+        if (!/*$references*/
+        ctx2[4].length) {
+          if (if_block) {
+            if_block.p(ctx2, dirty2);
+          } else {
+            if_block = create_if_block2(ctx2);
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
       },
       i(local) {
         if (current)
@@ -4720,6 +4716,12 @@
           detach(t4);
         if (detaching)
           detach(t5);
+        if (detaching)
+          detach(t6);
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach(if_block_anchor);
         mounted = false;
         run_all(dispose);
       }
@@ -4729,9 +4731,11 @@
     let $cursorline;
     let $cm2;
     let $dirty;
+    let $references;
     component_subscribe($$self, cursorline, ($$value) => $$invalidate(2, $cursorline = $$value));
-    component_subscribe($$self, cm2, ($$value) => $$invalidate(9, $cm2 = $$value));
+    component_subscribe($$self, cm2, ($$value) => $$invalidate(11, $cm2 = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(3, $dirty = $$value));
+    component_subscribe($$self, references, ($$value) => $$invalidate(4, $references = $$value));
     const pickerOpts = {
       types: [
         {
@@ -4743,7 +4747,7 @@
       multiple: false
     };
     let workingfile, filehandle = null, max = 0;
-    const loadText2 = (text2, filename) => {
+    const loadText = (text2, filename) => {
       $$invalidate(1, max = loadCMText(text2));
       references.set(referencesOf(filename));
       loadReference(0);
@@ -4754,7 +4758,7 @@
       $$invalidate(0, filehandle = filehandles[0]);
       workingfile = await filehandle.getFile();
       const text2 = await workingfile.text();
-      loadText2(text2, filehandle.name);
+      loadText(text2, filehandle.name);
     }
     async function save() {
       if (!filehandle)
@@ -4779,6 +4783,10 @@
         save();
       }
     }
+    const tryit = async () => {
+      const response = await fetch("dn3.yh.off");
+      loadText(await response.text(), "dn3.yh.off");
+    };
     function inputnumber_value_binding(value) {
       $cursorline = value;
       cursorline.set($cursorline);
@@ -4788,9 +4796,11 @@
       max,
       $cursorline,
       $dirty,
+      $references,
       openOff,
       save,
       handleKeydown,
+      tryit,
       inputnumber_value_binding
     ];
   }
@@ -5244,17 +5254,17 @@
 
   // src/help.js
   var helptext = `
-\u{1F4C2}\u6253\u958B\u5DE5\u4F5C\u6587\u4EF6 alt-o   \u{1F4BE}\u5132\u5B58\u5DE5\u4F5C\u6587\u4EF6\uFF08\u6703\u8981\u6C42\u6388\u6B0A\uFF09alt-s
-\u6253\u958B\u6587\u4EF6\u5F8C\uFF0C\u6700\u4E0A\u65B9\u986F\u793A\u53EF\u53C3\u8003\u5C0D\u9F4A\u4E4B\u6587\u672C\u3002
 
-\u5C0D\u9F4A\u64CD\u4F5C\uFF1A
-Enter \u6298\u884C
-\u5728\u53E5\u5B50\u672B\u7AEF\u6309 Delete \u63A5\u7E8C\u4E0B\u4E00\u884C
+\u{1F4C2}\u6253\u958B\u5DE5\u4F5C\u6587\u4EF6 alt-o   \u{1F4BE}\u5132\u5B58\u5DE5\u4F5C\u6587\u4EF6\uFF08\u7B2C\u4E00\u6B21\u5B58\u6A94\u6703\u8981\u6C42\u6388\u6B0A\uFF09alt-s
+\u6253\u958B\u6587\u4EF6\u5F8C\uFF0C\u6700\u4E0A\u65B9\u986F\u793A\u53EF\u53C3\u8003\u4E4B\u6587\u672C\u3002
+
+\u9010\u53E5\u5C0D\u7167\u64CD\u4F5C\uFF1A
+Enter \u6298\u884C\u3002
+\u5728\u53E5\u5B50\u672B\u7AEF\u6309 Delete \u6216\u53E5\u5B50\u958B\u982D\u6309BackSpace \u63A5\u7E8C
+Space \u6372\u52D5\u5C0D\u9F4A\uFF08\u6BB5\u9996\u81EA\u52D5\u5C0D\u9F4A\uFF09
 
 Ctrl-Home \u5230\u7B2C\u4E00\u884C  Ctrl-End  \u5230\u6700\u672B\u884C
 \u9801\u78BC\u8F38\u5165 \u6309\u4F4FCtrl\u53F3\u524D\u7BAD\u982D\u8DF3\u5230\u6700\u5F8C\u4E00\u884C
-
-
 `;
 
   // src/app.svelte
@@ -5419,7 +5429,7 @@ Ctrl-Home \u5230\u7B2C\u4E00\u884C  Ctrl-End  \u5230\u6700\u672B\u884C
           value: "",
           lineWrapping: true,
           readOnly: true,
-          theme: "zenburn",
+          theme: "ambiance",
           styleActiveLine: true
         }
       );
