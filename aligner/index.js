@@ -4133,7 +4133,7 @@
         a = element("a");
         a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
         set_style(span0, "font-size", "120%");
-        attr(a, "href", "https://www.youtube.com/watch?v=huCbF8bAx-8");
+        attr(a, "href", "https://youtu.be/2TskfhLQ9Jk");
         attr(a, "target", "_new");
         attr(a, "class", "svelte-2aqs7u");
         attr(div, "class", "Toolbar svelte-2aqs7u");
