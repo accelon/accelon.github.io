@@ -600,6 +600,12 @@
     let t3;
     let button2;
     let t5;
+    let button3;
+    let t7;
+    let button4;
+    let t8;
+    let t9;
+    let t10;
     let mounted;
     let dispose;
     return {
@@ -612,7 +618,14 @@
         t3 = space();
         button2 = element("button");
         button2.textContent = "\u2796";
-        t5 = text(
+        t5 = space();
+        button3 = element("button");
+        button3.textContent = "\u267B\uFE0F";
+        t7 = space();
+        button4 = element("button");
+        t8 = text("\u{1F4D0}");
+        t9 = space();
+        t10 = text(
           /*$totalframe*/
           ctx[1]
         );
@@ -623,6 +636,10 @@
         button1.disabled = button1_disabled_value = !/*$dirty*/
         ctx[0];
         attr(button2, "title", "Alt F, Remove Frame");
+        attr(button3, "title", "Alt R, Reset Frame");
+        attr(button4, "title", "Alt L, Load Frame Setting");
+        button4.disabled = /*$dirty*/
+        ctx[0];
       },
       m(target, anchor) {
         insert(target, button0, anchor);
@@ -633,6 +650,12 @@
         insert(target, t3, anchor);
         insert(target, button2, anchor);
         insert(target, t5, anchor);
+        insert(target, button3, anchor);
+        insert(target, t7, anchor);
+        insert(target, button4, anchor);
+        append(button4, t8);
+        insert(target, t9, anchor);
+        insert(target, t10, anchor);
         if (!mounted) {
           dispose = [
             listen(
@@ -651,13 +674,25 @@
               button1,
               "click",
               /*save*/
-              ctx[4]
+              ctx[5]
             ),
             listen(
               button2,
               "click",
               /*deleteframe*/
-              ctx[5]
+              ctx[7]
+            ),
+            listen(
+              button3,
+              "click",
+              /*reset*/
+              ctx[6]
+            ),
+            listen(
+              button4,
+              "click",
+              /*load*/
+              ctx[4]
             )
           ];
           mounted = true;
@@ -674,10 +709,15 @@
         ctx2[0])) {
           button1.disabled = button1_disabled_value;
         }
+        if (dirty2 & /*$dirty*/
+        1) {
+          button4.disabled = /*$dirty*/
+          ctx2[0];
+        }
         if (dirty2 & /*$totalframe*/
         2)
           set_data(
-            t5,
+            t10,
             /*$totalframe*/
             ctx2[1]
           );
@@ -697,6 +737,16 @@
           detach(button2);
         if (detaching)
           detach(t5);
+        if (detaching)
+          detach(button3);
+        if (detaching)
+          detach(t7);
+        if (detaching)
+          detach(button4);
+        if (detaching)
+          detach(t9);
+        if (detaching)
+          detach(t10);
         mounted = false;
         run_all(dispose);
       }
@@ -712,14 +762,14 @@
     let $selectedframe;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(8, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(9, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(10, $ratio = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(11, $fileprefix = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(12, $images = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(10, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(11, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(12, $ratio = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(13, $fileprefix = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(14, $images = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(13, $selectedframe = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(14, $nimage = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(15, $selectedframe = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(16, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
     const { ZipReader, BlobReader } = zip;
     const previmage = () => {
@@ -960,7 +1010,16 @@
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [$dirty, $totalframe, openImageFiles, handleKeydown, save, deleteframe];
+    return [
+      $dirty,
+      $totalframe,
+      openImageFiles,
+      handleKeydown,
+      load,
+      save,
+      reset,
+      deleteframe
+    ];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -2381,9 +2440,9 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.13 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
+        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.16 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
 \u{1F4C1}\u958B\u555FZip\u6216PDF(Alt-O)  \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
-\u91CD\u7F6E\u5716\u6846(Alt-R)   \u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
+\u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)      \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u9EDE \u7E2E\u5716 \u4E0A\u4E0B\u5C0D\u8ABF\u3002
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
