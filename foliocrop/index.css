@@ -59,14 +59,17 @@
 }
 
 /* fakecss:D:/2023/foliocrop/src/help.esbuild-svelte-fake-css */
-pre.svelte-1tue53g {
+pre.svelte-hk4l6b {
   font-size: 150%;
   margin: 0px;
 }
-.title.svelte-1tue53g {
+.title.svelte-hk4l6b {
   font-size: 200%;
 }
-a.svelte-1tue53g {
+a.svelte-hk4l6b {
+  color: darkcyan;
+}
+.filename.svelte-hk4l6b {
   color: darkcyan;
 }
 
