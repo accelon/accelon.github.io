@@ -57,9 +57,9 @@
   function get_slot_context(definition, ctx, $$scope, fn) {
     return definition[1] && fn ? assign($$scope.ctx.slice(), definition[1](fn(ctx))) : $$scope.ctx;
   }
-  function get_slot_changes(definition, $$scope, dirty3, fn) {
+  function get_slot_changes(definition, $$scope, dirty2, fn) {
     if (definition[2] && fn) {
-      const lets = definition[2](fn(dirty3));
+      const lets = definition[2](fn(dirty2));
       if ($$scope.dirty === void 0) {
         return lets;
       }
@@ -83,12 +83,12 @@
   }
   function get_all_dirty_from_scope($$scope) {
     if ($$scope.ctx.length > 32) {
-      const dirty3 = [];
+      const dirty2 = [];
       const length = $$scope.ctx.length / 32;
       for (let i = 0; i < length; i++) {
-        dirty3[i] = -1;
+        dirty2[i] = -1;
       }
-      return dirty3;
+      return dirty2;
     }
     return -1;
   }
@@ -264,9 +264,9 @@
     if ($$.fragment !== null) {
       $$.update();
       run_all($$.before_update);
-      const dirty3 = $$.dirty;
+      const dirty2 = $$.dirty;
       $$.dirty = [-1];
-      $$.fragment && $$.fragment.p($$.ctx, dirty3);
+      $$.fragment && $$.fragment.p($$.ctx, dirty2);
       $$.after_update.forEach(add_render_callback);
     }
   }
@@ -389,7 +389,7 @@
     }
     component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
   }
-  function init(component, options, instance9, create_fragment11, not_equal, props, append_styles, dirty3 = [-1]) {
+  function init(component, options, instance9, create_fragment11, not_equal, props, append_styles, dirty2 = [-1]) {
     const parent_component = current_component;
     set_current_component(component);
     const $$ = component.$$ = {
@@ -409,7 +409,7 @@
       context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
       // everything else
       callbacks: blank_object(),
-      dirty: dirty3,
+      dirty: dirty2,
       skip_bound: false,
       root: options.target || parent_component.$$.root
     };
@@ -567,7 +567,7 @@
   var nimage = writable(0);
   var ratio = writable(1);
   var totalframe = writable(0);
-  var dirty2 = writable(false);
+  var dirty = writable(false);
   var pageframe = writable(3);
   var selectedframe = writable(0);
   var fileprefix = writable("");
@@ -599,14 +599,14 @@
     const [x, y, w, h] = frame;
     return [x * ratio2, y * ratio2, w * ratio2, h * ratio2];
   };
-  var selectimage2 = (n) => {
+  var selectimage = (n) => {
     const imgs = get_store_value(images);
     const nimg = get_store_value(nimage);
     const frms = get_store_value(frames);
     const r = get_store_value(ratio);
     if (imgs?.length && imgs[nimg]) {
       imgs[nimg].frames = frms.map((f) => resizeframe(f, 1 / r));
-      dirty2.set(true);
+      dirty.set(true);
     }
     totalframe.set(caltotalframe());
     nimage.set(n);
@@ -746,7 +746,7 @@
     selectimage(0);
     const data = genjson();
     dirty.set(false);
-    const outfn = $fileprefix + ".json";
+    const outfn = get_store_value(fileprefix) + ".json";
     createBrowserDownload(outfn, data);
   };
 
@@ -831,18 +831,18 @@
           mounted = true;
         }
       },
-      p(ctx2, [dirty3]) {
-        if (dirty3 & /*$dirty*/
+      p(ctx2, [dirty2]) {
+        if (dirty2 & /*$dirty*/
         1 && button0_disabled_value !== (button0_disabled_value = !/*$dirty*/
         ctx2[0])) {
           button0.disabled = button0_disabled_value;
         }
-        if (dirty3 & /*$dirty*/
+        if (dirty2 & /*$dirty*/
         1) {
           button3.disabled = /*$dirty*/
           ctx2[0];
         }
-        if (dirty3 & /*$totalframe*/
+        if (dirty2 & /*$totalframe*/
         2)
           set_data(
             t8,
@@ -888,7 +888,7 @@
     component_subscribe($$self, frames, ($$value) => $$invalidate(5, $frames = $$value));
     component_subscribe($$self, pageframe, ($$value) => $$invalidate(6, $pageframe = $$value));
     component_subscribe($$self, ratio, ($$value) => $$invalidate(7, $ratio = $$value));
-    component_subscribe($$self, dirty2, ($$value) => $$invalidate(0, $dirty = $$value));
+    component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
     component_subscribe($$self, selectedframe, ($$value) => $$invalidate(8, $selectedframe = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(9, $images = $$value));
     component_subscribe($$self, nimage, ($$value) => $$invalidate(10, $nimage = $$value));
@@ -898,14 +898,14 @@
       n--;
       if (n < 0)
         n = 0;
-      selectimage2(n);
+      selectimage(n);
     };
     const nextimage = () => {
       let n = $nimage;
       n++;
       if (n >= $images?.length)
         n = $images?.length - 1;
-      selectimage2(n);
+      selectimage(n);
     };
     function handleFrameMove(evt) {
       const key = evt.key.toLowerCase();
@@ -1060,8 +1060,8 @@
       m(target, anchor) {
         insert(target, rect, anchor);
       },
-      p(ctx2, dirty3) {
-        if (dirty3 & /*x, w, verticalstrip*/
+      p(ctx2, dirty2) {
+        if (dirty2 & /*x, w, verticalstrip*/
         138 && rect_x_value !== (rect_x_value = /*x*/
         ctx2[1] + /*idx*/
         ctx2[15] * /*w*/
@@ -1069,7 +1069,7 @@
         ctx2[7]))) {
           attr(rect, "x", rect_x_value);
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4) {
           attr(
             rect,
@@ -1078,13 +1078,13 @@
             ctx2[2]
           );
         }
-        if (dirty3 & /*w, verticalstrip*/
+        if (dirty2 & /*w, verticalstrip*/
         136 && rect_width_value !== (rect_width_value = /*w*/
         ctx2[3] / /*verticalstrip*/
         ctx2[7])) {
           attr(rect, "width", rect_width_value);
         }
-        if (dirty3 & /*h*/
+        if (dirty2 & /*h*/
         16) {
           attr(
             rect,
@@ -1093,7 +1093,7 @@
             ctx2[4]
           );
         }
-        if (dirty3 & /*frameidx, verticalstrip*/
+        if (dirty2 & /*frameidx, verticalstrip*/
         2176 && rect_class_value !== (rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx2[11] * /*verticalstrip*/
         ctx2[7] + /*idx*/
@@ -1139,8 +1139,8 @@
       m(target, anchor) {
         insert(target, line, anchor);
       },
-      p(ctx2, dirty3) {
-        if (dirty3 & /*x*/
+      p(ctx2, dirty2) {
+        if (dirty2 & /*x*/
         2) {
           attr(
             line,
@@ -1149,7 +1149,7 @@
             ctx2[1]
           );
         }
-        if (dirty3 & /*y, h, horizontalstrip*/
+        if (dirty2 & /*y, h, horizontalstrip*/
         276 && line_y__value !== (line_y__value = /*y*/
         ctx2[2] + /*idx*/
         (ctx2[15] + 1) * /*h*/
@@ -1157,13 +1157,13 @@
         ctx2[8]))) {
           attr(line, "y1", line_y__value);
         }
-        if (dirty3 & /*x, w*/
+        if (dirty2 & /*x, w*/
         10 && line_x__value !== (line_x__value = /*x*/
         ctx2[1] + /*w*/
         ctx2[3])) {
           attr(line, "x2", line_x__value);
         }
-        if (dirty3 & /*y, h, horizontalstrip*/
+        if (dirty2 & /*y, h, horizontalstrip*/
         276 && line_y__value_1 !== (line_y__value_1 = /*y*/
         ctx2[2] + /*idx*/
         (ctx2[15] + 1) * /*h*/
@@ -1536,16 +1536,16 @@
           mounted = true;
         }
       },
-      p(new_ctx, [dirty3]) {
+      p(new_ctx, [dirty2]) {
         ctx = new_ctx;
-        if (dirty3 & /*caption*/
+        if (dirty2 & /*caption*/
         64)
           set_data(
             t0,
             /*caption*/
             ctx[6]
           );
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2) {
           attr(
             text0,
@@ -1554,12 +1554,12 @@
             ctx[1]
           );
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4 && text0_y_value !== (text0_y_value = /*y*/
         ctx[2] - 5)) {
           attr(text0, "y", text0_y_value);
         }
-        if (dirty3 & /*selected*/
+        if (dirty2 & /*selected*/
         4096) {
           toggle_class(
             text0,
@@ -1568,45 +1568,45 @@
             ctx[12]
           );
         }
-        if (dirty3 & /*x, r*/
+        if (dirty2 & /*x, r*/
         34 && t1_value !== (t1_value = Math.floor(
           /*x*/
           ctx[1] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t1, t1_value);
-        if (dirty3 & /*y, r*/
+        if (dirty2 & /*y, r*/
         36 && t3_value !== (t3_value = Math.floor(
           /*y*/
           ctx[2] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t3, t3_value);
-        if (dirty3 & /*w, r*/
+        if (dirty2 & /*w, r*/
         40 && t5_value !== (t5_value = Math.floor(
           /*w*/
           ctx[3] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t5, t5_value);
-        if (dirty3 & /*h, r*/
+        if (dirty2 & /*h, r*/
         48 && t7_value !== (t7_value = Math.floor(
           /*h*/
           ctx[4] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t7, t7_value);
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2 && text1_x_value !== (text1_x_value = /*x*/
         ctx[1] + 30)) {
           attr(text1, "x", text1_x_value);
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4 && text1_y_value !== (text1_y_value = /*y*/
         ctx[2] - 5)) {
           attr(text1, "y", text1_y_value);
         }
-        if (dirty3 & /*x, w, verticalstrip, y, h, frameidx*/
+        if (dirty2 & /*x, w, verticalstrip, y, h, frameidx*/
         2206) {
           each_value_1 = new Array(
             /*verticalstrip*/
@@ -1616,7 +1616,7 @@
           for (i = 0; i < each_value_1.length; i += 1) {
             const child_ctx = get_each_context_1(ctx, each_value_1, i);
             if (each_blocks_1[i]) {
-              each_blocks_1[i].p(child_ctx, dirty3);
+              each_blocks_1[i].p(child_ctx, dirty2);
             } else {
               each_blocks_1[i] = create_each_block_1(child_ctx);
               each_blocks_1[i].c();
@@ -1628,7 +1628,7 @@
           }
           each_blocks_1.length = each_value_1.length;
         }
-        if (dirty3 & /*x, y, h, horizontalstrip, w*/
+        if (dirty2 & /*x, y, h, horizontalstrip, w*/
         286) {
           each_value = new Array(
             /*horizontalstrip*/
@@ -1638,7 +1638,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context(ctx, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty3);
+              each_blocks[i].p(child_ctx, dirty2);
             } else {
               each_blocks[i] = create_each_block(child_ctx);
               each_blocks[i].c();
@@ -1650,7 +1650,7 @@
           }
           each_blocks.length = each_value.length;
         }
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2) {
           attr(
             rect0,
@@ -1659,7 +1659,7 @@
             ctx[1]
           );
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4) {
           attr(
             rect0,
@@ -1668,7 +1668,7 @@
             ctx[2]
           );
         }
-        if (dirty3 & /*w*/
+        if (dirty2 & /*w*/
         8) {
           attr(
             rect0,
@@ -1677,7 +1677,7 @@
             ctx[3]
           );
         }
-        if (dirty3 & /*h*/
+        if (dirty2 & /*h*/
         16) {
           attr(
             rect0,
@@ -1686,7 +1686,7 @@
             ctx[4]
           );
         }
-        if (dirty3 & /*expanding*/
+        if (dirty2 & /*expanding*/
         1) {
           toggle_class(
             rect0,
@@ -1695,7 +1695,7 @@
             ctx[0] == "middle"
           );
         }
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2) {
           attr(
             rect1,
@@ -1704,7 +1704,7 @@
             ctx[1]
           );
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4) {
           attr(
             rect1,
@@ -1713,7 +1713,7 @@
             ctx[2]
           );
         }
-        if (dirty3 & /*h*/
+        if (dirty2 & /*h*/
         16) {
           attr(
             rect1,
@@ -1722,7 +1722,7 @@
             ctx[4]
           );
         }
-        if (dirty3 & /*expanding*/
+        if (dirty2 & /*expanding*/
         1) {
           toggle_class(
             rect1,
@@ -1731,13 +1731,13 @@
             ctx[0] == "left"
           );
         }
-        if (dirty3 & /*x, w*/
+        if (dirty2 & /*x, w*/
         10 && rect2_x_value !== (rect2_x_value = /*x*/
         ctx[1] + /*w*/
         ctx[3] - grabberWidth)) {
           attr(rect2, "x", rect2_x_value);
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4) {
           attr(
             rect2,
@@ -1746,7 +1746,7 @@
             ctx[2]
           );
         }
-        if (dirty3 & /*h*/
+        if (dirty2 & /*h*/
         16) {
           attr(
             rect2,
@@ -1755,7 +1755,7 @@
             ctx[4]
           );
         }
-        if (dirty3 & /*expanding*/
+        if (dirty2 & /*expanding*/
         1) {
           toggle_class(
             rect2,
@@ -1764,7 +1764,7 @@
             ctx[0] == "right"
           );
         }
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2) {
           attr(
             rect3,
@@ -1773,7 +1773,7 @@
             ctx[1]
           );
         }
-        if (dirty3 & /*y*/
+        if (dirty2 & /*y*/
         4) {
           attr(
             rect3,
@@ -1782,7 +1782,7 @@
             ctx[2]
           );
         }
-        if (dirty3 & /*w*/
+        if (dirty2 & /*w*/
         8) {
           attr(
             rect3,
@@ -1791,7 +1791,7 @@
             ctx[3]
           );
         }
-        if (dirty3 & /*expanding*/
+        if (dirty2 & /*expanding*/
         1) {
           toggle_class(
             rect3,
@@ -1800,7 +1800,7 @@
             ctx[0] == "top"
           );
         }
-        if (dirty3 & /*x*/
+        if (dirty2 & /*x*/
         2) {
           attr(
             rect4,
@@ -1809,13 +1809,13 @@
             ctx[1]
           );
         }
-        if (dirty3 & /*y, h*/
+        if (dirty2 & /*y, h*/
         20 && rect4_y_value !== (rect4_y_value = /*y*/
         ctx[2] + /*h*/
         ctx[4] - grabberHeight)) {
           attr(rect4, "y", rect4_y_value);
         }
-        if (dirty3 & /*w*/
+        if (dirty2 & /*w*/
         8) {
           attr(
             rect4,
@@ -1824,7 +1824,7 @@
             ctx[3]
           );
         }
-        if (dirty3 & /*expanding*/
+        if (dirty2 & /*expanding*/
         1) {
           toggle_class(
             rect4,
@@ -2011,47 +2011,47 @@
         mount_component(cropper, target, anchor);
         current = true;
       },
-      p(ctx2, dirty3) {
+      p(ctx2, dirty2) {
         const cropper_changes = {};
-        if (dirty3 & /*theframes*/
+        if (dirty2 & /*theframes*/
         64)
           cropper_changes.x = /*frame*/
           ctx2[21][0];
-        if (dirty3 & /*theframes*/
+        if (dirty2 & /*theframes*/
         64)
           cropper_changes.y = /*frame*/
           ctx2[21][1];
-        if (dirty3 & /*theframes*/
+        if (dirty2 & /*theframes*/
         64)
           cropper_changes.w = /*frame*/
           ctx2[21][2];
-        if (dirty3 & /*theframes*/
+        if (dirty2 & /*theframes*/
         64)
           cropper_changes.h = /*frame*/
           ctx2[21][3];
-        if (dirty3 & /*$selectedframe*/
+        if (dirty2 & /*$selectedframe*/
         128)
           cropper_changes.selected = /*$selectedframe*/
           ctx2[7] & 1 << /*idx*/
           ctx2[23];
-        if (dirty3 & /*$verticalstrip*/
+        if (dirty2 & /*$verticalstrip*/
         256)
           cropper_changes.verticalstrip = /*$verticalstrip*/
           ctx2[8];
-        if (dirty3 & /*$horizontalstrip*/
+        if (dirty2 & /*$horizontalstrip*/
         512)
           cropper_changes.horizontalstrip = /*$horizontalstrip*/
           ctx2[9];
-        if (dirty3 & /*r*/
+        if (dirty2 & /*r*/
         8)
           cropper_changes.r = /*r*/
           ctx2[3];
-        if (dirty3 & /*start*/
+        if (dirty2 & /*start*/
         4)
           cropper_changes.caption = /*start*/
           ctx2[2] + /*idx*/
           ctx2[23];
-        if (!updating_expanding && dirty3 & /*expanding*/
+        if (!updating_expanding && dirty2 & /*expanding*/
         16) {
           updating_expanding = true;
           cropper_changes.expanding = /*expanding*/
@@ -2140,8 +2140,8 @@
           mounted = true;
         }
       },
-      p(ctx2, dirty3) {
-        if (dirty3 & /*theframes, $selectedframe, $verticalstrip, $horizontalstrip, r, startExpand, start, expanding*/
+      p(ctx2, dirty2) {
+        if (dirty2 & /*theframes, $selectedframe, $verticalstrip, $horizontalstrip, r, startExpand, start, expanding*/
         2012) {
           each_value = /*theframes*/
           ctx2[6];
@@ -2149,7 +2149,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context2(ctx2, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty3);
+              each_blocks[i].p(child_ctx, dirty2);
               transition_in(each_blocks[i], 1);
             } else {
               each_blocks[i] = create_each_block2(child_ctx);
@@ -2164,13 +2164,13 @@
           }
           check_outros();
         }
-        if (!current || dirty3 & /*width, height*/
+        if (!current || dirty2 & /*width, height*/
         3 && svg_viewBox_value !== (svg_viewBox_value = "0 0 " + /*width*/
         ctx2[1] + " " + /*height*/
         ctx2[0])) {
           attr(svg, "viewBox", svg_viewBox_value);
         }
-        if (!current || dirty3 & /*height*/
+        if (!current || dirty2 & /*height*/
         1) {
           attr(
             svg,
@@ -2179,7 +2179,7 @@
             ctx2[0]
           );
         }
-        if (!current || dirty3 & /*width*/
+        if (!current || dirty2 & /*width*/
         2) {
           attr(
             svg,
@@ -2188,7 +2188,7 @@
             ctx2[1]
           );
         }
-        if (!current || dirty3 & /*expanding*/
+        if (!current || dirty2 & /*expanding*/
         16) {
           toggle_class(
             svg,
@@ -2253,8 +2253,8 @@
           mounted = true;
         }
       },
-      p(ctx2, [dirty3]) {
-        if (dirty3 & /*theframes*/
+      p(ctx2, [dirty2]) {
+        if (dirty2 & /*theframes*/
         64 && safe_not_equal(previous_key, previous_key = /*theframes*/
         ctx2[6])) {
           group_outros();
@@ -2265,7 +2265,7 @@
           transition_in(key_block, 1);
           key_block.m(div, null);
         } else {
-          key_block.p(ctx2, dirty3);
+          key_block.p(ctx2, dirty2);
         }
       },
       i(local) {
@@ -2565,7 +2565,7 @@
     let t;
     let g0;
     let g1;
-    function select_block_type(ctx2, dirty3) {
+    function select_block_type(ctx2, dirty2) {
       if (
         /*over*/
         ctx2[0]
@@ -2575,7 +2575,7 @@
     }
     let current_block_type = select_block_type(ctx, -1);
     let if_block0 = current_block_type(ctx);
-    function select_block_type_1(ctx2, dirty3) {
+    function select_block_type_1(ctx2, dirty2) {
       if (
         /*over*/
         ctx2[0]
@@ -2613,8 +2613,8 @@
         append(svg, g1);
         if_block1.m(g1, null);
       },
-      p(ctx2, [dirty3]) {
-        if (current_block_type !== (current_block_type = select_block_type(ctx2, dirty3))) {
+      p(ctx2, [dirty2]) {
+        if (current_block_type !== (current_block_type = select_block_type(ctx2, dirty2))) {
           if_block0.d(1);
           if_block0 = current_block_type(ctx2);
           if (if_block0) {
@@ -2622,7 +2622,7 @@
             if_block0.m(g0, null);
           }
         }
-        if (current_block_type_1 !== (current_block_type_1 = select_block_type_1(ctx2, dirty3))) {
+        if (current_block_type_1 !== (current_block_type_1 = select_block_type_1(ctx2, dirty2))) {
           if_block1.d(1);
           if_block1 = current_block_type_1(ctx2);
           if (if_block1) {
@@ -2678,9 +2678,9 @@
         mount_component(fallbacksvg, div, null);
         current = true;
       },
-      p(ctx2, dirty3) {
+      p(ctx2, dirty2) {
         const fallbacksvg_changes = {};
-        if (dirty3 & /*isOver*/
+        if (dirty2 & /*isOver*/
         4)
           fallbacksvg_changes.over = /*isOver*/
           ctx2[2];
@@ -2798,9 +2798,9 @@
           mounted = true;
         }
       },
-      p(ctx2, [dirty3]) {
+      p(ctx2, [dirty2]) {
         if (default_slot) {
-          if (default_slot.p && (!current || dirty3 & /*$$scope*/
+          if (default_slot.p && (!current || dirty2 & /*$$scope*/
           16384)) {
             update_slot_base(
               default_slot,
@@ -2815,24 +2815,24 @@
                 default_slot_template,
                 /*$$scope*/
                 ctx2[14],
-                dirty3,
+                dirty2,
                 null
               ),
               null
             );
           }
         } else {
-          if (default_slot_or_fallback && default_slot_or_fallback.p && (!current || dirty3 & /*isOver*/
+          if (default_slot_or_fallback && default_slot_or_fallback.p && (!current || dirty2 & /*isOver*/
           4)) {
-            default_slot_or_fallback.p(ctx2, !current ? -1 : dirty3);
+            default_slot_or_fallback.p(ctx2, !current ? -1 : dirty2);
           }
         }
-        if (!current || dirty3 & /*multiple*/
+        if (!current || dirty2 & /*multiple*/
         1) {
           input_1.multiple = /*multiple*/
           ctx2[0];
         }
-        if (!current || dirty3 & /*disabled*/
+        if (!current || dirty2 & /*disabled*/
         2) {
           input_1.disabled = /*disabled*/
           ctx2[1];
@@ -3050,8 +3050,8 @@
         insert(target, img, anchor);
         current = true;
       },
-      p(ctx2, dirty3) {
-        if (!current || dirty3 & /*$fileprefix*/
+      p(ctx2, dirty2) {
+        if (!current || dirty2 & /*$fileprefix*/
         16)
           set_data(
             t0,
@@ -3059,20 +3059,20 @@
             ctx2[4]
           );
         const croppers_changes = {};
-        if (dirty3 & /*height*/
+        if (dirty2 & /*height*/
         4)
           croppers_changes.height = /*height*/
           ctx2[2];
-        if (dirty3 & /*width*/
+        if (dirty2 & /*width*/
         8)
           croppers_changes.width = /*width*/
           ctx2[3];
-        if (dirty3 & /*r*/
+        if (dirty2 & /*r*/
         2)
           croppers_changes.r = /*r*/
           ctx2[1];
         croppers.$set(croppers_changes);
-        if (!current || dirty3 & /*imageurl*/
+        if (!current || dirty2 & /*imageurl*/
         1 && !src_url_equal(img.src, img_src_value = /*imageurl*/
         ctx2[0])) {
           attr(img, "src", img_src_value);
@@ -3117,7 +3117,7 @@
     ) } });
     const if_block_creators = [create_if_block2, create_else_block2];
     const if_blocks = [];
-    function select_block_type(ctx2, dirty3) {
+    function select_block_type(ctx2, dirty2) {
       if (
         /*imageurl*/
         ctx2[0]
@@ -3144,11 +3144,11 @@
         insert(target, if_block_anchor, anchor);
         current = true;
       },
-      p(ctx2, [dirty3]) {
+      p(ctx2, [dirty2]) {
         let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2, dirty3);
+        current_block_type_index = select_block_type(ctx2, dirty2);
         if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty3);
+          if_blocks[current_block_type_index].p(ctx2, dirty2);
         } else {
           group_outros();
           transition_out(if_blocks[previous_block_index], 1, 1, () => {
@@ -3160,7 +3160,7 @@
             if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
             if_block.c();
           } else {
-            if_block.p(ctx2, dirty3);
+            if_block.p(ctx2, dirty2);
           }
           transition_in(if_block, 1);
           if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -3193,10 +3193,10 @@
   function instance6($$self, $$props, $$invalidate) {
     let $nimage;
     let $images;
-    let $fileprefix2;
+    let $fileprefix;
     component_subscribe($$self, nimage, ($$value) => $$invalidate(6, $nimage = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(7, $images = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix2 = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix = $$value));
     const onDrop = (e) => {
       const file = e[0];
       if (file && (file.name.endsWith(".zip") || file.name.endsWith(".pdf"))) {
@@ -3250,7 +3250,7 @@
       $$invalidate(2, height = document.getElementById("image1")?.height);
     $:
       $$invalidate(3, width = document.getElementById("image1")?.width);
-    return [imageurl, r, height, width, $fileprefix2, onDrop, $nimage, $images];
+    return [imageurl, r, height, width, $fileprefix, onDrop, $nimage, $images];
   }
   var Imageviewer = class extends SvelteComponent {
     constructor(options) {
@@ -3330,13 +3330,13 @@
           mounted = true;
         }
       },
-      p(new_ctx, dirty3) {
+      p(new_ctx, dirty2) {
         ctx = new_ctx;
-        if (dirty3 & /*$images*/
+        if (dirty2 & /*$images*/
         2 && t0_value !== (t0_value = /*image*/
         ctx[3].name + ""))
           set_data(t0, t0_value);
-        if (dirty3 & /*$images*/
+        if (dirty2 & /*$images*/
         2) {
           toggle_class(
             span0,
@@ -3345,11 +3345,11 @@
             ctx[3].frames
           );
         }
-        if (dirty3 & /*$images*/
+        if (dirty2 & /*$images*/
         2 && t2_value !== (t2_value = /*image*/
         (ctx[3].frames?.length || "") + ""))
           set_data(t2, t2_value);
-        if (dirty3 & /*$nimage*/
+        if (dirty2 & /*$nimage*/
         1) {
           toggle_class(
             div,
@@ -3393,8 +3393,8 @@
         }
         insert(target, each_1_anchor, anchor);
       },
-      p(ctx2, dirty3) {
-        if (dirty3 & /*$nimage, selectimage, $images*/
+      p(ctx2, dirty2) {
+        if (dirty2 & /*$nimage, selectimage, $images*/
         3) {
           each_value = /*$images*/
           ctx2[1];
@@ -3402,7 +3402,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context3(ctx2, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty3);
+              each_blocks[i].p(child_ctx, dirty2);
             } else {
               each_blocks[i] = create_each_block3(child_ctx);
               each_blocks[i].c();
@@ -3439,8 +3439,8 @@
         insert(target, div, anchor);
         key_block.m(div, null);
       },
-      p(ctx2, [dirty3]) {
-        if (dirty3 & /*$nimage*/
+      p(ctx2, [dirty2]) {
+        if (dirty2 & /*$nimage*/
         1 && safe_not_equal(previous_key, previous_key = /*$nimage*/
         ctx2[0])) {
           key_block.d(1);
@@ -3448,7 +3448,7 @@
           key_block.c();
           key_block.m(div, null);
         } else {
-          key_block.p(ctx2, dirty3);
+          key_block.p(ctx2, dirty2);
         }
       },
       i: noop,
@@ -3465,7 +3465,7 @@
     let $images;
     component_subscribe($$self, nimage, ($$value) => $$invalidate(0, $nimage = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(1, $images = $$value));
-    const click_handler = (idx) => selectimage2(idx);
+    const click_handler = (idx) => selectimage(idx);
     return [$nimage, $images, click_handler];
   }
   var Filelist = class extends SvelteComponent {
