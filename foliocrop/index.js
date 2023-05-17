@@ -2,6 +2,11 @@
   // node_modules/svelte/internal/index.mjs
   function noop() {
   }
+  function assign(tar, src) {
+    for (const k in src)
+      tar[k] = src[k];
+    return tar;
+  }
   function run(fn) {
     return fn();
   }
@@ -42,6 +47,50 @@
   }
   function component_subscribe(component, store, callback) {
     component.$$.on_destroy.push(subscribe(store, callback));
+  }
+  function create_slot(definition, ctx, $$scope, fn) {
+    if (definition) {
+      const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+      return definition[0](slot_ctx);
+    }
+  }
+  function get_slot_context(definition, ctx, $$scope, fn) {
+    return definition[1] && fn ? assign($$scope.ctx.slice(), definition[1](fn(ctx))) : $$scope.ctx;
+  }
+  function get_slot_changes(definition, $$scope, dirty3, fn) {
+    if (definition[2] && fn) {
+      const lets = definition[2](fn(dirty3));
+      if ($$scope.dirty === void 0) {
+        return lets;
+      }
+      if (typeof lets === "object") {
+        const merged = [];
+        const len = Math.max($$scope.dirty.length, lets.length);
+        for (let i = 0; i < len; i += 1) {
+          merged[i] = $$scope.dirty[i] | lets[i];
+        }
+        return merged;
+      }
+      return $$scope.dirty | lets;
+    }
+    return $$scope.dirty;
+  }
+  function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
+    if (slot_changes) {
+      const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
+      slot.p(slot_context, slot_changes);
+    }
+  }
+  function get_all_dirty_from_scope($$scope) {
+    if ($$scope.ctx.length > 32) {
+      const dirty3 = [];
+      const length = $$scope.ctx.length / 32;
+      for (let i = 0; i < length; i++) {
+        dirty3[i] = -1;
+      }
+      return dirty3;
+    }
+    return -1;
   }
   function null_to_empty(value) {
     return value == null ? "" : value;
@@ -215,9 +264,9 @@
     if ($$.fragment !== null) {
       $$.update();
       run_all($$.before_update);
-      const dirty2 = $$.dirty;
+      const dirty3 = $$.dirty;
       $$.dirty = [-1];
-      $$.fragment && $$.fragment.p($$.ctx, dirty2);
+      $$.fragment && $$.fragment.p($$.ctx, dirty3);
       $$.after_update.forEach(add_render_callback);
     }
   }
@@ -340,7 +389,7 @@
     }
     component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
   }
-  function init(component, options, instance7, create_fragment9, not_equal, props, append_styles, dirty2 = [-1]) {
+  function init(component, options, instance9, create_fragment11, not_equal, props, append_styles, dirty3 = [-1]) {
     const parent_component = current_component;
     set_current_component(component);
     const $$ = component.$$ = {
@@ -360,13 +409,13 @@
       context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
       // everything else
       callbacks: blank_object(),
-      dirty: dirty2,
+      dirty: dirty3,
       skip_bound: false,
       root: options.target || parent_component.$$.root
     };
     append_styles && append_styles($$.root);
     let ready = false;
-    $$.ctx = instance7 ? instance7(component, options.props || {}, (i, ret, ...rest) => {
+    $$.ctx = instance9 ? instance9(component, options.props || {}, (i, ret, ...rest) => {
       const value = rest.length ? rest[0] : ret;
       if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
         if (!$$.skip_bound && $$.bound[i])
@@ -379,7 +428,7 @@
     $$.update();
     ready = true;
     run_all($$.before_update);
-    $$.fragment = create_fragment9 ? create_fragment9($$.ctx) : false;
+    $$.fragment = create_fragment11 ? create_fragment11($$.ctx) : false;
     if (options.target) {
       if (options.hydrate) {
         start_hydrating();
@@ -518,7 +567,7 @@
   var nimage = writable(0);
   var ratio = writable(1);
   var totalframe = writable(0);
-  var dirty = writable(false);
+  var dirty2 = writable(false);
   var pageframe = writable(3);
   var selectedframe = writable(0);
   var fileprefix = writable("");
@@ -550,14 +599,14 @@
     const [x, y, w, h] = frame;
     return [x * ratio2, y * ratio2, w * ratio2, h * ratio2];
   };
-  var selectimage = (n) => {
+  var selectimage2 = (n) => {
     const imgs = get_store_value(images);
     const nimg = get_store_value(nimage);
     const frms = get_store_value(frames);
     const r = get_store_value(ratio);
     if (imgs?.length && imgs[nimg]) {
       imgs[nimg].frames = frms.map((f) => resizeframe(f, 1 / r));
-      dirty.set(true);
+      dirty2.set(true);
     }
     totalframe.set(caltotalframe());
     nimage.set(n);
@@ -579,66 +628,169 @@
   // ../ptk/platform/chromefs.ts
   var m = typeof navigator !== "undefined" && navigator.userAgent.match(/Chrome\/(\d+)/);
   var supprtedBrowser = m && parseInt(m[1]) >= 86;
-  var createBrowserDownload = (filename, buf) => {
+  var createBrowserDownload = (filename2, buf) => {
     let file = new Blob([buf], { type: "application/octet-binary" });
     let a = document.createElement("a"), url = URL.createObjectURL(file);
     a.href = url;
-    a.download = filename;
+    a.download = filename2;
     document.body.appendChild(a);
     a.click();
   };
 
+  // src/working.js
+  var { ZipReader, BlobReader } = zip;
+  var zipOpts = {
+    types: [{ description: "Images Zip/PDF", accept: { "zip/*": [".zip", ".pdf"] } }],
+    excludeAcceptAllOption: true,
+    multiple: false
+  };
+  var jsonOpts = {
+    types: [{ description: "json", accept: { "json/*": [".json"] } }],
+    excludeAcceptAllOption: true,
+    multiple: false
+  };
+  var getFolder = async () => {
+    const dirHandle = await window.showDirectoryPicker();
+    const out = [];
+    setTemplate("shandong");
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind == "file" && (entry.name.endsWith(".png") || entry.name.endsWith(".jpg"))) {
+        out.push({ entry, name: entry.name, frames: out.length ? null : [] });
+      }
+    }
+    out.sort(sortfilename);
+    if (out.length > 2)
+      out[out.length - 1].frames = [];
+    nimage.set(0);
+    images.set(out);
+    fileprefix.set(dirHandle.name);
+  };
+  var sortfilename = (a, b) => {
+    if (parseInt(a) && parseInt(b)) {
+      return parseInt(a) - parseInt(b);
+    } else {
+      return a.name > b.name ? 1 : -1;
+    }
+  };
+  async function openZip(file) {
+    const zip2 = new ZipReader(new BlobReader(file));
+    const entries = await zip2.getEntries();
+    const out = [];
+    setTemplate("shandong");
+    entries.forEach((entry) => {
+      if (entry.filename.endsWith(".jpg")) {
+        let at = entry.filename.lastIndexOf("/");
+        if (at == -1)
+          at = entry.filename.lastIndexOf("\\");
+        out.push({ name: entry.filename.slice(at + 1), entry, zip: zip2, frames: out.length ? null : [] });
+      }
+    });
+    out.sort(sortfilename);
+    if (out.length > 2)
+      out[out.length - 1].frames = [];
+    return out;
+  }
+  var pdf;
+  async function openPDF(file) {
+    setTemplate("qindinglongcang");
+    const arraybuffer = await file.arrayBuffer();
+    const typedarray = new Uint8Array(arraybuffer);
+    pdf = await pdfjsLib.getDocument(typedarray).promise;
+    const out = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      out.push({ name: i, pdf, page: i, frames: out.length ? null : [] });
+    }
+    if (out.length > 2)
+      out[out.length - 1].frames = [];
+    return out;
+  }
+  var openWorkingFile = async (file) => {
+    let out = [];
+    const filename2 = file.name.toLowerCase();
+    if (filename2.endsWith(".zip"))
+      out = await openZip(file);
+    else if (filename2.endsWith(".pdf"))
+      out = await openPDF(file);
+    else
+      return "";
+    nimage.set(0);
+    images.set(out);
+    fileprefix.set(filename2.replace(/\.[a-z]+$/, ""));
+    return filename2;
+  };
+  var filename = "";
+  var openImageFiles = async () => {
+    const filehandles = await window.showOpenFilePicker(zipOpts);
+    const file = await filehandles[0].getFile();
+    filename = openWorkingFile(file);
+  };
+  var load = async () => {
+    const imgs = get_store_value(images);
+    if (!imgs.length) {
+      alert("need images");
+      return;
+    }
+    const filehandles = await window.showOpenFilePicker(jsonOpts);
+    const file = await filehandles[0].getFile();
+    const json = JSON.parse(await file.text());
+    if (json.length !== imgs.length) {
+      alert("zip json missmatch");
+      return;
+    }
+    for (let i = 0; i < imgs.length; i++) {
+      imgs[i].frames = json[i].frames;
+    }
+    images.set(imgs);
+  };
+  var save = () => {
+    selectimage(0);
+    const data = genjson();
+    dirty.set(false);
+    const outfn = $fileprefix + ".json";
+    createBrowserDownload(outfn, data);
+  };
+
   // src/toolbar.svelte
-  var { window: window_1 } = globals;
   function create_fragment(ctx) {
     let button0;
     let t0;
+    let button0_disabled_value;
     let t1;
     let button1;
-    let t2;
-    let button1_disabled_value;
     let t3;
     let button2;
     let t5;
     let button3;
+    let t6;
     let t7;
-    let button4;
     let t8;
-    let t9;
-    let t10;
     let mounted;
     let dispose;
     return {
       c() {
         button0 = element("button");
-        t0 = text("\u{1F4C1}");
+        t0 = text("\u{1F4BE}");
         t1 = space();
         button1 = element("button");
-        t2 = text("\u{1F4BE}");
+        button1.textContent = "\u2796";
         t3 = space();
         button2 = element("button");
-        button2.textContent = "\u2796";
+        button2.textContent = "\u267B\uFE0F";
         t5 = space();
         button3 = element("button");
-        button3.textContent = "\u267B\uFE0F";
+        t6 = text("\u{1F4D0}");
         t7 = space();
-        button4 = element("button");
-        t8 = text("\u{1F4D0}");
-        t9 = space();
-        t10 = text(
+        t8 = text(
           /*$totalframe*/
           ctx[1]
         );
-        attr(button0, "title", "Alt O, Open Image Zip/PDF");
-        button0.disabled = /*$dirty*/
+        attr(button0, "title", "Alt S, Save");
+        button0.disabled = button0_disabled_value = !/*$dirty*/
         ctx[0];
-        attr(button1, "title", "Alt S, Save");
-        button1.disabled = button1_disabled_value = !/*$dirty*/
-        ctx[0];
-        attr(button2, "title", "Alt F, Remove Frame");
-        attr(button3, "title", "Alt R, Reset Frame");
-        attr(button4, "title", "Alt L, Load Frame Setting");
-        button4.disabled = /*$dirty*/
+        attr(button1, "title", "Alt F, Remove Frame");
+        attr(button2, "title", "Alt R, Reset Frame");
+        attr(button3, "title", "Alt L, Load Frame Setting");
+        button3.disabled = /*$dirty*/
         ctx[0];
       },
       m(target, anchor) {
@@ -646,78 +798,54 @@
         append(button0, t0);
         insert(target, t1, anchor);
         insert(target, button1, anchor);
-        append(button1, t2);
         insert(target, t3, anchor);
         insert(target, button2, anchor);
         insert(target, t5, anchor);
         insert(target, button3, anchor);
+        append(button3, t6);
         insert(target, t7, anchor);
-        insert(target, button4, anchor);
-        append(button4, t8);
-        insert(target, t9, anchor);
-        insert(target, t10, anchor);
+        insert(target, t8, anchor);
         if (!mounted) {
           dispose = [
             listen(
-              window_1,
+              window,
               "keydown",
               /*handleKeydown*/
-              ctx[3]
-            ),
-            listen(
-              button0,
-              "click",
-              /*openImageFiles*/
               ctx[2]
             ),
+            listen(button0, "click", save),
             listen(
               button1,
               "click",
-              /*save*/
-              ctx[5]
+              /*deleteframe*/
+              ctx[4]
             ),
             listen(
               button2,
               "click",
-              /*deleteframe*/
-              ctx[7]
-            ),
-            listen(
-              button3,
-              "click",
               /*reset*/
-              ctx[6]
+              ctx[3]
             ),
-            listen(
-              button4,
-              "click",
-              /*load*/
-              ctx[4]
-            )
+            listen(button3, "click", load)
           ];
           mounted = true;
         }
       },
-      p(ctx2, [dirty2]) {
-        if (dirty2 & /*$dirty*/
-        1) {
-          button0.disabled = /*$dirty*/
-          ctx2[0];
-        }
-        if (dirty2 & /*$dirty*/
-        1 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
+      p(ctx2, [dirty3]) {
+        if (dirty3 & /*$dirty*/
+        1 && button0_disabled_value !== (button0_disabled_value = !/*$dirty*/
         ctx2[0])) {
-          button1.disabled = button1_disabled_value;
+          button0.disabled = button0_disabled_value;
         }
-        if (dirty2 & /*$dirty*/
+        if (dirty3 & /*$dirty*/
         1) {
-          button4.disabled = /*$dirty*/
+          button3.disabled = /*$dirty*/
           ctx2[0];
         }
-        if (dirty2 & /*$totalframe*/
+        if (dirty3 & /*$totalframe*/
         2)
           set_data(
-            t10,
+            t8,
             /*$totalframe*/
             ctx2[1]
           );
@@ -742,11 +870,7 @@
         if (detaching)
           detach(t7);
         if (detaching)
-          detach(button4);
-        if (detaching)
-          detach(t9);
-        if (detaching)
-          detach(t10);
+          detach(t8);
         mounted = false;
         run_all(dispose);
       }
@@ -756,140 +880,32 @@
     let $frames;
     let $pageframe;
     let $ratio;
-    let $fileprefix;
-    let $images;
     let $dirty;
     let $selectedframe;
+    let $images;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(10, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(11, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(12, $ratio = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(13, $fileprefix = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(14, $images = $$value));
-    component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(15, $selectedframe = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(16, $nimage = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(5, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(6, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(7, $ratio = $$value));
+    component_subscribe($$self, dirty2, ($$value) => $$invalidate(0, $dirty = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(8, $selectedframe = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(9, $images = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(10, $nimage = $$value));
     component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
-    const { ZipReader, BlobReader } = zip;
     const previmage = () => {
       let n = $nimage;
       n--;
       if (n < 0)
         n = 0;
-      selectimage(n);
+      selectimage2(n);
     };
-    const zipOpts = {
-      types: [
-        {
-          description: "Images Zip/PDF",
-          accept: { "zip/*": [".zip", ".pdf"] }
-        }
-      ],
-      excludeAcceptAllOption: true,
-      multiple: false
-    };
-    const jsonOpts = {
-      types: [
-        {
-          description: "json",
-          accept: { "json/*": [".json"] }
-        }
-      ],
-      excludeAcceptAllOption: true,
-      multiple: false
-    };
-    const sortfilename = (a, b) => {
-      if (parseInt(a) && parseInt(b)) {
-        return parseInt(a) - parseInt(b);
-      } else {
-        return a.name > b.name ? 1 : -1;
-      }
-    };
-    async function getFolder() {
-      const dirHandle = await window.showDirectoryPicker();
-      const out = [];
-      setTemplate("shandong");
-      for await (const entry of dirHandle.values()) {
-        if (entry.kind == "file" && (entry.name.endsWith(".png") || entry.name.endsWith(".jpg"))) {
-          out.push({
-            entry,
-            name: entry.name,
-            frames: out.length ? null : []
-          });
-        }
-      }
-      out.sort(sortfilename);
-      if (out.length > 2)
-        out[out.length - 1].frames = [];
-      nimage.set(0);
-      images.set(out);
-      fileprefix.set(dirHandle.name);
-    }
-    async function openZip(file) {
-      const zip2 = new ZipReader(new BlobReader(file));
-      const entries = await zip2.getEntries();
-      const out = [];
-      setTemplate("shandong");
-      entries.forEach((entry) => {
-        if (entry.filename.endsWith(".jpg")) {
-          let at = entry.filename.lastIndexOf("/");
-          if (at == -1)
-            at = entry.filename.lastIndexOf("\\");
-          out.push({
-            name: entry.filename.slice(at + 1),
-            entry,
-            zip: zip2,
-            frames: out.length ? null : []
-          });
-        }
-      });
-      out.sort(sortfilename);
-      if (out.length > 2)
-        out[out.length - 1].frames = [];
-      return out;
-    }
-    let pdf;
-    async function openPDF(file) {
-      setTemplate("qindinglongcang");
-      const arraybuffer = await file.arrayBuffer();
-      const typedarray = new Uint8Array(arraybuffer);
-      pdf = await pdfjsLib.getDocument(typedarray).promise;
-      const out = [];
-      for (let i = 1; i <= pdf.numPages; i++) {
-        out.push({
-          name: i,
-          pdf,
-          page: i,
-          frames: out.length ? null : []
-        });
-      }
-      if (out.length > 2)
-        out[out.length - 1].frames = [];
-      return out;
-    }
-    let filename = "";
-    async function openImageFiles() {
-      const filehandles = await window.showOpenFilePicker(zipOpts);
-      const file = await filehandles[0].getFile();
-      filename = file.name.toLowerCase();
-      let out = [];
-      if (filename.endsWith(".zip"))
-        out = await openZip(file);
-      else if (filename.endsWith(".pdf"))
-        out = await openPDF(file);
-      else
-        return;
-      nimage.set(0);
-      images.set(out);
-      fileprefix.set(filename.replace(/\.[a-z]+$/, ""));
-    }
     const nextimage = () => {
       let n = $nimage;
       n++;
       if (n >= $images?.length)
         n = $images?.length - 1;
-      selectimage(n);
+      selectimage2(n);
     };
     function handleFrameMove(evt) {
       const key = evt.key.toLowerCase();
@@ -971,31 +987,6 @@
         evt.preventDefault();
       }
     }
-    const load = async () => {
-      if (!$images.length) {
-        alert("need images");
-        return;
-      }
-      const filehandles = await window.showOpenFilePicker(jsonOpts);
-      const file = await filehandles[0].getFile();
-      const json = JSON.parse(await file.text());
-      const imgs = $images;
-      if (json.length !== imgs.length) {
-        alert("zip json missmatch");
-        return;
-      }
-      for (let i = 0; i < imgs.length; i++) {
-        imgs[i].frames = json[i].frames;
-      }
-      images.set(imgs);
-    };
-    const save = () => {
-      selectimage(0);
-      const data = genjson();
-      dirty.set(false);
-      const outfn = $fileprefix + ".json";
-      createBrowserDownload(outfn, data);
-    };
     const reset = () => {
       const frms = [];
       const r = $ratio;
@@ -1010,16 +1001,7 @@
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [
-      $dirty,
-      $totalframe,
-      openImageFiles,
-      handleKeydown,
-      load,
-      save,
-      reset,
-      deleteframe
-    ];
+    return [$dirty, $totalframe, handleKeydown, reset, deleteframe];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -1078,8 +1060,8 @@
       m(target, anchor) {
         insert(target, rect, anchor);
       },
-      p(ctx2, dirty2) {
-        if (dirty2 & /*x, w, verticalstrip*/
+      p(ctx2, dirty3) {
+        if (dirty3 & /*x, w, verticalstrip*/
         138 && rect_x_value !== (rect_x_value = /*x*/
         ctx2[1] + /*idx*/
         ctx2[15] * /*w*/
@@ -1087,7 +1069,7 @@
         ctx2[7]))) {
           attr(rect, "x", rect_x_value);
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4) {
           attr(
             rect,
@@ -1096,13 +1078,13 @@
             ctx2[2]
           );
         }
-        if (dirty2 & /*w, verticalstrip*/
+        if (dirty3 & /*w, verticalstrip*/
         136 && rect_width_value !== (rect_width_value = /*w*/
         ctx2[3] / /*verticalstrip*/
         ctx2[7])) {
           attr(rect, "width", rect_width_value);
         }
-        if (dirty2 & /*h*/
+        if (dirty3 & /*h*/
         16) {
           attr(
             rect,
@@ -1111,7 +1093,7 @@
             ctx2[4]
           );
         }
-        if (dirty2 & /*frameidx, verticalstrip*/
+        if (dirty3 & /*frameidx, verticalstrip*/
         2176 && rect_class_value !== (rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx2[11] * /*verticalstrip*/
         ctx2[7] + /*idx*/
@@ -1157,8 +1139,8 @@
       m(target, anchor) {
         insert(target, line, anchor);
       },
-      p(ctx2, dirty2) {
-        if (dirty2 & /*x*/
+      p(ctx2, dirty3) {
+        if (dirty3 & /*x*/
         2) {
           attr(
             line,
@@ -1167,7 +1149,7 @@
             ctx2[1]
           );
         }
-        if (dirty2 & /*y, h, horizontalstrip*/
+        if (dirty3 & /*y, h, horizontalstrip*/
         276 && line_y__value !== (line_y__value = /*y*/
         ctx2[2] + /*idx*/
         (ctx2[15] + 1) * /*h*/
@@ -1175,13 +1157,13 @@
         ctx2[8]))) {
           attr(line, "y1", line_y__value);
         }
-        if (dirty2 & /*x, w*/
+        if (dirty3 & /*x, w*/
         10 && line_x__value !== (line_x__value = /*x*/
         ctx2[1] + /*w*/
         ctx2[3])) {
           attr(line, "x2", line_x__value);
         }
-        if (dirty2 & /*y, h, horizontalstrip*/
+        if (dirty3 & /*y, h, horizontalstrip*/
         276 && line_y__value_1 !== (line_y__value_1 = /*y*/
         ctx2[2] + /*idx*/
         (ctx2[15] + 1) * /*h*/
@@ -1554,16 +1536,16 @@
           mounted = true;
         }
       },
-      p(new_ctx, [dirty2]) {
+      p(new_ctx, [dirty3]) {
         ctx = new_ctx;
-        if (dirty2 & /*caption*/
+        if (dirty3 & /*caption*/
         64)
           set_data(
             t0,
             /*caption*/
             ctx[6]
           );
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2) {
           attr(
             text0,
@@ -1572,12 +1554,12 @@
             ctx[1]
           );
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4 && text0_y_value !== (text0_y_value = /*y*/
         ctx[2] - 5)) {
           attr(text0, "y", text0_y_value);
         }
-        if (dirty2 & /*selected*/
+        if (dirty3 & /*selected*/
         4096) {
           toggle_class(
             text0,
@@ -1586,45 +1568,45 @@
             ctx[12]
           );
         }
-        if (dirty2 & /*x, r*/
+        if (dirty3 & /*x, r*/
         34 && t1_value !== (t1_value = Math.floor(
           /*x*/
           ctx[1] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t1, t1_value);
-        if (dirty2 & /*y, r*/
+        if (dirty3 & /*y, r*/
         36 && t3_value !== (t3_value = Math.floor(
           /*y*/
           ctx[2] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t3, t3_value);
-        if (dirty2 & /*w, r*/
+        if (dirty3 & /*w, r*/
         40 && t5_value !== (t5_value = Math.floor(
           /*w*/
           ctx[3] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t5, t5_value);
-        if (dirty2 & /*h, r*/
+        if (dirty3 & /*h, r*/
         48 && t7_value !== (t7_value = Math.floor(
           /*h*/
           ctx[4] / /*r*/
           ctx[5]
         ) + ""))
           set_data(t7, t7_value);
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2 && text1_x_value !== (text1_x_value = /*x*/
         ctx[1] + 30)) {
           attr(text1, "x", text1_x_value);
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4 && text1_y_value !== (text1_y_value = /*y*/
         ctx[2] - 5)) {
           attr(text1, "y", text1_y_value);
         }
-        if (dirty2 & /*x, w, verticalstrip, y, h, frameidx*/
+        if (dirty3 & /*x, w, verticalstrip, y, h, frameidx*/
         2206) {
           each_value_1 = new Array(
             /*verticalstrip*/
@@ -1634,7 +1616,7 @@
           for (i = 0; i < each_value_1.length; i += 1) {
             const child_ctx = get_each_context_1(ctx, each_value_1, i);
             if (each_blocks_1[i]) {
-              each_blocks_1[i].p(child_ctx, dirty2);
+              each_blocks_1[i].p(child_ctx, dirty3);
             } else {
               each_blocks_1[i] = create_each_block_1(child_ctx);
               each_blocks_1[i].c();
@@ -1646,7 +1628,7 @@
           }
           each_blocks_1.length = each_value_1.length;
         }
-        if (dirty2 & /*x, y, h, horizontalstrip, w*/
+        if (dirty3 & /*x, y, h, horizontalstrip, w*/
         286) {
           each_value = new Array(
             /*horizontalstrip*/
@@ -1656,7 +1638,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context(ctx, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty2);
+              each_blocks[i].p(child_ctx, dirty3);
             } else {
               each_blocks[i] = create_each_block(child_ctx);
               each_blocks[i].c();
@@ -1668,7 +1650,7 @@
           }
           each_blocks.length = each_value.length;
         }
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2) {
           attr(
             rect0,
@@ -1677,7 +1659,7 @@
             ctx[1]
           );
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4) {
           attr(
             rect0,
@@ -1686,7 +1668,7 @@
             ctx[2]
           );
         }
-        if (dirty2 & /*w*/
+        if (dirty3 & /*w*/
         8) {
           attr(
             rect0,
@@ -1695,7 +1677,7 @@
             ctx[3]
           );
         }
-        if (dirty2 & /*h*/
+        if (dirty3 & /*h*/
         16) {
           attr(
             rect0,
@@ -1704,7 +1686,7 @@
             ctx[4]
           );
         }
-        if (dirty2 & /*expanding*/
+        if (dirty3 & /*expanding*/
         1) {
           toggle_class(
             rect0,
@@ -1713,7 +1695,7 @@
             ctx[0] == "middle"
           );
         }
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2) {
           attr(
             rect1,
@@ -1722,7 +1704,7 @@
             ctx[1]
           );
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4) {
           attr(
             rect1,
@@ -1731,7 +1713,7 @@
             ctx[2]
           );
         }
-        if (dirty2 & /*h*/
+        if (dirty3 & /*h*/
         16) {
           attr(
             rect1,
@@ -1740,7 +1722,7 @@
             ctx[4]
           );
         }
-        if (dirty2 & /*expanding*/
+        if (dirty3 & /*expanding*/
         1) {
           toggle_class(
             rect1,
@@ -1749,13 +1731,13 @@
             ctx[0] == "left"
           );
         }
-        if (dirty2 & /*x, w*/
+        if (dirty3 & /*x, w*/
         10 && rect2_x_value !== (rect2_x_value = /*x*/
         ctx[1] + /*w*/
         ctx[3] - grabberWidth)) {
           attr(rect2, "x", rect2_x_value);
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4) {
           attr(
             rect2,
@@ -1764,7 +1746,7 @@
             ctx[2]
           );
         }
-        if (dirty2 & /*h*/
+        if (dirty3 & /*h*/
         16) {
           attr(
             rect2,
@@ -1773,7 +1755,7 @@
             ctx[4]
           );
         }
-        if (dirty2 & /*expanding*/
+        if (dirty3 & /*expanding*/
         1) {
           toggle_class(
             rect2,
@@ -1782,7 +1764,7 @@
             ctx[0] == "right"
           );
         }
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2) {
           attr(
             rect3,
@@ -1791,7 +1773,7 @@
             ctx[1]
           );
         }
-        if (dirty2 & /*y*/
+        if (dirty3 & /*y*/
         4) {
           attr(
             rect3,
@@ -1800,7 +1782,7 @@
             ctx[2]
           );
         }
-        if (dirty2 & /*w*/
+        if (dirty3 & /*w*/
         8) {
           attr(
             rect3,
@@ -1809,7 +1791,7 @@
             ctx[3]
           );
         }
-        if (dirty2 & /*expanding*/
+        if (dirty3 & /*expanding*/
         1) {
           toggle_class(
             rect3,
@@ -1818,7 +1800,7 @@
             ctx[0] == "top"
           );
         }
-        if (dirty2 & /*x*/
+        if (dirty3 & /*x*/
         2) {
           attr(
             rect4,
@@ -1827,13 +1809,13 @@
             ctx[1]
           );
         }
-        if (dirty2 & /*y, h*/
+        if (dirty3 & /*y, h*/
         20 && rect4_y_value !== (rect4_y_value = /*y*/
         ctx[2] + /*h*/
         ctx[4] - grabberHeight)) {
           attr(rect4, "y", rect4_y_value);
         }
-        if (dirty2 & /*w*/
+        if (dirty3 & /*w*/
         8) {
           attr(
             rect4,
@@ -1842,7 +1824,7 @@
             ctx[3]
           );
         }
-        if (dirty2 & /*expanding*/
+        if (dirty3 & /*expanding*/
         1) {
           toggle_class(
             rect4,
@@ -2029,47 +2011,47 @@
         mount_component(cropper, target, anchor);
         current = true;
       },
-      p(ctx2, dirty2) {
+      p(ctx2, dirty3) {
         const cropper_changes = {};
-        if (dirty2 & /*theframes*/
+        if (dirty3 & /*theframes*/
         64)
           cropper_changes.x = /*frame*/
           ctx2[21][0];
-        if (dirty2 & /*theframes*/
+        if (dirty3 & /*theframes*/
         64)
           cropper_changes.y = /*frame*/
           ctx2[21][1];
-        if (dirty2 & /*theframes*/
+        if (dirty3 & /*theframes*/
         64)
           cropper_changes.w = /*frame*/
           ctx2[21][2];
-        if (dirty2 & /*theframes*/
+        if (dirty3 & /*theframes*/
         64)
           cropper_changes.h = /*frame*/
           ctx2[21][3];
-        if (dirty2 & /*$selectedframe*/
+        if (dirty3 & /*$selectedframe*/
         128)
           cropper_changes.selected = /*$selectedframe*/
           ctx2[7] & 1 << /*idx*/
           ctx2[23];
-        if (dirty2 & /*$verticalstrip*/
+        if (dirty3 & /*$verticalstrip*/
         256)
           cropper_changes.verticalstrip = /*$verticalstrip*/
           ctx2[8];
-        if (dirty2 & /*$horizontalstrip*/
+        if (dirty3 & /*$horizontalstrip*/
         512)
           cropper_changes.horizontalstrip = /*$horizontalstrip*/
           ctx2[9];
-        if (dirty2 & /*r*/
+        if (dirty3 & /*r*/
         8)
           cropper_changes.r = /*r*/
           ctx2[3];
-        if (dirty2 & /*start*/
+        if (dirty3 & /*start*/
         4)
           cropper_changes.caption = /*start*/
           ctx2[2] + /*idx*/
           ctx2[23];
-        if (!updating_expanding && dirty2 & /*expanding*/
+        if (!updating_expanding && dirty3 & /*expanding*/
         16) {
           updating_expanding = true;
           cropper_changes.expanding = /*expanding*/
@@ -2158,8 +2140,8 @@
           mounted = true;
         }
       },
-      p(ctx2, dirty2) {
-        if (dirty2 & /*theframes, $selectedframe, $verticalstrip, $horizontalstrip, r, startExpand, start, expanding*/
+      p(ctx2, dirty3) {
+        if (dirty3 & /*theframes, $selectedframe, $verticalstrip, $horizontalstrip, r, startExpand, start, expanding*/
         2012) {
           each_value = /*theframes*/
           ctx2[6];
@@ -2167,7 +2149,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context2(ctx2, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty2);
+              each_blocks[i].p(child_ctx, dirty3);
               transition_in(each_blocks[i], 1);
             } else {
               each_blocks[i] = create_each_block2(child_ctx);
@@ -2182,13 +2164,13 @@
           }
           check_outros();
         }
-        if (!current || dirty2 & /*width, height*/
+        if (!current || dirty3 & /*width, height*/
         3 && svg_viewBox_value !== (svg_viewBox_value = "0 0 " + /*width*/
         ctx2[1] + " " + /*height*/
         ctx2[0])) {
           attr(svg, "viewBox", svg_viewBox_value);
         }
-        if (!current || dirty2 & /*height*/
+        if (!current || dirty3 & /*height*/
         1) {
           attr(
             svg,
@@ -2197,7 +2179,7 @@
             ctx2[0]
           );
         }
-        if (!current || dirty2 & /*width*/
+        if (!current || dirty3 & /*width*/
         2) {
           attr(
             svg,
@@ -2206,7 +2188,7 @@
             ctx2[1]
           );
         }
-        if (!current || dirty2 & /*expanding*/
+        if (!current || dirty3 & /*expanding*/
         16) {
           toggle_class(
             svg,
@@ -2271,8 +2253,8 @@
           mounted = true;
         }
       },
-      p(ctx2, [dirty2]) {
-        if (dirty2 & /*theframes*/
+      p(ctx2, [dirty3]) {
+        if (dirty3 & /*theframes*/
         64 && safe_not_equal(previous_key, previous_key = /*theframes*/
         ctx2[6])) {
           group_outros();
@@ -2283,7 +2265,7 @@
           transition_in(key_block, 1);
           key_block.m(div, null);
         } else {
-          key_block.p(ctx2, dirty2);
+          key_block.p(ctx2, dirty3);
         }
       },
       i(local) {
@@ -2440,9 +2422,10 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.16 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
-\u{1F4C1}\u958B\u555FZip\u6216PDF(Alt-O)  \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
-\u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)      \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
+        pre.innerHTML = `<span class="title svelte-1tue53g">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.17 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-1tue53g">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
+\u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
+\u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
+\u65BD\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002\u2192
 \u9EDE \u7E2E\u5716 \u4E0A\u4E0B\u5C0D\u8ABF\u3002
 
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
@@ -2485,8 +2468,503 @@
   };
   var help_default = Help;
 
-  // src/imageviewer.svelte
+  // src/3rd/dropfilefallbacksvg.svelte
+  function create_else_block_1(ctx) {
+    let path;
+    let polyline;
+    return {
+      c() {
+        path = svg_element("path");
+        polyline = svg_element("polyline");
+        attr(path, "d", "M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z");
+        attr(polyline, "points", "13 2 13 9 20 9");
+      },
+      m(target, anchor) {
+        insert(target, path, anchor);
+        insert(target, polyline, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(path);
+        if (detaching)
+          detach(polyline);
+      }
+    };
+  }
+  function create_if_block_1(ctx) {
+    let path;
+    let polyline;
+    let line;
+    return {
+      c() {
+        path = svg_element("path");
+        polyline = svg_element("polyline");
+        line = svg_element("line");
+        attr(path, "d", "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4");
+        attr(polyline, "points", "7 10 12 15 17 10");
+        attr(line, "x1", "12");
+        attr(line, "y1", "15");
+        attr(line, "x2", "12");
+        attr(line, "y2", "3");
+      },
+      m(target, anchor) {
+        insert(target, path, anchor);
+        insert(target, polyline, anchor);
+        insert(target, line, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(path);
+        if (detaching)
+          detach(polyline);
+        if (detaching)
+          detach(line);
+      }
+    };
+  }
   function create_else_block(ctx) {
+    let text_1;
+    let t;
+    return {
+      c() {
+        text_1 = svg_element("text");
+        t = text("\u62D6\u653E/\u9EDE\u64CA");
+      },
+      m(target, anchor) {
+        insert(target, text_1, anchor);
+        append(text_1, t);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(text_1);
+      }
+    };
+  }
+  function create_if_block(ctx) {
+    let text_1;
+    let t;
+    return {
+      c() {
+        text_1 = svg_element("text");
+        t = text("Drop it!");
+        attr(text_1, "transform", "translate(0, 5)");
+      },
+      m(target, anchor) {
+        insert(target, text_1, anchor);
+        append(text_1, t);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(text_1);
+      }
+    };
+  }
+  function create_fragment5(ctx) {
+    let svg;
+    let title;
+    let t;
+    let g0;
+    let g1;
+    function select_block_type(ctx2, dirty3) {
+      if (
+        /*over*/
+        ctx2[0]
+      )
+        return create_if_block_1;
+      return create_else_block_1;
+    }
+    let current_block_type = select_block_type(ctx, -1);
+    let if_block0 = current_block_type(ctx);
+    function select_block_type_1(ctx2, dirty3) {
+      if (
+        /*over*/
+        ctx2[0]
+      )
+        return create_if_block;
+      return create_else_block;
+    }
+    let current_block_type_1 = select_block_type_1(ctx, -1);
+    let if_block1 = current_block_type_1(ctx);
+    return {
+      c() {
+        svg = svg_element("svg");
+        title = svg_element("title");
+        t = text("\u62D6\u653E\u6216\u9EDE\u64CA");
+        g0 = svg_element("g");
+        if_block0.c();
+        g1 = svg_element("g");
+        if_block1.c();
+        attr(g0, "transform", "translate(28, 15)");
+        attr(g0, "fill", "none");
+        attr(g0, "stroke", "currentColor");
+        attr(g0, "stroke-width", "1");
+        attr(g0, "stroke-linecap", "round");
+        attr(g0, "stroke-linejoin", "round");
+        attr(g1, "transform", "translate(40, 55)");
+        attr(g1, "text-anchor", "middle");
+        attr(svg, "viewBox", "0 0 80 80");
+      },
+      m(target, anchor) {
+        insert(target, svg, anchor);
+        append(svg, title);
+        append(title, t);
+        append(svg, g0);
+        if_block0.m(g0, null);
+        append(svg, g1);
+        if_block1.m(g1, null);
+      },
+      p(ctx2, [dirty3]) {
+        if (current_block_type !== (current_block_type = select_block_type(ctx2, dirty3))) {
+          if_block0.d(1);
+          if_block0 = current_block_type(ctx2);
+          if (if_block0) {
+            if_block0.c();
+            if_block0.m(g0, null);
+          }
+        }
+        if (current_block_type_1 !== (current_block_type_1 = select_block_type_1(ctx2, dirty3))) {
+          if_block1.d(1);
+          if_block1 = current_block_type_1(ctx2);
+          if (if_block1) {
+            if_block1.c();
+            if_block1.m(g1, null);
+          }
+        }
+      },
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching)
+          detach(svg);
+        if_block0.d();
+        if_block1.d();
+      }
+    };
+  }
+  function instance4($$self, $$props, $$invalidate) {
+    let { over = false } = $$props;
+    $$self.$$set = ($$props2) => {
+      if ("over" in $$props2)
+        $$invalidate(0, over = $$props2.over);
+    };
+    return [over];
+  }
+  var Dropfilefallbacksvg = class extends SvelteComponent {
+    constructor(options) {
+      super();
+      init(this, options, instance4, create_fragment5, safe_not_equal, { over: 0 });
+    }
+  };
+  var dropfilefallbacksvg_default = Dropfilefallbacksvg;
+
+  // src/3rd/dropfile.svelte
+  function fallback_block(ctx) {
+    let div;
+    let fallbacksvg;
+    let current;
+    fallbacksvg = new dropfilefallbacksvg_default({ props: { over: (
+      /*isOver*/
+      ctx[2]
+    ) } });
+    return {
+      c() {
+        div = element("div");
+        create_component(fallbacksvg.$$.fragment);
+        attr(div, "id", "fallback");
+        attr(div, "class", "svelte-1v4pc3g");
+      },
+      m(target, anchor) {
+        insert(target, div, anchor);
+        mount_component(fallbacksvg, div, null);
+        current = true;
+      },
+      p(ctx2, dirty3) {
+        const fallbacksvg_changes = {};
+        if (dirty3 & /*isOver*/
+        4)
+          fallbacksvg_changes.over = /*isOver*/
+          ctx2[2];
+        fallbacksvg.$set(fallbacksvg_changes);
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(fallbacksvg.$$.fragment, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(fallbacksvg.$$.fragment, local);
+        current = false;
+      },
+      d(detaching) {
+        if (detaching)
+          detach(div);
+        destroy_component(fallbacksvg);
+      }
+    };
+  }
+  function create_fragment6(ctx) {
+    let div;
+    let div_tabindex_value;
+    let t;
+    let input_1;
+    let current;
+    let mounted;
+    let dispose;
+    const default_slot_template = (
+      /*#slots*/
+      ctx[15].default
+    );
+    const default_slot = create_slot(
+      default_slot_template,
+      ctx,
+      /*$$scope*/
+      ctx[14],
+      null
+    );
+    const default_slot_or_fallback = default_slot || fallback_block(ctx);
+    return {
+      c() {
+        div = element("div");
+        if (default_slot_or_fallback)
+          default_slot_or_fallback.c();
+        t = space();
+        input_1 = element("input");
+        attr(div, "id", "zone");
+        attr(div, "tabindex", div_tabindex_value = 0);
+        attr(div, "class", "svelte-1v4pc3g");
+        attr(input_1, "id", "hidden-input");
+        attr(input_1, "type", "file");
+        input_1.multiple = /*multiple*/
+        ctx[0];
+        input_1.disabled = /*disabled*/
+        ctx[1];
+        attr(input_1, "class", "svelte-1v4pc3g");
+      },
+      m(target, anchor) {
+        insert(target, div, anchor);
+        if (default_slot_or_fallback) {
+          default_slot_or_fallback.m(div, null);
+        }
+        insert(target, t, anchor);
+        insert(target, input_1, anchor);
+        ctx[16](input_1);
+        current = true;
+        if (!mounted) {
+          dispose = [
+            listen(
+              div,
+              "drop",
+              /*handleDrop*/
+              ctx[6]
+            ),
+            listen(
+              div,
+              "dragover",
+              /*handleDragOver*/
+              ctx[7]
+            ),
+            listen(
+              div,
+              "dragenter",
+              /*handleEnter*/
+              ctx[4]
+            ),
+            listen(
+              div,
+              "dragleave",
+              /*handleLeave*/
+              ctx[5]
+            ),
+            listen(
+              div,
+              "click",
+              /*onClick*/
+              ctx[9]
+            ),
+            listen(
+              div,
+              "keydown",
+              /*onKeyDown*/
+              ctx[10]
+            ),
+            listen(
+              input_1,
+              "change",
+              /*handleChange*/
+              ctx[8]
+            )
+          ];
+          mounted = true;
+        }
+      },
+      p(ctx2, [dirty3]) {
+        if (default_slot) {
+          if (default_slot.p && (!current || dirty3 & /*$$scope*/
+          16384)) {
+            update_slot_base(
+              default_slot,
+              default_slot_template,
+              ctx2,
+              /*$$scope*/
+              ctx2[14],
+              !current ? get_all_dirty_from_scope(
+                /*$$scope*/
+                ctx2[14]
+              ) : get_slot_changes(
+                default_slot_template,
+                /*$$scope*/
+                ctx2[14],
+                dirty3,
+                null
+              ),
+              null
+            );
+          }
+        } else {
+          if (default_slot_or_fallback && default_slot_or_fallback.p && (!current || dirty3 & /*isOver*/
+          4)) {
+            default_slot_or_fallback.p(ctx2, !current ? -1 : dirty3);
+          }
+        }
+        if (!current || dirty3 & /*multiple*/
+        1) {
+          input_1.multiple = /*multiple*/
+          ctx2[0];
+        }
+        if (!current || dirty3 & /*disabled*/
+        2) {
+          input_1.disabled = /*disabled*/
+          ctx2[1];
+        }
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(default_slot_or_fallback, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(default_slot_or_fallback, local);
+        current = false;
+      },
+      d(detaching) {
+        if (detaching)
+          detach(div);
+        if (default_slot_or_fallback)
+          default_slot_or_fallback.d(detaching);
+        if (detaching)
+          detach(t);
+        if (detaching)
+          detach(input_1);
+        ctx[16](null);
+        mounted = false;
+        run_all(dispose);
+      }
+    };
+  }
+  function instance5($$self, $$props, $$invalidate) {
+    let { $$slots: slots = {}, $$scope } = $$props;
+    let { multiple = false } = $$props;
+    let { disabled = false } = $$props;
+    let { onDrop } = $$props;
+    let { onEnter } = $$props;
+    let { onLeave } = $$props;
+    let isOver = false;
+    let input;
+    const handleEnter = () => {
+      $$invalidate(2, isOver = true);
+      if (onEnter) {
+        onEnter();
+      }
+    };
+    const handleLeave = () => {
+      $$invalidate(2, isOver = false);
+      if (onLeave) {
+        onLeave();
+      }
+    };
+    const handleDrop = (e) => {
+      e.preventDefault();
+      if (!e?.dataTransfer?.items || disabled) {
+        return;
+      }
+      const items = Array.from(e.dataTransfer.files);
+      onDrop(items);
+      $$invalidate(2, isOver = false);
+    };
+    const handleDragOver = (e) => {
+      e.preventDefault();
+    };
+    const handleChange = (e) => {
+      e.preventDefault();
+      const files = e.target.files;
+      onDrop(Array.from(files));
+    };
+    const onClick = () => {
+      input.click();
+    };
+    const onKeyDown = (e) => {
+      if (e.key === "Enter") {
+        input.click();
+      }
+    };
+    function input_1_binding($$value) {
+      binding_callbacks[$$value ? "unshift" : "push"](() => {
+        input = $$value;
+        $$invalidate(3, input);
+      });
+    }
+    $$self.$$set = ($$props2) => {
+      if ("multiple" in $$props2)
+        $$invalidate(0, multiple = $$props2.multiple);
+      if ("disabled" in $$props2)
+        $$invalidate(1, disabled = $$props2.disabled);
+      if ("onDrop" in $$props2)
+        $$invalidate(11, onDrop = $$props2.onDrop);
+      if ("onEnter" in $$props2)
+        $$invalidate(12, onEnter = $$props2.onEnter);
+      if ("onLeave" in $$props2)
+        $$invalidate(13, onLeave = $$props2.onLeave);
+      if ("$$scope" in $$props2)
+        $$invalidate(14, $$scope = $$props2.$$scope);
+    };
+    return [
+      multiple,
+      disabled,
+      isOver,
+      input,
+      handleEnter,
+      handleLeave,
+      handleDrop,
+      handleDragOver,
+      handleChange,
+      onClick,
+      onKeyDown,
+      onDrop,
+      onEnter,
+      onLeave,
+      $$scope,
+      slots,
+      input_1_binding
+    ];
+  }
+  var Dropfile = class extends SvelteComponent {
+    constructor(options) {
+      super();
+      init(this, options, instance5, create_fragment6, safe_not_equal, {
+        multiple: 0,
+        disabled: 1,
+        onDrop: 11,
+        onEnter: 12,
+        onLeave: 13
+      });
+    }
+  };
+  var dropfile_default = Dropfile;
+
+  // src/imageviewer.svelte
+  function create_else_block2(ctx) {
     let help;
     let current;
     help = new help_default({});
@@ -2514,7 +2992,7 @@
       }
     };
   }
-  function create_if_block(ctx) {
+  function create_if_block2(ctx) {
     let span;
     let t0;
     let t1;
@@ -2553,13 +3031,13 @@
         create_component(croppers.$$.fragment);
         t2 = space();
         img = element("img");
-        attr(span, "class", "fileprefix svelte-163afnm");
-        attr(div, "class", "croppers svelte-163afnm");
+        attr(span, "class", "fileprefix svelte-1bpy5wq");
+        attr(div, "class", "croppers svelte-1bpy5wq");
         attr(img, "id", "image1");
         if (!src_url_equal(img.src, img_src_value = /*imageurl*/
         ctx[0]))
           attr(img, "src", img_src_value);
-        attr(img, "class", "image svelte-163afnm");
+        attr(img, "class", "image svelte-1bpy5wq");
         attr(img, "alt", "noimage");
       },
       m(target, anchor) {
@@ -2572,8 +3050,8 @@
         insert(target, img, anchor);
         current = true;
       },
-      p(ctx2, dirty2) {
-        if (!current || dirty2 & /*$fileprefix*/
+      p(ctx2, dirty3) {
+        if (!current || dirty3 & /*$fileprefix*/
         16)
           set_data(
             t0,
@@ -2581,20 +3059,20 @@
             ctx2[4]
           );
         const croppers_changes = {};
-        if (dirty2 & /*height*/
+        if (dirty3 & /*height*/
         4)
           croppers_changes.height = /*height*/
           ctx2[2];
-        if (dirty2 & /*width*/
+        if (dirty3 & /*width*/
         8)
           croppers_changes.width = /*width*/
           ctx2[3];
-        if (dirty2 & /*r*/
+        if (dirty3 & /*r*/
         2)
           croppers_changes.r = /*r*/
           ctx2[1];
         croppers.$set(croppers_changes);
-        if (!current || dirty2 & /*imageurl*/
+        if (!current || dirty3 & /*imageurl*/
         1 && !src_url_equal(img.src, img_src_value = /*imageurl*/
         ctx2[0])) {
           attr(img, "src", img_src_value);
@@ -2625,14 +3103,21 @@
       }
     };
   }
-  function create_fragment5(ctx) {
+  function create_fragment7(ctx) {
+    let span;
+    let dropfile;
+    let t;
     let current_block_type_index;
     let if_block;
     let if_block_anchor;
     let current;
-    const if_block_creators = [create_if_block, create_else_block];
+    dropfile = new dropfile_default({ props: { onDrop: (
+      /*onDrop*/
+      ctx[5]
+    ) } });
+    const if_block_creators = [create_if_block2, create_else_block2];
     const if_blocks = [];
-    function select_block_type(ctx2, dirty2) {
+    function select_block_type(ctx2, dirty3) {
       if (
         /*imageurl*/
         ctx2[0]
@@ -2644,19 +3129,26 @@
     if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     return {
       c() {
+        span = element("span");
+        create_component(dropfile.$$.fragment);
+        t = space();
         if_block.c();
         if_block_anchor = empty();
+        attr(span, "class", "dropzone svelte-1bpy5wq");
       },
       m(target, anchor) {
+        insert(target, span, anchor);
+        mount_component(dropfile, span, null);
+        insert(target, t, anchor);
         if_blocks[current_block_type_index].m(target, anchor);
         insert(target, if_block_anchor, anchor);
         current = true;
       },
-      p(ctx2, [dirty2]) {
+      p(ctx2, [dirty3]) {
         let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2, dirty2);
+        current_block_type_index = select_block_type(ctx2, dirty3);
         if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty2);
+          if_blocks[current_block_type_index].p(ctx2, dirty3);
         } else {
           group_outros();
           transition_out(if_blocks[previous_block_index], 1, 1, () => {
@@ -2668,7 +3160,7 @@
             if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
             if_block.c();
           } else {
-            if_block.p(ctx2, dirty2);
+            if_block.p(ctx2, dirty3);
           }
           transition_in(if_block, 1);
           if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -2677,27 +3169,40 @@
       i(local) {
         if (current)
           return;
+        transition_in(dropfile.$$.fragment, local);
         transition_in(if_block);
         current = true;
       },
       o(local) {
+        transition_out(dropfile.$$.fragment, local);
         transition_out(if_block);
         current = false;
       },
       d(detaching) {
+        if (detaching)
+          detach(span);
+        destroy_component(dropfile);
+        if (detaching)
+          detach(t);
         if_blocks[current_block_type_index].d(detaching);
         if (detaching)
           detach(if_block_anchor);
       }
     };
   }
-  function instance4($$self, $$props, $$invalidate) {
+  function instance6($$self, $$props, $$invalidate) {
     let $nimage;
     let $images;
-    let $fileprefix;
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(5, $nimage = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(6, $images = $$value));
-    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix = $$value));
+    let $fileprefix2;
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(6, $nimage = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(7, $images = $$value));
+    component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix2 = $$value));
+    const onDrop = (e) => {
+      const file = e[0];
+      if (file && (file.name.endsWith(".zip") || file.name.endsWith(".pdf"))) {
+        openWorkingFile(file);
+      }
+    };
     let imageurl = "", r = 1, height = 100, width = 100;
     async function getImageURL() {
       if (!$images?.length)
@@ -2736,7 +3241,7 @@
     }
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*$images, $nimage*/
-      96) {
+      192) {
         $:
           getImageURL($images, $nimage);
       }
@@ -2745,12 +3250,12 @@
       $$invalidate(2, height = document.getElementById("image1")?.height);
     $:
       $$invalidate(3, width = document.getElementById("image1")?.width);
-    return [imageurl, r, height, width, $fileprefix, $nimage, $images];
+    return [imageurl, r, height, width, $fileprefix2, onDrop, $nimage, $images];
   }
   var Imageviewer = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance4, create_fragment5, safe_not_equal, {});
+      init(this, options, instance6, create_fragment7, safe_not_equal, {});
     }
   };
   var imageviewer_default = Imageviewer;
@@ -2825,13 +3330,13 @@
           mounted = true;
         }
       },
-      p(new_ctx, dirty2) {
+      p(new_ctx, dirty3) {
         ctx = new_ctx;
-        if (dirty2 & /*$images*/
+        if (dirty3 & /*$images*/
         2 && t0_value !== (t0_value = /*image*/
         ctx[3].name + ""))
           set_data(t0, t0_value);
-        if (dirty2 & /*$images*/
+        if (dirty3 & /*$images*/
         2) {
           toggle_class(
             span0,
@@ -2840,11 +3345,11 @@
             ctx[3].frames
           );
         }
-        if (dirty2 & /*$images*/
+        if (dirty3 & /*$images*/
         2 && t2_value !== (t2_value = /*image*/
         (ctx[3].frames?.length || "") + ""))
           set_data(t2, t2_value);
-        if (dirty2 & /*$nimage*/
+        if (dirty3 & /*$nimage*/
         1) {
           toggle_class(
             div,
@@ -2888,8 +3393,8 @@
         }
         insert(target, each_1_anchor, anchor);
       },
-      p(ctx2, dirty2) {
-        if (dirty2 & /*$nimage, selectimage, $images*/
+      p(ctx2, dirty3) {
+        if (dirty3 & /*$nimage, selectimage, $images*/
         3) {
           each_value = /*$images*/
           ctx2[1];
@@ -2897,7 +3402,7 @@
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context3(ctx2, each_value, i);
             if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty2);
+              each_blocks[i].p(child_ctx, dirty3);
             } else {
               each_blocks[i] = create_each_block3(child_ctx);
               each_blocks[i].c();
@@ -2917,7 +3422,7 @@
       }
     };
   }
-  function create_fragment6(ctx) {
+  function create_fragment8(ctx) {
     let div;
     let previous_key = (
       /*$nimage*/
@@ -2934,8 +3439,8 @@
         insert(target, div, anchor);
         key_block.m(div, null);
       },
-      p(ctx2, [dirty2]) {
-        if (dirty2 & /*$nimage*/
+      p(ctx2, [dirty3]) {
+        if (dirty3 & /*$nimage*/
         1 && safe_not_equal(previous_key, previous_key = /*$nimage*/
         ctx2[0])) {
           key_block.d(1);
@@ -2943,7 +3448,7 @@
           key_block.c();
           key_block.m(div, null);
         } else {
-          key_block.p(ctx2, dirty2);
+          key_block.p(ctx2, dirty3);
         }
       },
       i: noop,
@@ -2955,24 +3460,24 @@
       }
     };
   }
-  function instance5($$self, $$props, $$invalidate) {
+  function instance7($$self, $$props, $$invalidate) {
     let $nimage;
     let $images;
     component_subscribe($$self, nimage, ($$value) => $$invalidate(0, $nimage = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(1, $images = $$value));
-    const click_handler = (idx) => selectimage(idx);
+    const click_handler = (idx) => selectimage2(idx);
     return [$nimage, $images, click_handler];
   }
   var Filelist = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance5, create_fragment6, safe_not_equal, {});
+      init(this, options, instance7, create_fragment8, safe_not_equal, {});
     }
   };
   var filelist_default = Filelist;
 
   // src/thumbnail.svelte
-  function create_fragment7(ctx) {
+  function create_fragment9(ctx) {
     let div;
     let canvas0;
     let br;
@@ -3019,7 +3524,7 @@
       }
     };
   }
-  function instance6($$self, $$props, $$invalidate) {
+  function instance8($$self, $$props, $$invalidate) {
     let $frames;
     let $verticalstrip;
     let $ratio;
@@ -3099,13 +3604,13 @@
   var Thumbnail = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance6, create_fragment7, safe_not_equal, {});
+      init(this, options, instance8, create_fragment9, safe_not_equal, {});
     }
   };
   var thumbnail_default = Thumbnail;
 
   // src/app.svelte
-  function create_fragment8(ctx) {
+  function create_fragment10(ctx) {
     let table;
     let tr;
     let td0;
@@ -3183,7 +3688,7 @@
   var App = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, null, create_fragment8, safe_not_equal, {});
+      init(this, options, null, create_fragment10, safe_not_equal, {});
     }
   };
   var app_default = App;
