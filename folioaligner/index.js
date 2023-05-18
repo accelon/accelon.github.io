@@ -5560,9 +5560,9 @@
     return {
       c() {
         span0 = element("span");
-        span0.textContent = "\u5716\u6587\u5C0D\u7167";
+        span0.textContent = "\u5716\u7248\u9010\u53E5\u5C0D\u9F4A";
         span1 = element("span");
-        span1.textContent = "\u3000ver 2023.5.13";
+        span1.textContent = "\u3000ver 2023.5.18";
         t2 = space();
         a = element("a");
         a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
@@ -5700,10 +5700,8 @@
     const if_block_creators = [create_if_block4, create_if_block_12, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
-      if (
-        /*$videoId*/
-        ctx2[1]
-      )
+      if (!/*$videoId*/
+      ctx2[1])
         return 0;
       if (document.location.protocol == "file:" || document.location.protocol == "http:")
         return 1;
