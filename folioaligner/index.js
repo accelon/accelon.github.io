@@ -245,14 +245,6 @@
   function set_current_component(component) {
     current_component = component;
   }
-  function get_current_component() {
-    if (!current_component)
-      throw new Error("Function called outside component initialization");
-    return current_component;
-  }
-  function onMount(fn) {
-    get_current_component().$$.on_mount.push(fn);
-  }
   var dirty_components = [];
   var binding_callbacks = [];
   var render_callbacks = [];
@@ -627,6 +619,7 @@
   var maxpage = writable(1);
   var maxline = writable(1);
   var replacing = writable(false);
+  var player = writable(null);
 
   // src/inputnumber.svelte
   function create_if_block_1(ctx) {
@@ -4558,7 +4551,7 @@
     sutra = findSutra(id);
     if (!sutra)
       return;
-    if (document.location.protocol == "file:" || document.location.protocol == "http:") {
+    if (document.location.protocol == "file:") {
       videoId.set("mp4/ql" + sutra.no + ".mp4");
     } else {
       videoId.set(sutra.youtube);
@@ -4567,14 +4560,16 @@
     pb.set(1);
     maxjuan.set(sutra.juanpage.length);
     maxpage.set(sutra.juanpage[get_store_value(juan) - 1]);
-    if (document.location.protocol == "https") {
+    if (document.location.protocol == "https:") {
       texturl = "https://raw.githubusercontent.com/accelon/longcang/off/main/ql" + sutra.no + ".off";
-    } else {
+    } else if (document.location.protocol == "http:") {
       texturl = "off/ql" + sutra.no + ".off";
     }
-    const resp = await fetch(texturl, { cache: "no-store" });
-    content = await resp.text();
-    loadCMText(content);
+    if (texturl) {
+      const resp = await fetch(texturl, { cache: "no-store" });
+      content = await resp.text();
+      loadCMText(content);
+    }
   };
 
   // src/toolbar.svelte
@@ -5485,6 +5480,7 @@
     };
   }
   function onPlayerReady(e) {
+    console.log("player ready");
     e.target.mute().playVideo();
     setTimeout(
       async () => {
@@ -5496,44 +5492,46 @@
   function instance5($$self, $$props, $$invalidate) {
     let $videoSeekTo;
     let $videoId;
+    let $player;
     component_subscribe($$self, videoSeekTo, ($$value) => $$invalidate(0, $videoSeekTo = $$value));
     component_subscribe($$self, videoId, ($$value) => $$invalidate(1, $videoId = $$value));
-    var player;
-    const createPlayer = (id) => {
-      player = new YT.Player(
+    component_subscribe($$self, player, ($$value) => $$invalidate(2, $player = $$value));
+    window.onYTReady = () => {
+      const helpVideoId = "2TskfhLQ9Jk";
+      const pylr = new YT.Player(
         "player",
         {
           height: "100%",
           // 高度預設值為390，css會調成responsive
           // width: '640', // 寬度預設值為640，css會調成responsive
-          videoId: id,
+          videoId: helpVideoId,
           playerVars: { controls: 0, disablekb: 1, rel: 0 },
           events: { "onReady": onPlayerReady }
         }
       );
+      player.set(pylr);
+      console.log($player);
     };
     const loadVideo = (id) => {
       if (!id)
         return;
-      if (!player)
-        player = createPlayer(id);
-      else
-        player?.loadVideoById(id);
+      $player?.loadVideoById(id);
       setTimeout(
         () => {
-          player?.pauseVideo();
+          $player?.pauseVideo();
         },
         2e3
       );
     };
     const seekTo = (t) => {
-      player?.seekTo(t);
+      $player?.seekTo(t);
     };
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*$videoId*/
       2) {
         $:
-          loadVideo($videoId);
+          if ($videoId && document.location.protocol !== "file:")
+            loadVideo($videoId);
       }
       if ($$self.$$.dirty & /*$videoSeekTo*/
       1) {
@@ -5550,55 +5548,6 @@
     }
   };
   var youtubeviewer_default = Youtubeviewer;
-
-  // src/help.svelte
-  function create_fragment5(ctx) {
-    let span0;
-    let span1;
-    let t2;
-    let a;
-    return {
-      c() {
-        span0 = element("span");
-        span0.textContent = "\u5716\u7248\u9010\u53E5\u5C0D\u9F4A";
-        span1 = element("span");
-        span1.textContent = "\u3000ver 2023.5.18";
-        t2 = space();
-        a = element("a");
-        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
-        set_style(span0, "font-size", "120%");
-        attr(a, "href", "xx");
-        attr(a, "target", "_new");
-        attr(a, "class", "svelte-npiq7h");
-      },
-      m(target, anchor) {
-        insert(target, span0, anchor);
-        insert(target, span1, anchor);
-        insert(target, t2, anchor);
-        insert(target, a, anchor);
-      },
-      p: noop,
-      i: noop,
-      o: noop,
-      d(detaching) {
-        if (detaching)
-          detach(span0);
-        if (detaching)
-          detach(span1);
-        if (detaching)
-          detach(t2);
-        if (detaching)
-          detach(a);
-      }
-    };
-  }
-  var Help = class extends SvelteComponent {
-    constructor(options) {
-      super();
-      init(this, options, null, create_fragment5, safe_not_equal, {});
-    }
-  };
-  var help_default = Help;
 
   // src/videoviewer.svelte
   function create_else_block(ctx) {
@@ -5629,7 +5578,44 @@
       }
     };
   }
-  function create_if_block_12(ctx) {
+  function create_if_block4(ctx) {
+    let previous_key = (
+      /*$videoId*/
+      ctx[1]
+    );
+    let key_block_anchor;
+    let key_block = create_key_block(ctx);
+    return {
+      c() {
+        key_block.c();
+        key_block_anchor = empty();
+      },
+      m(target, anchor) {
+        key_block.m(target, anchor);
+        insert(target, key_block_anchor, anchor);
+      },
+      p(ctx2, dirty2) {
+        if (dirty2 & /*$videoId*/
+        2 && safe_not_equal(previous_key, previous_key = /*$videoId*/
+        ctx2[1])) {
+          key_block.d(1);
+          key_block = create_key_block(ctx2);
+          key_block.c();
+          key_block.m(key_block_anchor.parentNode, key_block_anchor);
+        } else {
+          key_block.p(ctx2, dirty2);
+        }
+      },
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching)
+          detach(key_block_anchor);
+        key_block.d(detaching);
+      }
+    };
+  }
+  function create_key_block(ctx) {
     let video;
     let source;
     let source_src_value;
@@ -5655,8 +5641,6 @@
           attr(source, "src", source_src_value);
         }
       },
-      i: noop,
-      o: noop,
       d(detaching) {
         if (detaching)
           detach(video);
@@ -5664,48 +5648,17 @@
       }
     };
   }
-  function create_if_block4(ctx) {
-    let help;
-    let current;
-    help = new help_default({});
-    return {
-      c() {
-        create_component(help.$$.fragment);
-      },
-      m(target, anchor) {
-        mount_component(help, target, anchor);
-        current = true;
-      },
-      p: noop,
-      i(local) {
-        if (current)
-          return;
-        transition_in(help.$$.fragment, local);
-        current = true;
-      },
-      o(local) {
-        transition_out(help.$$.fragment, local);
-        current = false;
-      },
-      d(detaching) {
-        destroy_component(help, detaching);
-      }
-    };
-  }
-  function create_key_block(ctx) {
+  function create_fragment5(ctx) {
     let current_block_type_index;
     let if_block;
     let if_block_anchor;
     let current;
-    const if_block_creators = [create_if_block4, create_if_block_12, create_else_block];
+    const if_block_creators = [create_if_block4, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
-      if (!/*$videoId*/
-      ctx2[1])
+      if (document.location.protocol == "file:")
         return 0;
-      if (document.location.protocol == "file:" || document.location.protocol == "http:")
-        return 1;
-      return 2;
+      return 1;
     }
     current_block_type_index = select_block_type(ctx, -1);
     if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
@@ -5719,27 +5672,8 @@
         insert(target, if_block_anchor, anchor);
         current = true;
       },
-      p(ctx2, dirty2) {
-        let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2, dirty2);
-        if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty2);
-        } else {
-          group_outros();
-          transition_out(if_blocks[previous_block_index], 1, 1, () => {
-            if_blocks[previous_block_index] = null;
-          });
-          check_outros();
-          if_block = if_blocks[current_block_type_index];
-          if (!if_block) {
-            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
-            if_block.c();
-          } else {
-            if_block.p(ctx2, dirty2);
-          }
-          transition_in(if_block, 1);
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
+      p(ctx2, [dirty2]) {
+        if_block.p(ctx2, dirty2);
       },
       i(local) {
         if (current)
@@ -5758,70 +5692,20 @@
       }
     };
   }
-  function create_fragment6(ctx) {
-    let previous_key = (
-      /*$videoId*/
-      ctx[1]
-    );
-    let key_block_anchor;
-    let current;
-    let key_block = create_key_block(ctx);
-    return {
-      c() {
-        key_block.c();
-        key_block_anchor = empty();
-      },
-      m(target, anchor) {
-        key_block.m(target, anchor);
-        insert(target, key_block_anchor, anchor);
-        current = true;
-      },
-      p(ctx2, [dirty2]) {
-        if (dirty2 & /*$videoId*/
-        2 && safe_not_equal(previous_key, previous_key = /*$videoId*/
-        ctx2[1])) {
-          group_outros();
-          transition_out(key_block, 1, 1, noop);
-          check_outros();
-          key_block = create_key_block(ctx2);
-          key_block.c();
-          transition_in(key_block, 1);
-          key_block.m(key_block_anchor.parentNode, key_block_anchor);
-        } else {
-          key_block.p(ctx2, dirty2);
-        }
-      },
-      i(local) {
-        if (current)
-          return;
-        transition_in(key_block);
-        current = true;
-      },
-      o(local) {
-        transition_out(key_block);
-        current = false;
-      },
-      d(detaching) {
-        if (detaching)
-          detach(key_block_anchor);
-        key_block.d(detaching);
-      }
-    };
-  }
   function instance6($$self, $$props, $$invalidate) {
     let $videoSeekTo;
     let $videoId;
     component_subscribe($$self, videoSeekTo, ($$value) => $$invalidate(2, $videoSeekTo = $$value));
     component_subscribe($$self, videoId, ($$value) => $$invalidate(1, $videoId = $$value));
-    let player;
+    let mp4player;
     const seekTo = (t) => {
-      if (player)
-        $$invalidate(0, player.currentTime = t + 0.2, player);
+      if (mp4player)
+        $$invalidate(0, mp4player.currentTime = t + 0.2, mp4player);
     };
     function video_binding($$value) {
       binding_callbacks[$$value ? "unshift" : "push"](() => {
-        player = $$value;
-        $$invalidate(0, player);
+        mp4player = $$value;
+        $$invalidate(0, mp4player);
       });
     }
     $$self.$$.update = () => {
@@ -5831,18 +5715,18 @@
           seekTo($videoSeekTo);
       }
     };
-    return [player, $videoId, $videoSeekTo, video_binding];
+    return [mp4player, $videoId, $videoSeekTo, video_binding];
   }
   var Videoviewer = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance6, create_fragment6, safe_not_equal, {});
+      init(this, options, instance6, create_fragment5, safe_not_equal, {});
     }
   };
   var videoviewer_default = Videoviewer;
 
   // src/replacing.svelte
-  function create_fragment7(ctx) {
+  function create_fragment6(ctx) {
     let input;
     let button;
     let mounted;
@@ -5938,10 +5822,59 @@
   var Replacing = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance7, create_fragment7, safe_not_equal, {});
+      init(this, options, instance7, create_fragment6, safe_not_equal, {});
     }
   };
   var replacing_default = Replacing;
+
+  // src/help.svelte
+  function create_fragment7(ctx) {
+    let span0;
+    let span1;
+    let t2;
+    let a;
+    return {
+      c() {
+        span0 = element("span");
+        span0.textContent = "\u5716\u7248\u9010\u53E5\u5C0D\u9F4A";
+        span1 = element("span");
+        span1.textContent = "\u3000ver 2023.5.18";
+        t2 = space();
+        a = element("a");
+        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
+        set_style(span0, "font-size", "120%");
+        attr(a, "href", "xx");
+        attr(a, "target", "_new");
+        attr(a, "class", "svelte-npiq7h");
+      },
+      m(target, anchor) {
+        insert(target, span0, anchor);
+        insert(target, span1, anchor);
+        insert(target, t2, anchor);
+        insert(target, a, anchor);
+      },
+      p: noop,
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching)
+          detach(span0);
+        if (detaching)
+          detach(span1);
+        if (detaching)
+          detach(t2);
+        if (detaching)
+          detach(a);
+      }
+    };
+  }
+  var Help = class extends SvelteComponent {
+    constructor(options) {
+      super();
+      init(this, options, null, create_fragment7, safe_not_equal, {});
+    }
+  };
+  var help_default = Help;
 
   // src/app.svelte
   function create_a_slot(ctx) {
@@ -6008,7 +5941,7 @@
       }
     };
   }
-  function create_if_block5(ctx) {
+  function create_if_block_12(ctx) {
     let replacing_1;
     let current;
     replacing_1 = new replacing_default({});
@@ -6035,44 +5968,80 @@
       }
     };
   }
+  function create_if_block5(ctx) {
+    let help;
+    let current;
+    help = new help_default({});
+    return {
+      c() {
+        create_component(help.$$.fragment);
+      },
+      m(target, anchor) {
+        mount_component(help, target, anchor);
+        current = true;
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(help.$$.fragment, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(help.$$.fragment, local);
+        current = false;
+      },
+      d(detaching) {
+        destroy_component(help, detaching);
+      }
+    };
+  }
   function create_b_slot(ctx) {
     let div1;
     let show_if;
     let current_block_type_index;
-    let if_block;
-    let t;
+    let if_block0;
+    let t0;
+    let t1;
     let div0;
     let current;
-    const if_block_creators = [create_if_block5, create_else_block2];
+    const if_block_creators = [create_if_block_12, create_else_block2];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
       if (dirty2 & /*$replacing*/
-      4)
+      8)
         show_if = null;
       if (show_if == null)
         show_if = !!/*$replacing*/
-        (ctx2[2] && !~/*$replacing*/
-        ctx2[2].indexOf("\n"));
+        (ctx2[3] && !~/*$replacing*/
+        ctx2[3].indexOf("\n"));
       if (show_if)
         return 0;
       return 1;
     }
     current_block_type_index = select_block_type(ctx, -1);
-    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    let if_block1 = !/*$videoId*/
+    ctx[0] && create_if_block5(ctx);
     return {
       c() {
         div1 = element("div");
-        if_block.c();
-        t = space();
+        if_block0.c();
+        t0 = space();
+        if (if_block1)
+          if_block1.c();
+        t1 = space();
         div0 = element("div");
         attr(div1, "slot", "b");
       },
       m(target, anchor) {
         insert(target, div1, anchor);
         if_blocks[current_block_type_index].m(div1, null);
-        append(div1, t);
+        append(div1, t0);
+        if (if_block1)
+          if_block1.m(div1, null);
+        append(div1, t1);
         append(div1, div0);
-        ctx[3](div0);
+        ctx[4](div0);
         current = true;
       },
       p(ctx2, dirty2) {
@@ -6084,31 +6053,55 @@
             if_blocks[previous_block_index] = null;
           });
           check_outros();
-          if_block = if_blocks[current_block_type_index];
-          if (!if_block) {
-            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
-            if_block.c();
+          if_block0 = if_blocks[current_block_type_index];
+          if (!if_block0) {
+            if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+            if_block0.c();
           } else {
           }
-          transition_in(if_block, 1);
-          if_block.m(div1, t);
+          transition_in(if_block0, 1);
+          if_block0.m(div1, t0);
+        }
+        if (!/*$videoId*/
+        ctx2[0]) {
+          if (if_block1) {
+            if (dirty2 & /*$videoId*/
+            1) {
+              transition_in(if_block1, 1);
+            }
+          } else {
+            if_block1 = create_if_block5(ctx2);
+            if_block1.c();
+            transition_in(if_block1, 1);
+            if_block1.m(div1, t1);
+          }
+        } else if (if_block1) {
+          group_outros();
+          transition_out(if_block1, 1, 1, () => {
+            if_block1 = null;
+          });
+          check_outros();
         }
       },
       i(local) {
         if (current)
           return;
-        transition_in(if_block);
+        transition_in(if_block0);
+        transition_in(if_block1);
         current = true;
       },
       o(local) {
-        transition_out(if_block);
+        transition_out(if_block0);
+        transition_out(if_block1);
         current = false;
       },
       d(detaching) {
         if (detaching)
           detach(div1);
         if_blocks[current_block_type_index].d();
-        ctx[3](null);
+        if (if_block1)
+          if_block1.d();
+        ctx[4](null);
       }
     };
   }
@@ -6118,7 +6111,7 @@
     let updating_pos;
     let current;
     function splitpane_pos_binding(value) {
-      ctx[4](value);
+      ctx[5](value);
     }
     let splitpane_props = {
       type: "horizontal",
@@ -6129,10 +6122,10 @@
     };
     if (
       /*pos*/
-      ctx[1] !== void 0
+      ctx[2] !== void 0
     ) {
       splitpane_props.pos = /*pos*/
-      ctx[1];
+      ctx[2];
     }
     splitpane = new splitpane_default({ props: splitpane_props });
     binding_callbacks.push(() => bind(splitpane, "pos", splitpane_pos_binding));
@@ -6149,15 +6142,15 @@
       },
       p(ctx2, [dirty2]) {
         const splitpane_changes = {};
-        if (dirty2 & /*$$scope, editor, $replacing*/
-        37) {
+        if (dirty2 & /*$$scope, editor, $videoId, $replacing*/
+        139) {
           splitpane_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         if (!updating_pos && dirty2 & /*pos*/
-        2) {
+        4) {
           updating_pos = true;
           splitpane_changes.pos = /*pos*/
-          ctx2[1];
+          ctx2[2];
           add_flush_callback(() => updating_pos = false);
         }
         splitpane.$set(splitpane_changes);
@@ -6180,11 +6173,15 @@
     };
   }
   function instance8($$self, $$props, $$invalidate) {
+    let $videoId;
     let $replacing;
-    component_subscribe($$self, replacing, ($$value) => $$invalidate(2, $replacing = $$value));
+    component_subscribe($$self, videoId, ($$value) => $$invalidate(0, $videoId = $$value));
+    component_subscribe($$self, replacing, ($$value) => $$invalidate(3, $replacing = $$value));
     let editor;
     let pos = 50;
-    onMount(() => {
+    const createEditor = (id) => {
+      if (!id || get_store_value(thecm))
+        return;
       const cm = new CodeMirror(
         editor,
         {
@@ -6200,18 +6197,25 @@
       cm.on("change", afterChange);
       cm.on("keydown", keyDown);
       loadCMText("\u5DE5\u4F5C\u5340");
-    });
+    };
     function div0_binding($$value) {
       binding_callbacks[$$value ? "unshift" : "push"](() => {
         editor = $$value;
-        $$invalidate(0, editor);
+        $$invalidate(1, editor);
       });
     }
     function splitpane_pos_binding(value) {
       pos = value;
-      $$invalidate(1, pos);
+      $$invalidate(2, pos);
     }
-    return [editor, pos, $replacing, div0_binding, splitpane_pos_binding];
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$videoId*/
+      1) {
+        $:
+          createEditor($videoId);
+      }
+    };
+    return [$videoId, editor, pos, $replacing, div0_binding, splitpane_pos_binding];
   }
   var App = class extends SvelteComponent {
     constructor(options) {
