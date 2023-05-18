@@ -5550,56 +5550,6 @@
   var youtubeviewer_default = Youtubeviewer;
 
   // src/videoviewer.svelte
-  function create_if_block4(ctx) {
-    let previous_key = (
-      /*$videoId*/
-      ctx[1]
-    );
-    let key_block_anchor;
-    let current;
-    let key_block = create_key_block(ctx);
-    return {
-      c() {
-        key_block.c();
-        key_block_anchor = empty();
-      },
-      m(target, anchor) {
-        key_block.m(target, anchor);
-        insert(target, key_block_anchor, anchor);
-        current = true;
-      },
-      p(ctx2, dirty2) {
-        if (dirty2 & /*$videoId*/
-        2 && safe_not_equal(previous_key, previous_key = /*$videoId*/
-        ctx2[1])) {
-          group_outros();
-          transition_out(key_block, 1, 1, noop);
-          check_outros();
-          key_block = create_key_block(ctx2);
-          key_block.c();
-          transition_in(key_block, 1);
-          key_block.m(key_block_anchor.parentNode, key_block_anchor);
-        } else {
-          key_block.p(ctx2, dirty2);
-        }
-      },
-      i(local) {
-        if (current)
-          return;
-        transition_in(key_block);
-        current = true;
-      },
-      o(local) {
-        transition_out(key_block);
-        current = false;
-      },
-      d(detaching) {
-        if (detaching)
-          detach(key_block_anchor);
-        key_block.d(detaching);
-      }
-    };
-  }
   function create_else_block(ctx) {
     let youtubeviewer;
     let current;
@@ -5625,6 +5575,50 @@
       },
       d(detaching) {
         destroy_component(youtubeviewer, detaching);
+      }
+    };
+  }
+  function create_if_block4(ctx) {
+    let if_block_anchor;
+    let if_block = (
+      /*$videoId*/
+      ctx[1] && create_if_block_12(ctx)
+    );
+    return {
+      c() {
+        if (if_block)
+          if_block.c();
+        if_block_anchor = empty();
+      },
+      m(target, anchor) {
+        if (if_block)
+          if_block.m(target, anchor);
+        insert(target, if_block_anchor, anchor);
+      },
+      p(ctx2, dirty2) {
+        if (
+          /*$videoId*/
+          ctx2[1]
+        ) {
+          if (if_block) {
+            if_block.p(ctx2, dirty2);
+          } else {
+            if_block = create_if_block_12(ctx2);
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
+      },
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach(if_block_anchor);
       }
     };
   }
@@ -5654,8 +5648,6 @@
           attr(source, "src", source_src_value);
         }
       },
-      i: noop,
-      o: noop,
       d(detaching) {
         if (detaching)
           detach(video);
@@ -5668,13 +5660,10 @@
     let if_block;
     let if_block_anchor;
     let current;
-    const if_block_creators = [create_if_block_12, create_else_block];
+    const if_block_creators = [create_if_block4, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
-      if (
-        /*$videoId*/
-        ctx2[1]
-      )
+      if (document.location.protocol == "file:" || document.location.protocol == "http:")
         return 0;
       return 1;
     }
@@ -5691,26 +5680,7 @@
         current = true;
       },
       p(ctx2, dirty2) {
-        let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2, dirty2);
-        if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty2);
-        } else {
-          group_outros();
-          transition_out(if_blocks[previous_block_index], 1, 1, () => {
-            if_blocks[previous_block_index] = null;
-          });
-          check_outros();
-          if_block = if_blocks[current_block_type_index];
-          if (!if_block) {
-            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
-            if_block.c();
-          } else {
-            if_block.p(ctx2, dirty2);
-          }
-          transition_in(if_block, 1);
-          if_block.m(if_block_anchor.parentNode, if_block_anchor);
-        }
+        if_block.p(ctx2, dirty2);
       },
       i(local) {
         if (current)
@@ -5730,40 +5700,52 @@
     };
   }
   function create_fragment5(ctx) {
-    let if_block_anchor;
+    let previous_key = (
+      /*$videoId*/
+      ctx[1]
+    );
+    let key_block_anchor;
     let current;
-    let if_block = (document.location.protocol == "file:" || document.location.protocol == "http:") && create_if_block4(ctx);
+    let key_block = create_key_block(ctx);
     return {
       c() {
-        if (if_block)
-          if_block.c();
-        if_block_anchor = empty();
+        key_block.c();
+        key_block_anchor = empty();
       },
       m(target, anchor) {
-        if (if_block)
-          if_block.m(target, anchor);
-        insert(target, if_block_anchor, anchor);
+        key_block.m(target, anchor);
+        insert(target, key_block_anchor, anchor);
         current = true;
       },
       p(ctx2, [dirty2]) {
-        if (document.location.protocol == "file:" || document.location.protocol == "http:")
-          if_block.p(ctx2, dirty2);
+        if (dirty2 & /*$videoId*/
+        2 && safe_not_equal(previous_key, previous_key = /*$videoId*/
+        ctx2[1])) {
+          group_outros();
+          transition_out(key_block, 1, 1, noop);
+          check_outros();
+          key_block = create_key_block(ctx2);
+          key_block.c();
+          transition_in(key_block, 1);
+          key_block.m(key_block_anchor.parentNode, key_block_anchor);
+        } else {
+          key_block.p(ctx2, dirty2);
+        }
       },
       i(local) {
         if (current)
           return;
-        transition_in(if_block);
+        transition_in(key_block);
         current = true;
       },
       o(local) {
-        transition_out(if_block);
+        transition_out(key_block);
         current = false;
       },
       d(detaching) {
-        if (if_block)
-          if_block.d(detaching);
         if (detaching)
-          detach(if_block_anchor);
+          detach(key_block_anchor);
+        key_block.d(detaching);
       }
     };
   }
