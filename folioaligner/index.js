@@ -5615,12 +5615,33 @@
       }
     };
   }
+  function create_if_block_12(ctx) {
+    let t;
+    return {
+      c() {
+        t = text("\u5FC5\u9808\u6709\u672C\u5730\u5F71\u7247");
+      },
+      m(target, anchor) {
+        insert(target, t, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(t);
+      }
+    };
+  }
   function create_key_block(ctx) {
+    let t;
     let video;
     let source;
     let source_src_value;
+    let if_block = !/*$videoId*/
+    ctx[1] && create_if_block_12(ctx);
     return {
       c() {
+        if (if_block)
+          if_block.c();
+        t = space();
         video = element("video");
         source = element("source");
         if (!src_url_equal(source.src, source_src_value = /*$videoId*/
@@ -5630,11 +5651,26 @@
         attr(video, "class", "svelte-1yzr70e");
       },
       m(target, anchor) {
+        if (if_block)
+          if_block.m(target, anchor);
+        insert(target, t, anchor);
         insert(target, video, anchor);
         append(video, source);
         ctx[3](video);
       },
       p(ctx2, dirty2) {
+        if (!/*$videoId*/
+        ctx2[1]) {
+          if (if_block) {
+          } else {
+            if_block = create_if_block_12(ctx2);
+            if_block.c();
+            if_block.m(t.parentNode, t);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
         if (dirty2 & /*$videoId*/
         2 && !src_url_equal(source.src, source_src_value = /*$videoId*/
         ctx2[1])) {
@@ -5642,6 +5678,10 @@
         }
       },
       d(detaching) {
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach(t);
         if (detaching)
           detach(video);
         ctx[3](null);
@@ -5735,7 +5775,7 @@
       c() {
         input = element("input");
         button = element("button");
-        button.textContent = "Apply";
+        button.textContent = "\u2714";
         attr(input, "class", "svelte-18chlde");
       },
       m(target, anchor) {
@@ -5829,42 +5869,31 @@
 
   // src/help.svelte
   function create_fragment7(ctx) {
-    let span0;
-    let span1;
-    let t2;
-    let a;
+    let div;
     return {
       c() {
-        span0 = element("span");
-        span0.textContent = "\u5716\u7248\u9010\u53E5\u5C0D\u9F4A";
-        span1 = element("span");
-        span1.textContent = "\u3000ver 2023.5.18";
-        t2 = space();
-        a = element("a");
-        a.textContent = "\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247";
-        set_style(span0, "font-size", "120%");
-        attr(a, "href", "xx");
-        attr(a, "target", "_new");
-        attr(a, "class", "svelte-npiq7h");
+        div = element("div");
+        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.5.18</span> 
+<a href="xx" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u9078\u7D93\uFF1A\u9078\u53D6\u5EAB\u5B58\u7D93\u5178\u3002\u5377\u6578  \u9801\u6578   \u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
+
+\u7DE8\u8F2F\u5340\u4E0D\u80FD\u76F4\u63A5\u522A\u6539\u6587\u5B57\uFF0C\u53EA\u80FD\u63DB\u884C\u3001\u63A5\u884C\u3001\u8ABF\u6574\u5206\u9801\u3002
+\u6A19\u8A18\uFF1A^pb\u5206\u9801\u3001^juan\u5377\u865F\u3001^n\u7D93\u865F
+
+\u65B0\u589E\u6587\u5B57\uFF1A\u9078\u53D6\u81F3\u5C11\u4E00\u5B57\u9032\u5165\u7DE8\u8F2F\u614B\uFF08\u4E0D\u53EF\u8DE8\u884C\uFF09\uFF0C\u6309\u2714\u78BA\u5B9A\u3002
+\u522A\u9664\u6587\u5B57\uFF1A\u53D6\u4EE3\u6587\u5B57\u6E05\u7A7A\uFF0C\u6309\u2714\u78BA\u5B9A\u3002
+\u522A\u9664\u5206\u9801\uFF1A\u505C\u5728^pb\u4E2D\uFF0C\u6309Delete\u3002
+\u65B0\u589E\u5206\u9801\uFF1A\u6309Insert\uFF0C\u82E5\u8A72\u884C\u5DF2\u6709\u5206\u9801\uFF0C\u5247\u79FB\u52D5\u3002\u5206\u9801\u5C07\u79FB\u5230\u884C\u9996\u3002
+\u63A5\u884C\u91CD\u6392\uFF1A\u5728\u884C\u5C3E\u6309Delete\u6216\u884C\u9996\u6309Backspace\uFF0C\u81EA\u52D5\u91CD\u6392\u5230\u4E0B\u4E00\u5206\u9801\u3002</pre>`;
       },
       m(target, anchor) {
-        insert(target, span0, anchor);
-        insert(target, span1, anchor);
-        insert(target, t2, anchor);
-        insert(target, a, anchor);
+        insert(target, div, anchor);
       },
       p: noop,
       i: noop,
       o: noop,
       d(detaching) {
         if (detaching)
-          detach(span0);
-        if (detaching)
-          detach(span1);
-        if (detaching)
-          detach(t2);
-        if (detaching)
-          detach(a);
+          detach(div);
       }
     };
   }
@@ -5941,7 +5970,7 @@
       }
     };
   }
-  function create_if_block_12(ctx) {
+  function create_if_block_13(ctx) {
     let replacing_1;
     let current;
     replacing_1 = new replacing_default({});
@@ -6004,7 +6033,7 @@
     let t1;
     let div0;
     let current;
-    const if_block_creators = [create_if_block_12, create_else_block2];
+    const if_block_creators = [create_if_block_13, create_else_block2];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
       if (dirty2 & /*$replacing*/
