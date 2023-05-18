@@ -92,6 +92,10 @@
     }
     return -1;
   }
+  function set_store_value(store, ret, value) {
+    store.set(value);
+    return ret;
+  }
   function action_destroyer(action_result) {
     return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
   }
@@ -139,6 +143,12 @@
       node.parentNode.removeChild(node);
     }
   }
+  function destroy_each(iterations, detaching) {
+    for (let i = 0; i < iterations.length; i += 1) {
+      if (iterations[i])
+        iterations[i].d(detaching);
+    }
+  }
   function element(name2) {
     return document.createElement(name2);
   }
@@ -169,6 +179,9 @@
     if (text2.data === data)
       return;
     text2.data = data;
+  }
+  function set_input_value(input, value) {
+    input.value = value == null ? "" : value;
   }
   function set_style(node, key, value, important) {
     if (value == null) {
@@ -318,6 +331,20 @@
   }
   var outroing = /* @__PURE__ */ new Set();
   var outros;
+  function group_outros() {
+    outros = {
+      r: 0,
+      c: [],
+      p: outros
+      // parent group
+    };
+  }
+  function check_outros() {
+    if (!outros.r) {
+      run_all(outros.c);
+    }
+    outros = outros.p;
+  }
   function transition_in(block, local) {
     if (block && block.i) {
       outroing.delete(block);
@@ -414,7 +441,7 @@
     }
     component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
   }
-  function init(component, options, instance8, create_fragment7, not_equal, props, append_styles, dirty2 = [-1]) {
+  function init(component, options, instance9, create_fragment8, not_equal, props, append_styles, dirty2 = [-1]) {
     const parent_component = current_component;
     set_current_component(component);
     const $$ = component.$$ = {
@@ -440,7 +467,7 @@
     };
     append_styles && append_styles($$.root);
     let ready = false;
-    $$.ctx = instance8 ? instance8(component, options.props || {}, (i, ret, ...rest) => {
+    $$.ctx = instance9 ? instance9(component, options.props || {}, (i, ret, ...rest) => {
       const value = rest.length ? rest[0] : ret;
       if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
         if (!$$.skip_bound && $$.bound[i])
@@ -453,7 +480,7 @@
     $$.update();
     ready = true;
     run_all($$.before_update);
-    $$.fragment = create_fragment7 ? create_fragment7($$.ctx) : false;
+    $$.fragment = create_fragment8 ? create_fragment8($$.ctx) : false;
     if (options.target) {
       if (options.hydrate) {
         start_hydrating();
@@ -587,13 +614,19 @@
   }
 
   // src/store.js
-  var segments = writable([]);
   var dirty = writable(false);
   var thecm = writable(null);
   var cursorline = writable(0);
-  var thepdf = writable(null);
-  var imageurl = writable("");
-  var maxpage = writable(0);
+  var videoId = writable("");
+  var videoSeekTo = writable(0);
+  var localfile = writable();
+  var juan = writable(1);
+  var pb = writable(1);
+  var filename = writable("");
+  var maxjuan = writable(1);
+  var maxpage = writable(1);
+  var maxline = writable(1);
+  var replacing = writable(false);
 
   // src/inputnumber.svelte
   function create_if_block_1(ctx) {
@@ -905,160 +938,38 @@
   };
   var inputnumber_default = Inputnumber;
 
-  // src/folio.js
-  var loadpdf = async (fn) => {
-    const reponse = await fetch(fn);
-    const arraybuffer = await reponse.arrayBuffer();
-    const typedarray = new Uint8Array(arraybuffer);
-    const _pdf = await pdfjsLib.getDocument(typedarray).promise;
-    thepdf.set(_pdf);
-    maxpage.set(_pdf.numPages);
-    imageurl.set(await getPageUrl(2));
-  };
-  var getPageUrl = async (pn) => {
-    const promises = [];
-    let canvas;
-    const page = await get_store_value(thepdf).getPage(pn);
-    const viewport = page.getViewport({ scale: 1 });
-    canvas = document.createElement("canvas");
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
-    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
-    return canvas.toDataURL("image/png");
-  };
-
-  // src/toolbar.svelte
-  function create_fragment2(ctx) {
-    let span;
-    let button;
-    let t1;
-    let t2;
-    let inputnumber;
-    let updating_value;
-    let current;
-    let mounted;
-    let dispose;
-    function inputnumber_value_binding(value) {
-      ctx[4](value);
-    }
-    let inputnumber_props = {
-      max: (
-        /*$maxpage*/
-        ctx[1]
-      ),
-      onChange: (
-        /*onChange*/
-        ctx[2]
-      )
-    };
-    if (
-      /*value*/
-      ctx[0] !== void 0
-    ) {
-      inputnumber_props.value = /*value*/
-      ctx[0];
-    }
-    inputnumber = new inputnumber_default({ props: inputnumber_props });
-    binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
-    return {
-      c() {
-        span = element("span");
-        button = element("button");
-        button.textContent = "load";
-        t1 = text(
-          /*$maxpage*/
-          ctx[1]
-        );
-        t2 = space();
-        create_component(inputnumber.$$.fragment);
-        attr(span, "class", "Toolbar svelte-qni7of");
-      },
-      m(target, anchor) {
-        insert(target, span, anchor);
-        append(span, button);
-        append(span, t1);
-        append(span, t2);
-        mount_component(inputnumber, span, null);
-        current = true;
-        if (!mounted) {
-          dispose = listen(
-            button,
-            "click",
-            /*click_handler*/
-            ctx[3]
-          );
-          mounted = true;
-        }
-      },
-      p(ctx2, [dirty2]) {
-        if (!current || dirty2 & /*$maxpage*/
-        2)
-          set_data(
-            t1,
-            /*$maxpage*/
-            ctx2[1]
-          );
-        const inputnumber_changes = {};
-        if (dirty2 & /*$maxpage*/
-        2)
-          inputnumber_changes.max = /*$maxpage*/
-          ctx2[1];
-        if (!updating_value && dirty2 & /*value*/
-        1) {
-          updating_value = true;
-          inputnumber_changes.value = /*value*/
-          ctx2[0];
-          add_flush_callback(() => updating_value = false);
-        }
-        inputnumber.$set(inputnumber_changes);
-      },
-      i(local) {
-        if (current)
-          return;
-        transition_in(inputnumber.$$.fragment, local);
-        current = true;
-      },
-      o(local) {
-        transition_out(inputnumber.$$.fragment, local);
-        current = false;
-      },
-      d(detaching) {
-        if (detaching)
-          detach(span);
-        destroy_component(inputnumber);
-        mounted = false;
-        dispose();
+  // src/sutra.js
+  var sutras = [
+    { no: "541", title: "\u9577\u963F\u542B\u7D93", youtube: "9U9ddWjH2AQ", juanpage: [74, 45, 58, 55, 50, 50, 39, 48, 40, 68, 55, 71, 54, 48, 60, 48, 60, 62, 63, 68, 58, 49] },
+    { no: "538", title: "\u4E2D\u963F\u542B\u7D93", youtube: "DzgdZCfG5Mo", juanpage: [50, 50, 63, 66, 50, 55, 69, 65, 63, 62, 50, 60, 45, 57, 53, 63, 57, 62, 64, 48, 45, 46, 54, 53, 46, 54, 47, 40, 57, 63, 42, 39, 74, 47, 47, 56, 51, 53, 48, 46, 43, 52, 58, 43, 39, 39, 52, 27, 70, 49, 52, 53, 35, 56, 47, 49, 53, 38, 67, 70] },
+    { no: "540", title: "\u96DC\u963F\u542B\u7D93", youtube: "XTHD0CF-aRI", juanpage: [54, 64, 59, 54, 65, 42, 55, 57, 67, 66, 55, 64, 54, 61, 64, 62, 70, 59, 54, 55, 57, 61, 74, 54, 36, 73, 61, 60, 60, 53, 57, 62, 67, 72, 72, 61, 77, 56, 58, 54, 54, 51, 58, 62, 58, 52, 68, 62, 59, 73] },
+    { no: "539", title: "\u589E\u4E00\u963F\u542B\u7D93", youtube: "srcQt__mtDI", juanpage: [43, 26, 41, 34, 41, 40, 47, 46, 49, 31, 42, 59, 50, 41, 52, 35, 37, 48, 46, 61, 34, 53, 69, 65, 66, 73, 34, 49, 34, 40, 45, 46, 57, 50, 45, 38, 36, 37, 35, 22, 51, 43, 42, 65, 54, 48, 65, 60, 35, 41, 43, 26, 41, 34, 41, 40, 47, 46, 49, 31, 42, 59, 50, 41, 52, 35, 37, 48, 46, 61, 34, 53, 69, 65, 66, 73, 34, 49, 34, 40, 45, 46, 57, 50, 45, 38, 36, 37, 35, 22, 51, 43, 42, 65, 54, 48, 65, 60, 35, 41] }
+  ];
+  var findSutra = (no) => {
+    for (let i = 0; i < sutras.length; i++) {
+      if (sutras[i].no == no) {
+        return sutras[i];
       }
-    };
-  }
-  var pdffn = "/pdf/0001-001.pdf";
-  function instance2($$self, $$props, $$invalidate) {
-    let $maxpage;
-    component_subscribe($$self, maxpage, ($$value) => $$invalidate(1, $maxpage = $$value));
-    let numPages = 0, value = 1;
-    const onChange = (v) => {
-      getPageUrl(v).then((url) => {
-        imageurl.set(url);
-      });
-      return v;
-    };
-    const click_handler = () => loadpdf(pdffn);
-    function inputnumber_value_binding(value$1) {
-      value = value$1;
-      $$invalidate(0, value);
-    }
-    return [value, $maxpage, onChange, click_handler, inputnumber_value_binding];
-  }
-  var Toolbar = class extends SvelteComponent {
-    constructor(options) {
-      super();
-      init(this, options, instance2, create_fragment2, safe_not_equal, {});
     }
   };
-  var toolbar_default = Toolbar;
 
   // ../ptk/offtext/constants.ts
   var OFFTAG_REGEX_G = /\^([#@\/\.\:a-z_\-\d~]+)(<(?:\\.|.)*?>)?/g;
+
+  // ../ptk/utils/bsearch.ts
+  var bsearchNumber = (arr, obj) => {
+    let low = 0, high = arr.length - 1, mid;
+    while (low < high) {
+      mid = low + high >> 1;
+      if (arr[mid] === obj) {
+        while (mid > -1 && arr[mid - 1] === obj)
+          mid--;
+        return mid;
+      }
+      arr[mid] < obj ? low = mid + 1 : high = mid;
+    }
+    return low;
+  };
 
   // ../ptk/utils/unpackintarray.ts
   var maxlen2 = 113 * 113;
@@ -1075,6 +986,33 @@
   var CodeEnd = 31;
   var MaxShared = CodeEnd - CodeStart2;
   var SEP = String.fromCharCode(CodeStart2);
+
+  // ../ptk/utils/unicode.ts
+  var splitUTF32 = (str) => {
+    if (!str) {
+      const empty2 = [];
+      return empty2;
+    }
+    let i = 0;
+    const out = [];
+    while (i < str.length) {
+      const code = str.codePointAt(i) || 0;
+      out.push(code);
+      i++;
+      if (code > 65535)
+        i++;
+    }
+    return out;
+  };
+  var splitUTF32Char = (str) => splitUTF32(str).map((cp) => String.fromCodePoint(cp));
+
+  // ../ptk/utils/cjk.ts
+  var isPunc = (str) => {
+    if (!str)
+      return false;
+    const cp = str.charCodeAt(0);
+    return cp >= 12289 && cp <= 12319 || cp > 65280;
+  };
 
   // ../ptk/utils/bopomofo.ts
   var consonants = "b,p,m,f,d,t,n,l,g,k,h,j,q,x,zh,ch,sh,r,z,c,s".split(",");
@@ -4242,10 +4180,10 @@
   // ../ptk/zip/utils.ts
   var makeUint8Array = (thing) => new Uint8Array(thing.buffer || thing);
   var wasm = "AGFzbQEAAAABCgJgAABgAn9/AXwDAwIAAQUDAQACBwkCAW0CAAFjAAEIAQAKlQECSQEDfwNAIAEhAEEAIQIDQCAAQQF2IABBAXFBoIbi7X5scyEAIAJBAWoiAkEIRw0ACyABQQJ0IAA2AgAgAUEBaiIBQYACRw0ACwtJAQF/IAFBf3MhAUGAgAQhAkGAgAQgAGohAANAIAFB/wFxIAItAABzQQJ0KAIAIAFBCHZzIQEgAkEBaiICIABJDQALIAFBf3O4Cw";
-  var instance3 = new WebAssembly.Instance(
+  var instance2 = new WebAssembly.Instance(
     new WebAssembly.Module(Uint8Array.from(atob(wasm), (c2) => c2.charCodeAt(0)))
   );
-  var { c, m: m2 } = instance3.exports;
+  var { c, m: m2 } = instance2.exports;
   var pageSize = 65536;
   var crcBuffer = makeUint8Array(m2).subarray(pageSize);
 
@@ -4286,245 +4224,758 @@
   tokenizeIASTPunc.isToken = (w) => w.match(/^([“‘]*[a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*[’।॥\.,;?\!…”–]* *)$/);
 
   // src/editor.ts
-  var markOfftext = (cm, line, segs = null, lines = null) => {
-    const text2 = lines && lines[line] || cm.getLine(line);
-    text2.replace(OFFTAG_REGEX_G, (m4, m1, m22, ch) => {
-      const c2 = m1.charCodeAt(1);
-      if (m1.startsWith("n") && c2 > 48 && c2 < 64) {
-        if (segs && (!segs.length || segs[segs.length - 1] !== line))
-          segs.push(line);
+  var juans = [];
+  var pbs = [];
+  var countChar = (linetext) => {
+    const chars = splitUTF32Char(linetext);
+    let i = 0, count = 0;
+    while (i < chars.length) {
+      const cp = chars[i]?.charCodeAt(0);
+      if (!isPunc(chars[i]) && (cp >= 13312 || cp == 12870)) {
+        count++;
       }
-      cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "offtag" });
+      i++;
+    }
+    return count;
+  };
+  var markOfftext = (cm, line) => {
+    const text2 = cm.getLine(line);
+    text2.replace(OFFTAG_REGEX_G, (m4, m1, m22, ch) => {
+      if (m1.startsWith("juan")) {
+        juans.push(line);
+        cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "juan" });
+      } else if (m1.startsWith("pb")) {
+        pbs.push(line);
+        cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "pb" });
+      } else {
+        cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "offtag" });
+      }
     });
-    return segs;
+  };
+  var rebuildJuanPb = (cm) => {
+    console.log("rebuild pb");
+    juans.length = 0;
+    pbs.length = 0;
+    for (let line = 0; line < cm.lineCount(); line++) {
+      const text2 = cm.getLine(line);
+      text2.replace(OFFTAG_REGEX_G, (m4, m1, m22, ch) => {
+        if (m1.startsWith("juan")) {
+          juans.push(line);
+        } else if (m1.startsWith("pb")) {
+          pbs.push(line);
+        }
+      });
+    }
   };
   var loadCMText = (text2) => {
     const cm = get_store_value(thecm);
     const line = cm.getCursor().line;
     cm.doc.setValue(text2);
     const lines = text2.split("\n");
-    const segs = [];
+    juans.length = 0;
+    pbs.length = 0;
     cm.operation(() => {
-      for (let i = 0; i < lines.length; i++) {
-        markOfftext(cm, i, segs, lines);
-      }
+      for (let i = 0; i < lines.length; i++)
+        markOfftext(cm, i);
     });
-    if (segs[0] !== 0)
-      segs.unshift(0);
-    segs.push(lines.length);
-    segments.set(segs);
-    cm.setCursor({ line });
+    if (line <= cm.lineCount())
+      cm.setCursor({ line });
     return lines.length;
+  };
+  var isdeletespace = (cm, from, to) => {
+    if (from.line == to.line && Math.abs(from.ch - to.ch) == 1) {
+      const line = cm.getLine(from.line);
+      const ch = Math.min(from.ch, to.ch);
+      return line.charAt(ch) == "\u3000";
+    }
+  };
+  var isinsertspace = (cm, text2) => {
+    if (text2.length == 1 && (text2[0] == " " || text2[0] == "\u3000")) {
+      if (text2[0] == " ")
+        text2[0] = "\u3000";
+      return true;
+    }
+  };
+  var beforeChange = (cm, obj) => {
+    const { origin, text: text2, to, from, cancel } = obj;
+    if (origin == "setValue" || !origin)
+      return;
+    const cursor = cm.getCursor();
+    const marks = cm.doc.findMarksAt(cursor);
+    if (marks.length) {
+      const markpos = marks[0].find();
+      if (markpos.to.ch > cursor.ch && markpos.from.ch < cursor.ch) {
+        cancel();
+        return;
+      }
+    }
+    if (origin == "+delete") {
+      if (to.line == from.line + 1 && to.ch == 0) {
+      } else if (isdeletespace(cm, from, to)) {
+      } else
+        cancel();
+    } else if (origin == "+input") {
+      if (text2.length == 2 && text2.join("") == "") {
+      } else if (isinsertspace(cm, text2)) {
+      } else {
+        cancel();
+      }
+    }
+  };
+  var isGatha = (linetext) => {
+    return linetext.length >= 5 && !~linetext.indexOf("\u3002") && ~linetext.indexOf("\u3000");
+  };
+  var reflowLine = (cm, line) => {
+    const pagetext = [];
+    let till = line;
+    let firstline = cm.getLine(line);
+    if (isGatha(firstline)) {
+      firstline = firstline.replace(/　/g, "\u25CF") + "\u25CF";
+    }
+    pagetext.push(firstline);
+    for (let i = line + 1; i < cm.lineCount(); i++) {
+      let linetext2 = cm.getLine(i);
+      if (~linetext2.indexOf("^pb")) {
+        break;
+      } else {
+        if (isGatha(linetext2)) {
+          linetext2 = "\u25CF" + linetext2.replace(/　/g, "\u25CF") + "\u25CF";
+        }
+        pagetext.push(linetext2);
+        till = i;
+      }
+      if (pagetext.length > 20)
+        break;
+    }
+    const text2 = pagetext.join("").replace(/●+/g, "\u25CF");
+    const chars = splitUTF32Char(text2), out = [];
+    let count = 0, linetext = "";
+    for (let i = 0; i < chars.length; i++) {
+      linetext += chars[i];
+      const cp = chars[i].codePointAt(0) || 0;
+      if (!isPunc(chars[i]) && (cp >= 13312 || cp == 12870 || cp == 9679)) {
+        if (linetext == "\u25CF") {
+        } else
+          count++;
+      }
+      if (count == 17) {
+        out.push(linetext.replace(/^●/g, "").replace(/●$/g, "").replace(/●/g, "\u3000"));
+        count = 0;
+        linetext = "";
+      }
+    }
+    if (linetext)
+      out.push(linetext.replace(/^●/g, "").replace(/●$/g, "").replace(/●/g, "\u3000"));
+    const newtext = out.join("\n").replace(/　\n/g, "\n").replace(/\n。/g, "\u3002\n").replace(/\n．/g, "\uFF0E\n").replace(/\n+/g, "\n").trim() + "\n";
+    cm.replaceRange(newtext, { line, ch: 0 }, { line: till + 1, ch: 0 });
+  };
+  var afterChange = (cm, obj) => {
+    const { removed, from, to, text: text2 } = obj;
+    get_store_value(filename) && dirty.set(true);
+    if (~text2.join("").indexOf("^") || ~removed.join("").indexOf("^")) {
+      const marks = cm.findMarks(from, to);
+      marks.forEach((mark) => mark.clear());
+      for (let i = from.line; i < from.line + text2.length; i++) {
+        markOfftext(cm, i);
+      }
+      rebuildJuanPb(cm);
+    }
+    const linetext = cm.getLine(from.line);
+    if (countChar(linetext) > 17) {
+      touchtext(() => {
+        reflowLine(cm, from.line);
+      });
+    }
+  };
+  var movePb = (cm, e) => {
+    const key = e.key.toLowerCase();
+    const cursor = cm.getCursor();
+    let linetext = cm.getLine(cursor.line);
+    let at = cursor.ch;
+    while (linetext.charAt(at) !== "^" && at > 0)
+      at--;
+    linetext = linetext.slice(0, at) + linetext.slice(at + 3);
+    if (key == "arrowdown") {
+      if (cursor.line < cm.lineCount()) {
+        let nexttext = cm.getLine(cursor.line + 1);
+        nexttext = "^pb" + nexttext;
+        cm.doc.replaceRange(linetext + "\n" + nexttext, { line: cursor.line, ch: 0 }, { line: cursor.line + 1, ch: nexttext.length - 3 });
+        setTimeout(() => {
+          cm.setCursor({ line: cursor.line + 1, ch: 0 });
+        }, 10);
+      }
+    } else if (key == "arrowup") {
+      if (cursor.line > 0) {
+        let prevtext = cm.getLine(cursor.line - 1);
+        prevtext = "^pb" + prevtext;
+        cm.doc.replaceRange(prevtext + "\n" + linetext, { line: cursor.line - 1, ch: 0 }, { line: cursor.line, ch: linetext.length - 3 });
+        setTimeout(() => {
+          cm.setCursor({ line: cursor.line - 1, ch: 0 });
+        }, 10);
+      }
+    } else if (key == "arrowleft" || key == "arrowright") {
+      if (key == "arrowleft" && at > 0) {
+        at--;
+        const cp = linetext.charAt(at);
+        if (at > 0 && cp >= 55296 && cp <= 57343)
+          at--;
+      } else if (at < linetext.length && key == "arrowright") {
+        at++;
+        const cp = linetext.charAt(at);
+        if (at > 0 && cp >= 55296 && cp <= 57343)
+          at++;
+      }
+      linetext = linetext.slice(0, at) + "^pb" + linetext.slice(at);
+      cm.doc.replaceRange(linetext, { line: cursor.line, ch: 0 }, { line: cursor.line, ch: cm.getLine(cursor.line).length });
+      setTimeout(() => {
+        markOfftext(cm, cursor.line);
+        cm.setCursor({ line: cursor.line, ch: at + (key == "arrowright" ? 3 : 0) });
+      }, 10);
+    }
+  };
+  var juanPbAtLine = (line) => {
+    const juan2 = bsearchNumber(juans, line + 1);
+    const at = bsearchNumber(pbs, line + 1);
+    const at2 = bsearchNumber(pbs, juans[juan2 - 1]);
+    const pb2 = at - at2;
+    return [juan2, pb2];
+  };
+  var lineOfJuanPb = (juan2, pb2) => {
+    const juanstart = juans[juan2 - 1];
+    const at = bsearchNumber(pbs, juanstart);
+    return pbs[pb2 + at - 1];
   };
   var cursorActivity = (cm) => {
     const cursor = cm.getCursor();
+    const sel = cm.doc.getSelection();
+    replacing.set(sel);
+    if (cursor.line + 1 == get_store_value(cursorline))
+      return;
     cursorline.set(cursor.line + 1);
-    if (~cm.getLine(cursor.line).indexOf("^n"))
-      ;
+    const [a, b] = juanPbAtLine(cursor.line);
+    if (get_store_value(juan) !== a)
+      juan.set(a);
+    if (get_store_value(pb) !== b)
+      pb.set(b);
   };
   var setCursorLine = (line) => {
-    get_store_value(cm2).setCursor({ line: line - 1 });
+    const cm = get_store_value(thecm);
+    if (line < cm.lineCount())
+      cm.setCursor(line);
     return line;
   };
+  var touchtext = (cb) => {
+    const cm = get_store_value(thecm);
+    cm.off("beforeChange", beforeChange);
+    cm.operation(cb);
+    cm.on("beforeChange", beforeChange);
+  };
+  var replaceLine = (cm, line, newtext) => {
+    const oldtext = cm.getLine(line);
+    cm.replaceRange(newtext, { line, ch: 0 }, { line, ch: oldtext.length });
+  };
+  var keyDown = (cm, e) => {
+    const marks = cm.doc.findMarksAt(cm.getCursor());
+    if ((marks.length == 0 || marks[0].className !== "pb") && e.key == "Insert") {
+      const cursor = cm.getCursor();
+      const linetext = cm.getLine(cursor.line);
+      touchtext(() => {
+        let newtext = linetext.replace("^pb", "^^^");
+        newtext = (newtext.slice(0, cursor.ch) + (cursor.ch ? "\n" : "") + //split a line or insert at the begining
+        "^pb" + newtext.slice(cursor.ch)).replace("^^^", "");
+        replaceLine(cm, cursor.line, newtext);
+        cm.setCursor({ line: cursor.line + 1, ch: 0 });
+      });
+      return;
+    } else if (marks.length && e.key == "Delete") {
+      const cursor = cm.getCursor();
+      const linetext = cm.getLine(cursor.line);
+      if (marks[0].className == "pb") {
+        let at = cursor.ch;
+        while (linetext.charAt(at) !== "^" && at > 0)
+          at--;
+        if (cursor.ch - at == 3)
+          return;
+        const newtext = linetext.slice(0, at) + linetext.slice(at + 3);
+        touchtext(() => {
+          replaceLine(cm, cursor.line, newtext);
+          cm.setCursor({ line: cursor.line, ch: at });
+        });
+      }
+      return;
+    }
+    if (!e.ctrlKey)
+      return;
+    if (e.key == "ArrowDown" || e.key == "ArrowUp" || e.key == "ArrowRight" || e.key == "ArrowLeft") {
+      const m4 = cm.findMarksAt(cm.getCursor());
+      if (m4 && m4.length && m4[0].className == "pb") {
+        movePb(cm, e);
+        e.preventDefault();
+      }
+    }
+  };
 
-  // src/editortoolbar.svelte
-  var { window: window_1 } = globals;
-  function create_fragment3(ctx) {
-    let button0;
-    let t0;
-    let button0_disabled_value;
-    let t1;
-    let button1;
-    let t2;
-    let button1_disabled_value;
-    let t3;
-    let inputnumber;
-    let updating_value;
-    let t4;
-    let t5_value = (
-      /*filehandle*/
-      (ctx[0]?.name || "") + ""
+  // src/workingfile.js
+  var sutra;
+  var texturl = "";
+  var filehandle;
+  var pickerOpts = {
+    types: [{ description: "Offtext", accept: { "off/*": [".off"] } }],
+    excludeAcceptAllOption: true,
+    multiple: false
+  };
+  var workingfile;
+  var loadText = (text2, fn) => {
+    maxline.set(loadCMText(text2));
+    setCursorLine(parseInt(localStorage.getItem("aligner_" + fn)) || 1);
+  };
+  var openOff = async () => {
+    const filehandles = await window.showOpenFilePicker(pickerOpts);
+    filehandle = filehandles[0];
+    const fn = filehandle.name;
+    filename.set(fn);
+    const m4 = fn.match(/ql([\da-z]+)/);
+    if (!m4)
+      return;
+    loadSutra(m4[1]);
+    workingfile = await filehandle.getFile();
+    const text2 = await workingfile.text();
+    localfile.set(true);
+    loadText(text2, fn);
+  };
+  var save = async () => {
+    if (!filehandle)
+      return;
+    if (await verifyPermission(filehandle, true)) {
+      const writable2 = await filehandle.createWritable();
+      await writable2.write(get_store_value(thecm).getValue());
+      await writable2.close();
+      dirty.set(false);
+      localStorage.setItem("aligner_" + filehandle.name, get_store_value(cursorline));
+    }
+  };
+  var loadSutra = async (id) => {
+    sutra = findSutra(id);
+    if (!sutra)
+      return;
+    if (document.location.protocol == "file:" || document.location.protocol == "http:") {
+      videoId.set("mp4/ql" + sutra.no + ".mp4");
+    } else {
+      videoId.set(sutra.youtube);
+    }
+    juan.set(1);
+    pb.set(1);
+    maxjuan.set(sutra.juanpage.length);
+    maxpage.set(sutra.juanpage[get_store_value(juan) - 1]);
+    if (document.location.protocol == "https") {
+      texturl = "https://raw.githubusercontent.com/accelon/longcang/off/main/ql" + sutra.no + ".off";
+    } else {
+      texturl = "off/ql" + sutra.no + ".off";
+    }
+    const resp = await fetch(texturl, { cache: "no-store" });
+    content = await resp.text();
+    loadCMText(content);
+  };
+
+  // src/toolbar.svelte
+  function get_each_context(ctx, list, i) {
+    const child_ctx = ctx.slice();
+    child_ctx[16] = list[i];
+    return child_ctx;
+  }
+  function create_if_block2(ctx) {
+    let select;
+    let option;
+    let mounted;
+    let dispose;
+    let each_value = sutras;
+    let each_blocks = [];
+    for (let i = 0; i < each_value.length; i += 1) {
+      each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    }
+    return {
+      c() {
+        select = element("select");
+        option = element("option");
+        option.textContent = "\u9078\u7D93";
+        for (let i = 0; i < each_blocks.length; i += 1) {
+          each_blocks[i].c();
+        }
+        option.__value = "\u9078\u7D93";
+        option.value = option.__value;
+      },
+      m(target, anchor) {
+        insert(target, select, anchor);
+        append(select, option);
+        for (let i = 0; i < each_blocks.length; i += 1) {
+          if (each_blocks[i]) {
+            each_blocks[i].m(select, null);
+          }
+        }
+        if (!mounted) {
+          dispose = listen(
+            select,
+            "change",
+            /*onSutra*/
+            ctx[11]
+          );
+          mounted = true;
+        }
+      },
+      p(ctx2, dirty2) {
+        if (dirty2 & /*sutras*/
+        0) {
+          each_value = sutras;
+          let i;
+          for (i = 0; i < each_value.length; i += 1) {
+            const child_ctx = get_each_context(ctx2, each_value, i);
+            if (each_blocks[i]) {
+              each_blocks[i].p(child_ctx, dirty2);
+            } else {
+              each_blocks[i] = create_each_block(child_ctx);
+              each_blocks[i].c();
+              each_blocks[i].m(select, null);
+            }
+          }
+          for (; i < each_blocks.length; i += 1) {
+            each_blocks[i].d(1);
+          }
+          each_blocks.length = each_value.length;
+        }
+      },
+      d(detaching) {
+        if (detaching)
+          detach(select);
+        destroy_each(each_blocks, detaching);
+        mounted = false;
+        dispose();
+      }
+    };
+  }
+  function create_each_block(ctx) {
+    let option;
+    let t_value = (
+      /*sutra*/
+      ctx[16].title + ""
     );
+    let t;
+    let option_id_value;
+    let option_value_value;
+    return {
+      c() {
+        option = element("option");
+        t = text(t_value);
+        attr(option, "id", option_id_value = /*sutra*/
+        ctx[16].no);
+        option.__value = option_value_value = /*sutra*/
+        ctx[16].title;
+        option.value = option.__value;
+      },
+      m(target, anchor) {
+        insert(target, option, anchor);
+        append(option, t);
+      },
+      p: noop,
+      d(detaching) {
+        if (detaching)
+          detach(option);
+      }
+    };
+  }
+  function create_fragment2(ctx) {
+    let span;
+    let t0;
+    let inputnumber0;
+    let t1;
+    let inputnumber1;
+    let t2;
+    let button0;
+    let t3;
+    let button0_disabled_value;
+    let t4;
+    let button1;
     let t5;
+    let button1_disabled_value;
+    let t6;
+    let inputnumber2;
+    let updating_value;
+    let t7;
+    let t8;
     let current;
     let mounted;
     let dispose;
-    function inputnumber_value_binding(value) {
-      ctx[7](value);
+    let if_block = !/*$localfile*/
+    ctx[2] && create_if_block2(ctx);
+    inputnumber0 = new inputnumber_default({
+      props: {
+        max: (
+          /*$maxjuan*/
+          ctx[3]
+        ),
+        value: (
+          /*$juan*/
+          ctx[1]
+        ),
+        onChange: (
+          /*onJuanChange*/
+          ctx[9]
+        )
+      }
+    });
+    inputnumber1 = new inputnumber_default({
+      props: {
+        max: (
+          /*$maxpage*/
+          ctx[4]
+        ),
+        value: (
+          /*$pb*/
+          ctx[0]
+        ),
+        onChange: (
+          /*onPageChange*/
+          ctx[10]
+        )
+      }
+    });
+    function inputnumber2_value_binding(value) {
+      ctx[13](value);
     }
-    let inputnumber_props = {
+    let inputnumber2_props = {
       onChange: setCursorLine,
       min: 1,
       max: (
-        /*max*/
-        ctx[1]
+        /*$maxline*/
+        ctx[7]
       )
     };
     if (
       /*$cursorline*/
-      ctx[2] !== void 0
+      ctx[6] !== void 0
     ) {
-      inputnumber_props.value = /*$cursorline*/
-      ctx[2];
+      inputnumber2_props.value = /*$cursorline*/
+      ctx[6];
     }
-    inputnumber = new inputnumber_default({ props: inputnumber_props });
-    binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
+    inputnumber2 = new inputnumber_default({ props: inputnumber2_props });
+    binding_callbacks.push(() => bind(inputnumber2, "value", inputnumber2_value_binding));
     return {
       c() {
+        span = element("span");
+        if (if_block)
+          if_block.c();
+        t0 = text("\n\u5377");
+        create_component(inputnumber0.$$.fragment);
+        t1 = text("\n\u9801");
+        create_component(inputnumber1.$$.fragment);
+        t2 = space();
         button0 = element("button");
-        t0 = text("\u{1F4C2}");
-        t1 = space();
-        button1 = element("button");
-        t2 = text("\u{1F4BE}");
-        t3 = space();
-        create_component(inputnumber.$$.fragment);
+        t3 = text("\u{1F4C2}");
         t4 = space();
-        t5 = text(t5_value);
+        button1 = element("button");
+        t5 = text("\u{1F4BE}");
+        t6 = space();
+        create_component(inputnumber2.$$.fragment);
+        t7 = space();
+        t8 = text(
+          /*$filename*/
+          ctx[8]
+        );
+        attr(span, "class", "Toolbar svelte-qni7of");
         button0.disabled = button0_disabled_value = /*$dirty*/
-        ctx[3] && /*filehandle*/
-        ctx[0];
+        ctx[5] && filename;
         attr(button0, "title", "alt-p");
         attr(button0, "class", "clickable");
         button1.disabled = button1_disabled_value = !/*$dirty*/
-        ctx[3] || !/*filehandle*/
-        ctx[0];
+        ctx[5] || !filename;
         attr(button1, "title", "alt-s");
       },
       m(target, anchor) {
+        insert(target, span, anchor);
+        if (if_block)
+          if_block.m(span, null);
+        append(span, t0);
+        mount_component(inputnumber0, span, null);
+        append(span, t1);
+        mount_component(inputnumber1, span, null);
+        insert(target, t2, anchor);
         insert(target, button0, anchor);
-        append(button0, t0);
-        insert(target, t1, anchor);
-        insert(target, button1, anchor);
-        append(button1, t2);
-        insert(target, t3, anchor);
-        mount_component(inputnumber, target, anchor);
+        append(button0, t3);
         insert(target, t4, anchor);
-        insert(target, t5, anchor);
+        insert(target, button1, anchor);
+        append(button1, t5);
+        insert(target, t6, anchor);
+        mount_component(inputnumber2, target, anchor);
+        insert(target, t7, anchor);
+        insert(target, t8, anchor);
         current = true;
         if (!mounted) {
           dispose = [
             listen(
-              window_1,
+              window,
               "keydown",
               /*handleKeydown*/
-              ctx[6]
+              ctx[12]
             ),
-            listen(
-              button0,
-              "click",
-              /*openOff*/
-              ctx[4]
-            ),
-            listen(
-              button1,
-              "click",
-              /*save*/
-              ctx[5]
-            )
+            listen(button0, "click", openOff),
+            listen(button1, "click", save)
           ];
           mounted = true;
         }
       },
       p(ctx2, [dirty2]) {
-        if (!current || dirty2 & /*$dirty, filehandle*/
-        9 && button0_disabled_value !== (button0_disabled_value = /*$dirty*/
-        ctx2[3] && /*filehandle*/
-        ctx2[0])) {
+        if (!/*$localfile*/
+        ctx2[2]) {
+          if (if_block) {
+            if_block.p(ctx2, dirty2);
+          } else {
+            if_block = create_if_block2(ctx2);
+            if_block.c();
+            if_block.m(span, t0);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
+        const inputnumber0_changes = {};
+        if (dirty2 & /*$maxjuan*/
+        8)
+          inputnumber0_changes.max = /*$maxjuan*/
+          ctx2[3];
+        if (dirty2 & /*$juan*/
+        2)
+          inputnumber0_changes.value = /*$juan*/
+          ctx2[1];
+        inputnumber0.$set(inputnumber0_changes);
+        const inputnumber1_changes = {};
+        if (dirty2 & /*$maxpage*/
+        16)
+          inputnumber1_changes.max = /*$maxpage*/
+          ctx2[4];
+        if (dirty2 & /*$pb*/
+        1)
+          inputnumber1_changes.value = /*$pb*/
+          ctx2[0];
+        inputnumber1.$set(inputnumber1_changes);
+        if (!current || dirty2 & /*$dirty*/
+        32 && button0_disabled_value !== (button0_disabled_value = /*$dirty*/
+        ctx2[5] && filename)) {
           button0.disabled = button0_disabled_value;
         }
-        if (!current || dirty2 & /*$dirty, filehandle*/
-        9 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
-        ctx2[3] || !/*filehandle*/
-        ctx2[0])) {
+        if (!current || dirty2 & /*$dirty*/
+        32 && button1_disabled_value !== (button1_disabled_value = !/*$dirty*/
+        ctx2[5] || !filename)) {
           button1.disabled = button1_disabled_value;
         }
-        const inputnumber_changes = {};
-        if (dirty2 & /*max*/
-        2)
-          inputnumber_changes.max = /*max*/
-          ctx2[1];
+        const inputnumber2_changes = {};
+        if (dirty2 & /*$maxline*/
+        128)
+          inputnumber2_changes.max = /*$maxline*/
+          ctx2[7];
         if (!updating_value && dirty2 & /*$cursorline*/
-        4) {
+        64) {
           updating_value = true;
-          inputnumber_changes.value = /*$cursorline*/
-          ctx2[2];
+          inputnumber2_changes.value = /*$cursorline*/
+          ctx2[6];
           add_flush_callback(() => updating_value = false);
         }
-        inputnumber.$set(inputnumber_changes);
-        if ((!current || dirty2 & /*filehandle*/
-        1) && t5_value !== (t5_value = /*filehandle*/
-        (ctx2[0]?.name || "") + ""))
-          set_data(t5, t5_value);
+        inputnumber2.$set(inputnumber2_changes);
+        if (!current || dirty2 & /*$filename*/
+        256)
+          set_data(
+            t8,
+            /*$filename*/
+            ctx2[8]
+          );
       },
       i(local) {
         if (current)
           return;
-        transition_in(inputnumber.$$.fragment, local);
+        transition_in(inputnumber0.$$.fragment, local);
+        transition_in(inputnumber1.$$.fragment, local);
+        transition_in(inputnumber2.$$.fragment, local);
         current = true;
       },
       o(local) {
-        transition_out(inputnumber.$$.fragment, local);
+        transition_out(inputnumber0.$$.fragment, local);
+        transition_out(inputnumber1.$$.fragment, local);
+        transition_out(inputnumber2.$$.fragment, local);
         current = false;
       },
       d(detaching) {
         if (detaching)
+          detach(span);
+        if (if_block)
+          if_block.d();
+        destroy_component(inputnumber0);
+        destroy_component(inputnumber1);
+        if (detaching)
+          detach(t2);
+        if (detaching)
           detach(button0);
-        if (detaching)
-          detach(t1);
-        if (detaching)
-          detach(button1);
-        if (detaching)
-          detach(t3);
-        destroy_component(inputnumber, detaching);
         if (detaching)
           detach(t4);
         if (detaching)
-          detach(t5);
+          detach(button1);
+        if (detaching)
+          detach(t6);
+        destroy_component(inputnumber2, detaching);
+        if (detaching)
+          detach(t7);
+        if (detaching)
+          detach(t8);
         mounted = false;
         run_all(dispose);
       }
     };
   }
-  function instance4($$self, $$props, $$invalidate) {
-    let $cursorline;
+  function instance3($$self, $$props, $$invalidate) {
+    let $pb;
+    let $juan;
     let $thecm;
+    let $localfile;
+    let $maxjuan;
+    let $maxpage;
     let $dirty;
-    component_subscribe($$self, cursorline, ($$value) => $$invalidate(2, $cursorline = $$value));
-    component_subscribe($$self, thecm, ($$value) => $$invalidate(9, $thecm = $$value));
-    component_subscribe($$self, dirty, ($$value) => $$invalidate(3, $dirty = $$value));
-    const pickerOpts = {
-      types: [
-        {
-          description: "Offtext",
-          accept: { "off/*": [".off"] }
-        }
-      ],
-      excludeAcceptAllOption: true,
-      multiple: false
+    let $cursorline;
+    let $maxline;
+    let $filename;
+    component_subscribe($$self, pb, ($$value) => $$invalidate(0, $pb = $$value));
+    component_subscribe($$self, juan, ($$value) => $$invalidate(1, $juan = $$value));
+    component_subscribe($$self, thecm, ($$value) => $$invalidate(14, $thecm = $$value));
+    component_subscribe($$self, localfile, ($$value) => $$invalidate(2, $localfile = $$value));
+    component_subscribe($$self, maxjuan, ($$value) => $$invalidate(3, $maxjuan = $$value));
+    component_subscribe($$self, maxpage, ($$value) => $$invalidate(4, $maxpage = $$value));
+    component_subscribe($$self, dirty, ($$value) => $$invalidate(5, $dirty = $$value));
+    component_subscribe($$self, cursorline, ($$value) => $$invalidate(6, $cursorline = $$value));
+    component_subscribe($$self, maxline, ($$value) => $$invalidate(7, $maxline = $$value));
+    component_subscribe($$self, filename, ($$value) => $$invalidate(8, $filename = $$value));
+    const onJuanChange = (v) => {
+      maxjuan.set(sutra.juanpage.length);
+      set_store_value(pb, $pb = 1, $pb);
+      set_store_value(juan, $juan = v, $juan);
+      maxpage.set(sutra.juanpage[v - 1]);
+      onPageChange($pb);
+      return v;
     };
-    let workingfile, filehandle = null, max = 0;
-    const loadText = (text2, filename) => {
-      $$invalidate(1, max = loadCMText(text2));
-      setCursorLine(parseInt(localStorage.getItem("aligner_" + filename)) || 1);
+    const onPageChange = (v) => {
+      const line = lineOfJuanPb($juan, v);
+      if (line <= $thecm.lineCount())
+        $thecm.setCursor({ line });
+      pb.set(v);
+      return v;
     };
-    async function openOff() {
-      const filehandles = await window.showOpenFilePicker(pickerOpts);
-      $$invalidate(0, filehandle = filehandles[0]);
-      workingfile = await filehandle.getFile();
-      const text2 = await workingfile.text();
-      loadText(text2, filehandle.name);
-    }
-    async function save() {
-      if (!filehandle)
-        return;
-      if (await verifyPermission(filehandle, true)) {
-        const writable2 = await filehandle.createWritable();
-        await writable2.write($thecm.getValue());
-        await writable2.close();
-        dirty.set(false);
-        localStorage.setItem("aligner_" + filehandle.name, $cursorline);
+    const seekVideo = (j2, p) => {
+      let juanstart = 0;
+      for (let i = 0; i < j2 - 1; i++) {
+        juanstart += sutra.juanpage[i] - 1;
       }
-    }
+      const seek = juanstart + (p - 1) >> 1;
+      videoSeekTo.set(seek);
+    };
+    const onSutra = async (e) => {
+      const option = e.target.selectedOptions[0];
+      await loadSutra(option.id);
+    };
     function handleKeydown(evt) {
       const key = evt.key.toLowerCase();
       const alt = evt.altKey;
@@ -4536,39 +4987,48 @@
         save();
       }
     }
-    const tryit = async () => {
-      const response = await fetch("dn3.yh.off");
-      loadText(await response.text(), "dn3.yh.off");
-    };
-    function inputnumber_value_binding(value) {
+    function inputnumber2_value_binding(value) {
       $cursorline = value;
       cursorline.set($cursorline);
     }
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$juan, $pb*/
+      3) {
+        $:
+          seekVideo($juan, $pb);
+      }
+    };
     return [
-      filehandle,
-      max,
-      $cursorline,
+      $pb,
+      $juan,
+      $localfile,
+      $maxjuan,
+      $maxpage,
       $dirty,
-      openOff,
-      save,
+      $cursorline,
+      $maxline,
+      $filename,
+      onJuanChange,
+      onPageChange,
+      onSutra,
       handleKeydown,
-      inputnumber_value_binding
+      inputnumber2_value_binding
     ];
   }
-  var Editortoolbar = class extends SvelteComponent {
+  var Toolbar = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance4, create_fragment3, safe_not_equal, {});
+      init(this, options, instance3, create_fragment2, safe_not_equal, {});
     }
   };
-  var editortoolbar_default = Editortoolbar;
+  var toolbar_default = Toolbar;
 
   // src/3rdparty/splitpane.svelte
   var get_b_slot_changes = (dirty2) => ({});
   var get_b_slot_context = (ctx) => ({});
   var get_a_slot_changes = (dirty2) => ({});
   var get_a_slot_context = (ctx) => ({});
-  function create_if_block2(ctx) {
+  function create_if_block3(ctx) {
     let div;
     return {
       c() {
@@ -4584,7 +5044,7 @@
       }
     };
   }
-  function create_fragment4(ctx) {
+  function create_fragment3(ctx) {
     let div3;
     let div0;
     let div0_style_value;
@@ -4627,7 +5087,7 @@
     );
     let if_block = (
       /*dragging*/
-      ctx[6] && create_if_block2(ctx)
+      ctx[6] && create_if_block3(ctx)
     );
     return {
       c() {
@@ -4799,7 +5259,7 @@
         ) {
           if (if_block) {
           } else {
-            if_block = create_if_block2(ctx2);
+            if_block = create_if_block3(ctx2);
             if_block.c();
             if_block.m(if_block_anchor.parentNode, if_block_anchor);
           }
@@ -4840,7 +5300,7 @@
       }
     };
   }
-  function instance5($$self, $$props, $$invalidate) {
+  function instance4($$self, $$props, $$invalidate) {
     let size;
     let side;
     let dimension;
@@ -4992,7 +5452,7 @@
   var Splitpane = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance5, create_fragment4, safe_not_equal, {
+      init(this, options, instance4, create_fragment3, safe_not_equal, {
         onChange: 13,
         type: 1,
         pos: 0,
@@ -5003,45 +5463,17 @@
   };
   var splitpane_default = Splitpane;
 
-  // src/videoviewer.svelte
-  function create_fragment5(ctx) {
+  // src/youtubeviewer.svelte
+  function create_fragment4(ctx) {
     let div1;
-    let video_1;
-    let source;
-    let source_src_value;
-    let t0;
-    let br;
-    let t1;
-    let div0;
-    let canvas_1;
     return {
       c() {
         div1 = element("div");
-        video_1 = element("video");
-        source = element("source");
-        t0 = space();
-        br = element("br");
-        t1 = space();
-        div0 = element("div");
-        canvas_1 = element("canvas");
-        if (!src_url_equal(source.src, source_src_value = /*src*/
-        ctx[2]))
-          attr(source, "src", source_src_value);
-        attr(source, "type", "video/mp4");
-        attr(video_1, "width", "1");
-        set_style(div0, "height", "95vh");
+        div1.innerHTML = `<div id="player"></div>`;
+        set_style(div1, "height", "100vh");
       },
       m(target, anchor) {
         insert(target, div1, anchor);
-        append(div1, video_1);
-        append(video_1, source);
-        ctx[3](video_1);
-        append(div1, t0);
-        append(div1, br);
-        append(div1, t1);
-        append(div1, div0);
-        append(div0, canvas_1);
-        ctx[4](canvas_1);
       },
       p: noop,
       i: noop,
@@ -5049,47 +5481,316 @@
       d(detaching) {
         if (detaching)
           detach(div1);
+      }
+    };
+  }
+  var helpVideoId = "2TskfhLQ9Jk";
+  function onPlayerReady(e) {
+    e.target.mute().playVideo();
+    setTimeout(
+      async () => {
+        e.target.pauseVideo();
+      },
+      1e3
+    );
+  }
+  function instance5($$self, $$props, $$invalidate) {
+    let $videoSeekTo;
+    let $videoId;
+    component_subscribe($$self, videoSeekTo, ($$value) => $$invalidate(0, $videoSeekTo = $$value));
+    component_subscribe($$self, videoId, ($$value) => $$invalidate(1, $videoId = $$value));
+    var player;
+    window.onYTReady = () => {
+      player = new YT.Player(
+        "player",
+        {
+          height: "100%",
+          // 高度預設值為390，css會調成responsive
+          // width: '640', // 寬度預設值為640，css會調成responsive
+          videoId: helpVideoId,
+          playerVars: { controls: 0, disablekb: 1, rel: 0 },
+          events: { "onReady": onPlayerReady }
+        }
+      );
+    };
+    const loadVideo = (id) => {
+      if (!id)
+        return;
+      player.loadVideoById(id);
+      setTimeout(
+        () => {
+          player.pauseVideo();
+        },
+        2e3
+      );
+    };
+    const seekTo = (t) => {
+      player && player.seekTo(t);
+    };
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$videoId*/
+      2) {
+        $:
+          loadVideo($videoId);
+      }
+      if ($$self.$$.dirty & /*$videoSeekTo*/
+      1) {
+        $:
+          seekTo($videoSeekTo);
+      }
+    };
+    return [$videoSeekTo, $videoId];
+  }
+  var Youtubeviewer = class extends SvelteComponent {
+    constructor(options) {
+      super();
+      init(this, options, instance5, create_fragment4, safe_not_equal, {});
+    }
+  };
+  var youtubeviewer_default = Youtubeviewer;
+
+  // src/videoviewer.svelte
+  function create_if_block4(ctx) {
+    let previous_key = (
+      /*$videoId*/
+      ctx[1]
+    );
+    let key_block_anchor;
+    let current;
+    let key_block = create_key_block(ctx);
+    return {
+      c() {
+        key_block.c();
+        key_block_anchor = empty();
+      },
+      m(target, anchor) {
+        key_block.m(target, anchor);
+        insert(target, key_block_anchor, anchor);
+        current = true;
+      },
+      p(ctx2, dirty2) {
+        if (dirty2 & /*$videoId*/
+        2 && safe_not_equal(previous_key, previous_key = /*$videoId*/
+        ctx2[1])) {
+          group_outros();
+          transition_out(key_block, 1, 1, noop);
+          check_outros();
+          key_block = create_key_block(ctx2);
+          key_block.c();
+          transition_in(key_block, 1);
+          key_block.m(key_block_anchor.parentNode, key_block_anchor);
+        } else {
+          key_block.p(ctx2, dirty2);
+        }
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(key_block);
+        current = true;
+      },
+      o(local) {
+        transition_out(key_block);
+        current = false;
+      },
+      d(detaching) {
+        if (detaching)
+          detach(key_block_anchor);
+        key_block.d(detaching);
+      }
+    };
+  }
+  function create_else_block(ctx) {
+    let youtubeviewer;
+    let current;
+    youtubeviewer = new youtubeviewer_default({});
+    return {
+      c() {
+        create_component(youtubeviewer.$$.fragment);
+      },
+      m(target, anchor) {
+        mount_component(youtubeviewer, target, anchor);
+        current = true;
+      },
+      p: noop,
+      i(local) {
+        if (current)
+          return;
+        transition_in(youtubeviewer.$$.fragment, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(youtubeviewer.$$.fragment, local);
+        current = false;
+      },
+      d(detaching) {
+        destroy_component(youtubeviewer, detaching);
+      }
+    };
+  }
+  function create_if_block_12(ctx) {
+    let video;
+    let source;
+    let source_src_value;
+    return {
+      c() {
+        video = element("video");
+        source = element("source");
+        if (!src_url_equal(source.src, source_src_value = /*$videoId*/
+        ctx[1]))
+          attr(source, "src", source_src_value);
+        attr(source, "type", "video/mp4");
+        attr(video, "class", "svelte-1yzr70e");
+      },
+      m(target, anchor) {
+        insert(target, video, anchor);
+        append(video, source);
+        ctx[3](video);
+      },
+      p(ctx2, dirty2) {
+        if (dirty2 & /*$videoId*/
+        2 && !src_url_equal(source.src, source_src_value = /*$videoId*/
+        ctx2[1])) {
+          attr(source, "src", source_src_value);
+        }
+      },
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching)
+          detach(video);
         ctx[3](null);
-        ctx[4](null);
+      }
+    };
+  }
+  function create_key_block(ctx) {
+    let current_block_type_index;
+    let if_block;
+    let if_block_anchor;
+    let current;
+    const if_block_creators = [create_if_block_12, create_else_block];
+    const if_blocks = [];
+    function select_block_type(ctx2, dirty2) {
+      if (
+        /*$videoId*/
+        ctx2[1]
+      )
+        return 0;
+      return 1;
+    }
+    current_block_type_index = select_block_type(ctx, -1);
+    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    return {
+      c() {
+        if_block.c();
+        if_block_anchor = empty();
+      },
+      m(target, anchor) {
+        if_blocks[current_block_type_index].m(target, anchor);
+        insert(target, if_block_anchor, anchor);
+        current = true;
+      },
+      p(ctx2, dirty2) {
+        let previous_block_index = current_block_type_index;
+        current_block_type_index = select_block_type(ctx2, dirty2);
+        if (current_block_type_index === previous_block_index) {
+          if_blocks[current_block_type_index].p(ctx2, dirty2);
+        } else {
+          group_outros();
+          transition_out(if_blocks[previous_block_index], 1, 1, () => {
+            if_blocks[previous_block_index] = null;
+          });
+          check_outros();
+          if_block = if_blocks[current_block_type_index];
+          if (!if_block) {
+            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+            if_block.c();
+          } else {
+            if_block.p(ctx2, dirty2);
+          }
+          transition_in(if_block, 1);
+          if_block.m(if_block_anchor.parentNode, if_block_anchor);
+        }
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(if_block);
+        current = true;
+      },
+      o(local) {
+        transition_out(if_block);
+        current = false;
+      },
+      d(detaching) {
+        if_blocks[current_block_type_index].d(detaching);
+        if (detaching)
+          detach(if_block_anchor);
+      }
+    };
+  }
+  function create_fragment5(ctx) {
+    let if_block_anchor;
+    let current;
+    let if_block = (document.location.protocol == "file:" || document.location.protocol == "http:") && create_if_block4(ctx);
+    return {
+      c() {
+        if (if_block)
+          if_block.c();
+        if_block_anchor = empty();
+      },
+      m(target, anchor) {
+        if (if_block)
+          if_block.m(target, anchor);
+        insert(target, if_block_anchor, anchor);
+        current = true;
+      },
+      p(ctx2, [dirty2]) {
+        if (document.location.protocol == "file:" || document.location.protocol == "http:")
+          if_block.p(ctx2, dirty2);
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(if_block);
+        current = true;
+      },
+      o(local) {
+        transition_out(if_block);
+        current = false;
+      },
+      d(detaching) {
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach(if_block_anchor);
       }
     };
   }
   function instance6($$self, $$props, $$invalidate) {
-    let canvas, video;
-    const production = ~document.location.href.indexOf("https");
-    const src = production ? "http://www.youtube.com/embed/9U9ddWjH2AQ" : "mp4/ql541.mp4";
-    const draw = () => {
-      const ctx = canvas.getContext("2d");
-      ctx.width = video.videoWidth;
-      ctx.height = video.videoHeight;
-      $$invalidate(0, canvas.style.height = "100%", canvas);
-      $$invalidate(0, canvas.width = video.videoWidth, canvas);
-      $$invalidate(0, canvas.height = video.videoHeight, canvas);
-      console.log(video.videoHeight, video.videoWidth);
-      ctx.drawImage(video, 0, 0, ctx.width, ctx.height);
+    let $videoSeekTo;
+    let $videoId;
+    component_subscribe($$self, videoSeekTo, ($$value) => $$invalidate(2, $videoSeekTo = $$value));
+    component_subscribe($$self, videoId, ($$value) => $$invalidate(1, $videoId = $$value));
+    let player;
+    const seekTo = (t) => {
+      if (player)
+        $$invalidate(0, player.currentTime = t + 0.2, player);
     };
-    onMount(() => {
-      $$invalidate(
-        1,
-        video.oncanplay = () => {
-          setTimeout(draw, 500);
-        },
-        video
-      );
-    });
-    function video_1_binding($$value) {
+    function video_binding($$value) {
       binding_callbacks[$$value ? "unshift" : "push"](() => {
-        video = $$value;
-        $$invalidate(1, video);
+        player = $$value;
+        $$invalidate(0, player);
       });
     }
-    function canvas_1_binding($$value) {
-      binding_callbacks[$$value ? "unshift" : "push"](() => {
-        canvas = $$value;
-        $$invalidate(0, canvas);
-      });
-    }
-    return [canvas, video, src, video_1_binding, canvas_1_binding];
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$videoSeekTo*/
+      4) {
+        $:
+          seekTo($videoSeekTo);
+      }
+    };
+    return [player, $videoId, $videoSeekTo, video_binding];
   }
   var Videoviewer = class extends SvelteComponent {
     constructor(options) {
@@ -5098,6 +5799,108 @@
     }
   };
   var videoviewer_default = Videoviewer;
+
+  // src/replacing.svelte
+  function create_fragment6(ctx) {
+    let input;
+    let button;
+    let mounted;
+    let dispose;
+    return {
+      c() {
+        input = element("input");
+        button = element("button");
+        button.textContent = "Apply";
+        attr(input, "class", "svelte-18chlde");
+      },
+      m(target, anchor) {
+        insert(target, input, anchor);
+        set_input_value(
+          input,
+          /*value*/
+          ctx[0]
+        );
+        insert(target, button, anchor);
+        if (!mounted) {
+          dispose = [
+            listen(
+              input,
+              "input",
+              /*input_input_handler*/
+              ctx[3]
+            ),
+            listen(
+              button,
+              "click",
+              /*applychange*/
+              ctx[1]
+            )
+          ];
+          mounted = true;
+        }
+      },
+      p(ctx2, [dirty2]) {
+        if (dirty2 & /*value*/
+        1 && input.value !== /*value*/
+        ctx2[0]) {
+          set_input_value(
+            input,
+            /*value*/
+            ctx2[0]
+          );
+        }
+      },
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching)
+          detach(input);
+        if (detaching)
+          detach(button);
+        mounted = false;
+        run_all(dispose);
+      }
+    };
+  }
+  function instance7($$self, $$props, $$invalidate) {
+    let value;
+    let $replacing;
+    let $thecm;
+    component_subscribe($$self, replacing, ($$value) => $$invalidate(2, $replacing = $$value));
+    component_subscribe($$self, thecm, ($$value) => $$invalidate(4, $thecm = $$value));
+    const applychange = () => {
+      const cm = $thecm;
+      const sel = cm.getSelection();
+      const cursor = cm.getCursor();
+      if (sel !== value) {
+        touchtext(() => {
+          cm.replaceSelection(value);
+          markOfftext(cm, cursor.line);
+        });
+        cm.setSelection(cm.getCursor());
+        replacing.set("");
+      }
+    };
+    function input_input_handler() {
+      value = this.value;
+      $$invalidate(0, value), $$invalidate(2, $replacing);
+    }
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$replacing*/
+      4) {
+        $:
+          $$invalidate(0, value = $replacing);
+      }
+    };
+    return [value, applychange, $replacing, input_input_handler];
+  }
+  var Replacing = class extends SvelteComponent {
+    constructor(options) {
+      super();
+      init(this, options, instance7, create_fragment6, safe_not_equal, {});
+    }
+  };
+  var replacing_default = Replacing;
 
   // src/app.svelte
   function create_a_slot(ctx) {
@@ -5137,65 +5940,144 @@
       }
     };
   }
-  function create_b_slot(ctx) {
-    let div1;
+  function create_else_block2(ctx) {
     let toolbar;
-    let t0;
-    let editortoolbar;
-    let t1;
-    let div0;
     let current;
     toolbar = new toolbar_default({});
-    editortoolbar = new editortoolbar_default({});
+    return {
+      c() {
+        create_component(toolbar.$$.fragment);
+      },
+      m(target, anchor) {
+        mount_component(toolbar, target, anchor);
+        current = true;
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(toolbar.$$.fragment, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(toolbar.$$.fragment, local);
+        current = false;
+      },
+      d(detaching) {
+        destroy_component(toolbar, detaching);
+      }
+    };
+  }
+  function create_if_block5(ctx) {
+    let replacing_1;
+    let current;
+    replacing_1 = new replacing_default({});
+    return {
+      c() {
+        create_component(replacing_1.$$.fragment);
+      },
+      m(target, anchor) {
+        mount_component(replacing_1, target, anchor);
+        current = true;
+      },
+      i(local) {
+        if (current)
+          return;
+        transition_in(replacing_1.$$.fragment, local);
+        current = true;
+      },
+      o(local) {
+        transition_out(replacing_1.$$.fragment, local);
+        current = false;
+      },
+      d(detaching) {
+        destroy_component(replacing_1, detaching);
+      }
+    };
+  }
+  function create_b_slot(ctx) {
+    let div1;
+    let show_if;
+    let current_block_type_index;
+    let if_block;
+    let t;
+    let div0;
+    let current;
+    const if_block_creators = [create_if_block5, create_else_block2];
+    const if_blocks = [];
+    function select_block_type(ctx2, dirty2) {
+      if (dirty2 & /*$replacing*/
+      4)
+        show_if = null;
+      if (show_if == null)
+        show_if = !!/*$replacing*/
+        (ctx2[2] && !~/*$replacing*/
+        ctx2[2].indexOf("\n"));
+      if (show_if)
+        return 0;
+      return 1;
+    }
+    current_block_type_index = select_block_type(ctx, -1);
+    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     return {
       c() {
         div1 = element("div");
-        create_component(toolbar.$$.fragment);
-        t0 = space();
-        create_component(editortoolbar.$$.fragment);
-        t1 = space();
+        if_block.c();
+        t = space();
         div0 = element("div");
         attr(div1, "slot", "b");
       },
       m(target, anchor) {
         insert(target, div1, anchor);
-        mount_component(toolbar, div1, null);
-        append(div1, t0);
-        mount_component(editortoolbar, div1, null);
-        append(div1, t1);
+        if_blocks[current_block_type_index].m(div1, null);
+        append(div1, t);
         append(div1, div0);
-        ctx[2](div0);
+        ctx[3](div0);
         current = true;
       },
-      p: noop,
+      p(ctx2, dirty2) {
+        let previous_block_index = current_block_type_index;
+        current_block_type_index = select_block_type(ctx2, dirty2);
+        if (current_block_type_index !== previous_block_index) {
+          group_outros();
+          transition_out(if_blocks[previous_block_index], 1, 1, () => {
+            if_blocks[previous_block_index] = null;
+          });
+          check_outros();
+          if_block = if_blocks[current_block_type_index];
+          if (!if_block) {
+            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+            if_block.c();
+          } else {
+          }
+          transition_in(if_block, 1);
+          if_block.m(div1, t);
+        }
+      },
       i(local) {
         if (current)
           return;
-        transition_in(toolbar.$$.fragment, local);
-        transition_in(editortoolbar.$$.fragment, local);
+        transition_in(if_block);
         current = true;
       },
       o(local) {
-        transition_out(toolbar.$$.fragment, local);
-        transition_out(editortoolbar.$$.fragment, local);
+        transition_out(if_block);
         current = false;
       },
       d(detaching) {
         if (detaching)
           detach(div1);
-        destroy_component(toolbar);
-        destroy_component(editortoolbar);
-        ctx[2](null);
+        if_blocks[current_block_type_index].d();
+        ctx[3](null);
       }
     };
   }
-  function create_fragment6(ctx) {
+  function create_fragment7(ctx) {
     let div;
     let splitpane;
     let updating_pos;
     let current;
     function splitpane_pos_binding(value) {
-      ctx[3](value);
+      ctx[4](value);
     }
     let splitpane_props = {
       type: "horizontal",
@@ -5226,8 +6108,8 @@
       },
       p(ctx2, [dirty2]) {
         const splitpane_changes = {};
-        if (dirty2 & /*$$scope, editor*/
-        17) {
+        if (dirty2 & /*$$scope, editor, $replacing*/
+        37) {
           splitpane_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         if (!updating_pos && dirty2 & /*pos*/
@@ -5256,21 +6138,26 @@
       }
     };
   }
-  function instance7($$self, $$props, $$invalidate) {
+  function instance8($$self, $$props, $$invalidate) {
+    let $replacing;
+    component_subscribe($$self, replacing, ($$value) => $$invalidate(2, $replacing = $$value));
     let editor;
-    let pos = 40;
+    let pos = 50;
     onMount(() => {
       const cm = new CodeMirror(
         editor,
         {
           value: "",
-          lineWrapping: true,
+          lineWrapping: false,
           theme: "ambiance",
           styleActiveLine: true
         }
       );
       thecm.set(cm);
-      get_store_value(thecm).on("cursorActivity", (cm3, obj) => cursorActivity(cm3));
+      cm.on("cursorActivity", cursorActivity);
+      cm.on("beforeChange", beforeChange);
+      cm.on("change", afterChange);
+      cm.on("keydown", keyDown);
       loadCMText("\u5DE5\u4F5C\u5340");
     });
     function div0_binding($$value) {
@@ -5283,12 +6170,12 @@
       pos = value;
       $$invalidate(1, pos);
     }
-    return [editor, pos, div0_binding, splitpane_pos_binding];
+    return [editor, pos, $replacing, div0_binding, splitpane_pos_binding];
   }
   var App = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance7, create_fragment6, safe_not_equal, {});
+      init(this, options, instance8, create_fragment7, safe_not_equal, {});
     }
   };
   var app_default = App;

@@ -97,14 +97,14 @@
   bottom: 0;
 }
 
-/* fakecss:D:/2023/folioaligner/src/help.esbuild-svelte-fake-css */
-a.svelte-npiq7h {
-  color: lightblue;
+/* fakecss:D:/2023/folioaligner/src/videoviewer.esbuild-svelte-fake-css */
+video.svelte-1yzr70e {
+  height: 100vh;
 }
 
-/* fakecss:D:/2023/folioaligner/src/imageviewer.esbuild-svelte-fake-css */
-.image.svelte-17yooot {
-  height: 95vh;
+/* fakecss:D:/2023/folioaligner/src/replacing.esbuild-svelte-fake-css */
+input.svelte-18chlde {
+  font-size: 100%;
 }
 
 /* fakecss:D:/2023/folioaligner/src/app.esbuild-svelte-fake-css */
