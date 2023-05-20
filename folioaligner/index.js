@@ -4469,6 +4469,7 @@
   };
   var keyDown = (cm, e) => {
     const marks = cm.doc.findMarksAt(cm.getCursor());
+    cm.toggleOverwrite(false);
     if ((marks.length == 0 || marks[0].className !== "pb") && e.key == "Insert") {
       const cursor = cm.getCursor();
       const linetext = cm.getLine(cursor.line);
