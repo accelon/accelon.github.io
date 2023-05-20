@@ -5498,7 +5498,7 @@
     component_subscribe($$self, player, ($$value) => $$invalidate(2, $player = $$value));
     setTimeout(
       () => {
-        const helpVideoId = "9U9ddWjH2AQ";
+        const helpVideoId = "7DMXmf4v3UQ";
         const pylr = new YT.Player(
           "player",
           {
