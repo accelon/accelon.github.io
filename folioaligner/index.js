@@ -1004,7 +1004,7 @@
     if (!str)
       return false;
     const cp = str.charCodeAt(0);
-    return cp >= 12289 && cp <= 12319 || cp > 65280;
+    return cp >= 12289 && cp <= 12319 || cp > 65280 || cp >= 65040 && cp <= 65131;
   };
 
   // ../ptk/utils/bopomofo.ts
@@ -5511,9 +5511,10 @@
               events: { "onReady": onPlayerReady }
             }
           );
+          console.log("create youtube player");
           player.set(pylr);
         },
-        3e3
+        5e3
       );
     };
     const loadVideo = (id) => {
