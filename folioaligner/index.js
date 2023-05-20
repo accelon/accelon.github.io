@@ -5497,20 +5497,24 @@
     component_subscribe($$self, videoId, ($$value) => $$invalidate(1, $videoId = $$value));
     component_subscribe($$self, player, ($$value) => $$invalidate(2, $player = $$value));
     window.onYTReady = () => {
-      const helpVideoId = "2TskfhLQ9Jk";
-      const pylr = new YT.Player(
-        "player",
-        {
-          height: "100%",
-          // 高度預設值為390，css會調成responsive
-          // width: '640', // 寬度預設值為640，css會調成responsive
-          videoId: helpVideoId,
-          playerVars: { controls: 0, disablekb: 1, rel: 0 },
-          events: { "onReady": onPlayerReady }
-        }
+      setTimeout(
+        () => {
+          const helpVideoId = "9U9ddWjH2AQ";
+          const pylr = new YT.Player(
+            "player",
+            {
+              height: "100%",
+              // 高度預設值為390，css會調成responsive
+              // width: '640', // 寬度預設值為640，css會調成responsive
+              videoId: helpVideoId,
+              playerVars: { controls: 0, disablekb: 1, rel: 0 },
+              events: { "onReady": onPlayerReady }
+            }
+          );
+          player.set(pylr);
+        },
+        3e3
       );
-      player.set(pylr);
-      console.log($player);
     };
     const loadVideo = (id) => {
       if (!id)
