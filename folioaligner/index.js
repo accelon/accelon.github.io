@@ -5498,30 +5498,22 @@
     component_subscribe($$self, player, ($$value) => $$invalidate(2, $player = $$value));
     setTimeout(
       () => {
-        window.onYTReady = () => {
-          console.log("install onYTReady");
-          setTimeout(
-            () => {
-              const helpVideoId = "9U9ddWjH2AQ";
-              const pylr = new YT.Player(
-                "player",
-                {
-                  height: "100%",
-                  // 高度預設值為390，css會調成responsive
-                  // width: '640', // 寬度預設值為640，css會調成responsive
-                  videoId: helpVideoId,
-                  playerVars: { controls: 0, disablekb: 1, rel: 0 },
-                  events: { "onReady": onPlayerReady }
-                }
-              );
-              console.log("create youtube player");
-              player.set(pylr);
-            },
-            2e3
-          );
-        };
+        const helpVideoId = "9U9ddWjH2AQ";
+        const pylr = new YT.Player(
+          "player",
+          {
+            height: "100%",
+            // 高度預設值為390，css會調成responsive
+            // width: '640', // 寬度預設值為640，css會調成responsive
+            videoId: helpVideoId,
+            playerVars: { controls: 0, disablekb: 1, rel: 0 },
+            events: { "onReady": onPlayerReady }
+          }
+        );
+        console.log("create youtube player");
+        player.set(pylr);
       },
-      2e3
+      3e3
     );
     const loadVideo = (id) => {
       if (!id)
