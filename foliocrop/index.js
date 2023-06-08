@@ -2422,7 +2422,7 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">Folio Crop \u5716\u6846\u88C1\u5207\u5C0D\u9F4A</span> 2023.5.17 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.8 <a href="https://www.youtube.com/watch?v=UvtJITtLz1c" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u65BD\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002\u2192
