@@ -571,13 +571,14 @@
   var pageframe = writable(3);
   var selectedframe = writable(0);
   var fileprefix = writable("");
+  var framefile = writable(null);
   var verticalstrip = writable(5);
   var horizontalstrip = writable(17);
   var defaultframe;
   var setTemplate = (name) => {
     if (name == "shandong") {
       defaultframe = function(idx) {
-        return [1030 * (2 - idx) + 186, 139, 950, 2180];
+        return [1030 * (2 - idx) + 186, 139, 950, 2120];
       };
       pageframe.set(3);
     } else if (name == "qindinglongcang") {
@@ -636,6 +637,19 @@
     document.body.appendChild(a);
     a.click();
   };
+  async function verifyPermission(fileHandle, readWrite = false) {
+    const options = {};
+    if (readWrite) {
+      options.mode = "readwrite";
+    }
+    if (await fileHandle.queryPermission(options) === "granted") {
+      return true;
+    }
+    if (await fileHandle.requestPermission(options) === "granted") {
+      return true;
+    }
+    return false;
+  }
 
   // src/working.js
   var { ZipReader, BlobReader } = zip;
@@ -676,6 +690,7 @@
     const zip2 = new ZipReader(new BlobReader(file));
     const entries = await zip2.getEntries();
     const out = [];
+    framefile.set(null);
     setTemplate("shandong");
     entries.forEach((entry) => {
       if (entry.filename.endsWith(".jpg")) {
@@ -733,6 +748,7 @@
     const filehandles = await window.showOpenFilePicker(jsonOpts);
     const file = await filehandles[0].getFile();
     const json = JSON.parse(await file.text());
+    framefile.set(filehandles[0]);
     if (json.length !== imgs.length) {
       alert("zip json missmatch");
       return;
@@ -742,12 +758,23 @@
     }
     images.set(imgs);
   };
-  var save = () => {
+  var save = async () => {
     selectimage(0);
     const data = genjson();
-    dirty.set(false);
-    const outfn = get_store_value(fileprefix) + ".json";
-    createBrowserDownload(outfn, data);
+    const file = get_store_value(framefile);
+    if (file) {
+      const ok = await verifyPermission(file, true);
+      if (ok) {
+        const writable2 = await file.createWritable();
+        await writable2.write(data);
+        await writable2.close();
+        dirty.set(false);
+      }
+    } else {
+      dirty.set(false);
+      const outfn = get_store_value(fileprefix) + ".json";
+      createBrowserDownload(outfn, data);
+    }
   };
 
   // src/toolbar.svelte
@@ -2422,27 +2449,25 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.8 <a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.11 <a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
-\u65BD\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002\u2192
-\u9EDE \u7E2E\u5716 \u4E0A\u4E0B\u5C0D\u8ABF\u3002
-
+\u62D6\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u5FAE\u8ABF\uFF0C\u6309Ctrl\u901F\u8ABF\u3002
-\u6309\u5716\u6846\u5DE6\u908A\u6C34\u5E73\u65B9\u5411\u79FB\u52D5\uFF0C\u6309\u9802\u908A\u5782\u771F\u65B9\u5411\u79FB\u52D5\u3002
+\u6309\u5716\u6846\u5DE6\u908A\u6C34\u5E73\u65B9\u5411\u79FB\u52D5\uFF0C\u6309\u9802\u908A\u5782\u76F4\u65B9\u5411\u79FB\u52D5\u3002
 \u8B93\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u90FD\u5728\u7E2E\u5716\u5167\uFF0C\u4E26\u76E1\u91CF\u5C45\u4E2D\u5C0D\u9F4A\u3002
-\u53F3\u908A\u548C\u5E95\u908A\u8ABF\u6574\u5716\u6846\u5927\u5C0F\uFF0C\u76E1\u91CF\u8B93\u6BCF\u500B\u5B57\u5728\u5C0F\u683C\u5B50\u5167\u3002
-\u5373\u4F7F\u6846\u5167\u5C11\u65BC\u4E94\u884C\u6587\u5B57\uFF0C\u4E5F\u4E0D\u8981\u6539\u8B8A\u5716\u6846\u5927\u5C0F\uFF0C\u5377\u672B\u6821\u6CE8\u548C\u593E\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u5B57\u9AD4\u8F03\u5C0F\u6545\uFF09\u3002
+\u9EDE \u5716\u62CD\u6E05\u55AE\u53F3\u908A\u7684\u300C\u5169\u884C\u7E2E\u5716\u300D\u53EF\u4E0A\u4E0B\u5C0D\u8ABF\u986F\u793A\u3002
+\u53F3\u908A\u548C\u5E95\u908A\u8ABF\u6574\u5716\u6846\u5927\u5C0F\uFF0C\u8B93\u6BCF\u500B\u5B57\u5728\u5C0F\u683C\u5B50\u5167\uFF0C\u76E1\u91CF\u8B93\u6C34\u5E73\u7DDA\u5728\u5B57\u8207\u5B57\u4E4B\u9593\u3002
+\u5373\u4F7F\u6846\u5167\u5C11\u65BC\u4E94\u884C\u6587\u5B57\uFF0C\u4E5F\u8981\u5C0D\u9F4A\uFF0C\u5377\u672B\u6821\u6CE8\u548C\u593E\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u5B57\u9AD4\u8F03\u5C0F\u6545\uFF09\u3002
 \u6C92\u6709\u5167\u6587\u6216\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002\u4E00\u5377\u5167\u7B2C\u4E00\u62CD\u548C\u6700\u5F8C\u4E00\u62CD\u9810\u8A2D\u7121\u5716\u6846\u3002
-
-\u5EFA\u8B70\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002
-\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
-\u8ABF\u6574\u8996\u7A97\u5927\u5C0F\u53CA\u89E3\u6790\u5EA6\uFF0C\u6846\u53EF\u80FD\u6703\u5C0D\u4E0D\u6E96\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
-
+\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
+\u8ABF\u6574\u700F\u89BD\u8996\u7A97\u5927\u5C0F\u53CA\u6539\u8B8A\u7E2E\u653E\u6BD4\u4F8B\uFF0C\u6846\u7684\u4F4D\u7F6E\u53EF\u80FD\u6703\u8DD1\u6389\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
 \u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F<span class="filename svelte-hk4l6b"> xxx(1).json , xxx(2).json </span>\u3002
 \u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u5373<span class="filename svelte-hk4l6b">0001-001\u592901.zip</span>\u7684\u5EA7\u6A19\u6A94\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>
 \u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07<span class="filename svelte-hk4l6b">0001-001\u592901(3).json</span>\u66F4\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>\u518D\u4E0A\u50B3\u3002
+\u5982\u679C\u8F09\u5165\u5EA7\u6A19\u6A94\uFF08\u8F09\u5165\u5716\u6A94\u5F8C\u8981\u7ACB\u523B\u8F09\u5165\u5EA7\u6A19\u6A94\uFF09\uFF0C\u5B58\u6A94\u5F8C\u5C31\u4E0D\u662F\u653E\u5728\u700F\u89BD\u5668\u300C\u4E0B\u8F09\u300D\u6A94\u6848\u593E\uFF0C\u800C\u662F\u8986\u84CB\u8F09\u5165\u7684\u6A94\u6848\u3002
+\u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\uFF0C
 `;
         attr(pre, "class", "svelte-hk4l6b");
       },
