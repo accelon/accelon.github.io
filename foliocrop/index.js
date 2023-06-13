@@ -938,7 +938,7 @@
       const key = evt.key.toLowerCase();
       const alt = evt.altKey;
       const ctrl = evt.ctrlKey;
-      let dy = 0, dx = 0;
+      let dy = 0, dx = 0, xinc = 0, yinc = 0;
       if (key == "arrowup")
         dy = -1;
       if (key == "arrowdown")
@@ -950,12 +950,14 @@
       if (alt) {
         dx *= 1;
         dy *= 1;
-      } else if (ctrl) {
-        dx *= 5;
-        dy *= 5;
       } else {
-        dx *= 2.5;
-        dy *= 2.5;
+        dx *= 2;
+        dy *= 2;
+      }
+      if (ctrl) {
+        xinc += dx;
+        yinc += dy;
+        dx = 0, dy = 0;
       }
       const frms = $frames;
       const sel = $selectedframe;
@@ -964,7 +966,7 @@
         x += dx;
         y += dy;
         if (1 << i & sel || !sel) {
-          frms[i] = [x, y, w, h];
+          frms[i] = [x, y, w + xinc, h + yinc];
         }
       }
       frames.set(frms);
@@ -2449,12 +2451,12 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.11 <a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.13<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u62D6\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
-\u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u540C\u6642\u6309Alt\u5FAE\u8ABF\uFF0C\u6309Ctrl\u901F\u8ABF\u3002
+\u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u6309Ctrl\u8ABF\u6574\u5927\u5C0F\uFF0C\u540C\u6642\u6309Alt\u5FAE\u8ABF\u3002
 \u6309\u5716\u6846\u5DE6\u908A\u6C34\u5E73\u65B9\u5411\u79FB\u52D5\uFF0C\u6309\u9802\u908A\u5782\u76F4\u65B9\u5411\u79FB\u52D5\u3002
 \u8B93\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u90FD\u5728\u7E2E\u5716\u5167\uFF0C\u4E26\u76E1\u91CF\u5C45\u4E2D\u5C0D\u9F4A\u3002
 \u9EDE \u5716\u62CD\u6E05\u55AE\u53F3\u908A\u7684\u300C\u5169\u884C\u7E2E\u5716\u300D\u53EF\u4E0A\u4E0B\u5C0D\u8ABF\u986F\u793A\u3002
