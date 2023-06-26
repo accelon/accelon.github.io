@@ -578,7 +578,7 @@
   var setTemplate = (name) => {
     if (name == "shandong") {
       defaultframe = function(idx) {
-        return [1030 * (2 - idx) + 186, 139, 950, 2120];
+        return [1030 * (2 - idx) + 186, 139, 964, 2120];
       };
       pageframe.set(3);
     } else if (name == "qindinglongcang") {
@@ -1090,7 +1090,7 @@
         attr(rect, "class", rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx[11] * /*verticalstrip*/
         ctx[7] + /*idx*/
-        ctx[15]) % 2) + " svelte-6svlme");
+        ctx[15]) % 2) + " svelte-gbfacu");
       },
       m(target, anchor) {
         insert(target, rect, anchor);
@@ -1132,7 +1132,7 @@
         2176 && rect_class_value !== (rect_class_value = null_to_empty("vstrip" + /*frameidx*/
         (ctx2[11] * /*verticalstrip*/
         ctx2[7] + /*idx*/
-        ctx2[15]) % 2) + " svelte-6svlme")) {
+        ctx2[15]) % 2) + " svelte-gbfacu")) {
           attr(rect, "class", rect_class_value);
         }
       },
@@ -1169,7 +1169,7 @@
         (ctx[15] + 1) * /*h*/
         (ctx[4] / /*horizontalstrip*/
         ctx[8]));
-        attr(line, "class", "hstrip svelte-6svlme");
+        attr(line, "class", "hstrip svelte-gbfacu");
       },
       m(target, anchor) {
         insert(target, line, anchor);
@@ -1219,35 +1219,44 @@
     let t0;
     let text0_y_value;
     let text1;
-    let t1_value = Math.floor(
+    let t1_value = (
+      /*h*/
+      (ctx[4] / /*w*/
+      ctx[3]).toFixed(2) + ""
+    );
+    let t1;
+    let text1_x_value;
+    let text1_y_value;
+    let text2;
+    let t2_value = Math.floor(
       /*x*/
       ctx[1] / /*r*/
       ctx[5]
     ) + "";
-    let t1;
     let t2;
-    let t3_value = Math.floor(
+    let t3;
+    let t4_value = Math.floor(
       /*y*/
       ctx[2] / /*r*/
       ctx[5]
     ) + "";
-    let t3;
     let t4;
-    let t5_value = Math.floor(
+    let t5;
+    let t6_value = Math.floor(
       /*w*/
       ctx[3] / /*r*/
       ctx[5]
     ) + "";
-    let t5;
     let t6;
-    let t7_value = Math.floor(
+    let t7;
+    let t8_value = Math.floor(
       /*h*/
       ctx[4] / /*r*/
       ctx[5]
     ) + "";
-    let t7;
-    let text1_x_value;
-    let text1_y_value;
+    let t8;
+    let text2_x_value;
+    let text2_y_value;
     let each0_anchor;
     let rect0;
     let rect1;
@@ -1284,12 +1293,14 @@
         );
         text1 = svg_element("text");
         t1 = text(t1_value);
-        t2 = text(",");
-        t3 = text(t3_value);
-        t4 = text(":");
-        t5 = text(t5_value);
-        t6 = text(",");
-        t7 = text(t7_value);
+        text2 = svg_element("text");
+        t2 = text(t2_value);
+        t3 = text(",");
+        t4 = text(t4_value);
+        t5 = text(":");
+        t6 = text(t6_value);
+        t7 = text(",");
+        t8 = text(t8_value);
         for (let i = 0; i < each_blocks_1.length; i += 1) {
           each_blocks_1[i].c();
         }
@@ -1310,7 +1321,7 @@
         );
         attr(text0, "y", text0_y_value = /*y*/
         ctx[2] - 5);
-        attr(text0, "class", "caption svelte-6svlme");
+        attr(text0, "class", "caption svelte-gbfacu");
         toggle_class(
           text0,
           "selected",
@@ -1318,10 +1329,21 @@
           ctx[12]
         );
         attr(text1, "x", text1_x_value = /*x*/
-        ctx[1] + 30);
+        ctx[1] + 20);
         attr(text1, "y", text1_y_value = /*y*/
         ctx[2] - 5);
-        attr(text1, "class", "pointerpos svelte-6svlme");
+        attr(text1, "class", "ratio svelte-gbfacu");
+        toggle_class(
+          text1,
+          "selected",
+          /*selected*/
+          ctx[12]
+        );
+        attr(text2, "x", text2_x_value = /*x*/
+        ctx[1] + 80);
+        attr(text2, "y", text2_y_value = /*y*/
+        ctx[2] - 5);
+        attr(text2, "class", "pointerpos svelte-gbfacu");
         attr(
           rect0,
           "x",
@@ -1346,7 +1368,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect0, "class", "step svelte-6svlme");
+        attr(rect0, "class", "step svelte-gbfacu");
         toggle_class(
           rect0,
           "active",
@@ -1372,7 +1394,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect1, "class", "grip svelte-6svlme");
+        attr(rect1, "class", "grip svelte-gbfacu");
         toggle_class(
           rect1,
           "active",
@@ -1395,7 +1417,7 @@
           /*h*/
           ctx[4]
         );
-        attr(rect2, "class", "gripx svelte-6svlme");
+        attr(rect2, "class", "gripx svelte-gbfacu");
         toggle_class(
           rect2,
           "active",
@@ -1421,7 +1443,7 @@
           ctx[3]
         );
         attr(rect3, "height", grabberHeight);
-        attr(rect3, "class", "grip svelte-6svlme");
+        attr(rect3, "class", "grip svelte-gbfacu");
         toggle_class(
           rect3,
           "active",
@@ -1444,7 +1466,7 @@
           ctx[3]
         );
         attr(rect4, "height", grabberHeight);
-        attr(rect4, "class", "gripy svelte-6svlme");
+        attr(rect4, "class", "gripy svelte-gbfacu");
         toggle_class(
           rect4,
           "active",
@@ -1458,12 +1480,14 @@
         append(text0, t0);
         append(g, text1);
         append(text1, t1);
-        append(text1, t2);
-        append(text1, t3);
-        append(text1, t4);
-        append(text1, t5);
-        append(text1, t6);
-        append(text1, t7);
+        append(g, text2);
+        append(text2, t2);
+        append(text2, t3);
+        append(text2, t4);
+        append(text2, t5);
+        append(text2, t6);
+        append(text2, t7);
+        append(text2, t8);
         for (let i = 0; i < each_blocks_1.length; i += 1) {
           if (each_blocks_1[i]) {
             each_blocks_1[i].m(g, null);
@@ -1603,43 +1627,67 @@
             ctx[12]
           );
         }
-        if (dirty2 & /*x, r*/
-        34 && t1_value !== (t1_value = Math.floor(
-          /*x*/
-          ctx[1] / /*r*/
-          ctx[5]
-        ) + ""))
+        if (dirty2 & /*h, w*/
+        24 && t1_value !== (t1_value = /*h*/
+        (ctx[4] / /*w*/
+        ctx[3]).toFixed(2) + ""))
           set_data(t1, t1_value);
-        if (dirty2 & /*y, r*/
-        36 && t3_value !== (t3_value = Math.floor(
-          /*y*/
-          ctx[2] / /*r*/
-          ctx[5]
-        ) + ""))
-          set_data(t3, t3_value);
-        if (dirty2 & /*w, r*/
-        40 && t5_value !== (t5_value = Math.floor(
-          /*w*/
-          ctx[3] / /*r*/
-          ctx[5]
-        ) + ""))
-          set_data(t5, t5_value);
-        if (dirty2 & /*h, r*/
-        48 && t7_value !== (t7_value = Math.floor(
-          /*h*/
-          ctx[4] / /*r*/
-          ctx[5]
-        ) + ""))
-          set_data(t7, t7_value);
         if (dirty2 & /*x*/
         2 && text1_x_value !== (text1_x_value = /*x*/
-        ctx[1] + 30)) {
+        ctx[1] + 20)) {
           attr(text1, "x", text1_x_value);
         }
         if (dirty2 & /*y*/
         4 && text1_y_value !== (text1_y_value = /*y*/
         ctx[2] - 5)) {
           attr(text1, "y", text1_y_value);
+        }
+        if (dirty2 & /*selected*/
+        4096) {
+          toggle_class(
+            text1,
+            "selected",
+            /*selected*/
+            ctx[12]
+          );
+        }
+        if (dirty2 & /*x, r*/
+        34 && t2_value !== (t2_value = Math.floor(
+          /*x*/
+          ctx[1] / /*r*/
+          ctx[5]
+        ) + ""))
+          set_data(t2, t2_value);
+        if (dirty2 & /*y, r*/
+        36 && t4_value !== (t4_value = Math.floor(
+          /*y*/
+          ctx[2] / /*r*/
+          ctx[5]
+        ) + ""))
+          set_data(t4, t4_value);
+        if (dirty2 & /*w, r*/
+        40 && t6_value !== (t6_value = Math.floor(
+          /*w*/
+          ctx[3] / /*r*/
+          ctx[5]
+        ) + ""))
+          set_data(t6, t6_value);
+        if (dirty2 & /*h, r*/
+        48 && t8_value !== (t8_value = Math.floor(
+          /*h*/
+          ctx[4] / /*r*/
+          ctx[5]
+        ) + ""))
+          set_data(t8, t8_value);
+        if (dirty2 & /*x*/
+        2 && text2_x_value !== (text2_x_value = /*x*/
+        ctx[1] + 80)) {
+          attr(text2, "x", text2_x_value);
+        }
+        if (dirty2 & /*y*/
+        4 && text2_y_value !== (text2_y_value = /*y*/
+        ctx[2] - 5)) {
+          attr(text2, "y", text2_y_value);
         }
         if (dirty2 & /*x, w, verticalstrip, y, h, frameidx*/
         2206) {
@@ -2469,7 +2517,7 @@
 \u53F3\u908A\u548C\u5E95\u908A\u8ABF\u6574\u5716\u6846\u5927\u5C0F\uFF0C\u8B93\u6BCF\u500B\u5B57\u5728\u5C0F\u683C\u5B50\u5167\uFF0C\u76E1\u91CF\u8B93\u6C34\u5E73\u7DDA\u5728\u5B57\u8207\u5B57\u4E4B\u9593\u3002
 \u5373\u4F7F\u6846\u5167\u5C11\u65BC\u4E94\u884C\u6587\u5B57\uFF0C\u4E5F\u8981\u5C0D\u9F4A\uFF0C\u5377\u672B\u6821\u6CE8\u548C\u593E\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u5B57\u9AD4\u8F03\u5C0F\u6545\uFF09\u3002
 \u6C92\u6709\u5167\u6587\u6216\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002\u4E00\u5377\u5167\u7B2C\u4E00\u62CD\u548C\u6700\u5F8C\u4E00\u62CD\u9810\u8A2D\u7121\u5716\u6846\u3002
-\u6309 1, 2 ,3 \u9078\u6846\u30020\u5168\u9078\u3002
+\u6309 1, 2 ,3 \u9078\u6846\u30020\u5168\u9078\u3002\u5E8F\u865F\u65C1\u7684\u6BD4\u4F8B\u8D8A\u63A5\u8FD1 2.2 \u8D8A\u597D\u3002
 \u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
 \u8ABF\u6574\u700F\u89BD\u8996\u7A97\u5927\u5C0F\u53CA\u6539\u8B8A\u7E2E\u653E\u6BD4\u4F8B\uFF0C\u6846\u7684\u4F4D\u7F6E\u53EF\u80FD\u6703\u8DD1\u6389\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
 \u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F<span class="filename svelte-hk4l6b"> xxx(1).json , xxx(2).json </span>\u3002
