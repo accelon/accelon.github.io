@@ -611,6 +611,8 @@
     }
     totalframe.set(caltotalframe());
     nimage.set(n);
+    if (get_store_value(totalframe))
+      selectedframe.set(1);
   };
   var genjson = () => {
     const imgs = get_store_value(images);
@@ -982,9 +984,9 @@
         if (f == 3)
           f = 4;
         selectedframe.set(f);
+        evt.preventDefault();
       } else if (alt && key == "n" || key == "enter") {
         nextimage();
-        ;
         evt.preventDefault();
       } else if (alt && key == "p") {
         previmage();
