@@ -3577,10 +3577,10 @@
       m(target, anchor) {
         insert(target, div, anchor);
         append(div, canvas0);
-        ctx[5](canvas0);
+        ctx[6](canvas0);
         append(div, br);
         append(div, canvas1_1);
-        ctx[6](canvas1_1);
+        ctx[7](canvas1_1);
         if (!mounted) {
           dispose = listen(
             canvas0,
@@ -3597,22 +3597,22 @@
       d(detaching) {
         if (detaching)
           detach(div);
-        ctx[5](null);
         ctx[6](null);
+        ctx[7](null);
         mounted = false;
         dispose();
       }
     };
   }
   function instance8($$self, $$props, $$invalidate) {
+    let $selectedframe;
     let $frames;
     let $verticalstrip;
     let $ratio;
-    let $selectedframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(4, $frames = $$value));
-    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(7, $verticalstrip = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(8, $ratio = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(9, $selectedframe = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(4, $selectedframe = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(5, $frames = $$value));
+    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(8, $verticalstrip = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(9, $ratio = $$value));
     let canvas1, canvas2;
     const updateThumbnail = () => {
       const img1 = document.getElementById("image1");
@@ -3665,10 +3665,10 @@
       });
     }
     $$self.$$.update = () => {
-      if ($$self.$$.dirty & /*$frames, swap*/
-      24) {
+      if ($$self.$$.dirty & /*$frames, $selectedframe, swap*/
+      56) {
         $:
-          updateThumbnail($frames, swap);
+          updateThumbnail($frames, $selectedframe, swap);
       }
     };
     return [
@@ -3676,6 +3676,7 @@
       canvas2,
       swapthumbnail,
       swap,
+      $selectedframe,
       $frames,
       canvas0_binding,
       canvas1_1_binding
