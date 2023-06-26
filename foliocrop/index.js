@@ -977,8 +977,12 @@
       if (key == "f5") {
         evt.preventDefault();
         return;
-      }
-      if (alt && key == "n" || key == "enter") {
+      } else if (key == "0" || key == "1" || key == "2" || key == "3") {
+        let f = parseInt(key);
+        if (f == 3)
+          f = 4;
+        selectedframe.set(f);
+      } else if (alt && key == "n" || key == "enter") {
         nextimage();
         ;
         evt.preventDefault();
@@ -2451,7 +2455,7 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.13<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.26<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u62D6\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
@@ -2463,6 +2467,7 @@
 \u53F3\u908A\u548C\u5E95\u908A\u8ABF\u6574\u5716\u6846\u5927\u5C0F\uFF0C\u8B93\u6BCF\u500B\u5B57\u5728\u5C0F\u683C\u5B50\u5167\uFF0C\u76E1\u91CF\u8B93\u6C34\u5E73\u7DDA\u5728\u5B57\u8207\u5B57\u4E4B\u9593\u3002
 \u5373\u4F7F\u6846\u5167\u5C11\u65BC\u4E94\u884C\u6587\u5B57\uFF0C\u4E5F\u8981\u5C0D\u9F4A\uFF0C\u5377\u672B\u6821\u6CE8\u548C\u593E\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u5B57\u9AD4\u8F03\u5C0F\u6545\uFF09\u3002
 \u6C92\u6709\u5167\u6587\u6216\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002\u4E00\u5377\u5167\u7B2C\u4E00\u62CD\u548C\u6700\u5F8C\u4E00\u62CD\u9810\u8A2D\u7121\u5716\u6846\u3002
+\u6309 1, 2 ,3 \u9078\u6846\u30020\u5168\u9078\u3002
 \u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
 \u8ABF\u6574\u700F\u89BD\u8996\u7A97\u5927\u5C0F\u53CA\u6539\u8B8A\u7E2E\u653E\u6BD4\u4F8B\uFF0C\u6846\u7684\u4F4D\u7F6E\u53EF\u80FD\u6703\u8DD1\u6389\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
 \u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F<span class="filename svelte-hk4l6b"> xxx(1).json , xxx(2).json </span>\u3002
