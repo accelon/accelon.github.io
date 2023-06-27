@@ -741,6 +741,14 @@
     const file = await filehandles[0].getFile();
     filename = openWorkingFile(file);
   };
+  var loadfile = async (file) => {
+    const imgs = get_store_value(images);
+    const json2 = JSON.parse(await file.text());
+    for (let i = 0; i < imgs.length; i++) {
+      imgs[i].frames = json2[i].frames;
+    }
+    images.set(imgs);
+  };
   var load = async () => {
     const imgs = get_store_value(images);
     if (!imgs.length) {
@@ -749,16 +757,12 @@
     }
     const filehandles = await window.showOpenFilePicker({ ...jsonOpts });
     const file = await filehandles[0].getFile();
-    const json = JSON.parse(await file.text());
     framefile.set(filehandles[0]);
     if (json.length !== imgs.length || filehandles[0].name.replace(".json", "") !== get_store_value(fileprefix)) {
       alert("zip json filename mismatch");
       return;
     }
-    for (let i = 0; i < imgs.length; i++) {
-      imgs[i].frames = json[i].frames;
-    }
-    images.set(imgs);
+    loadfile(file);
   };
   var save = async () => {
     selectimage(0);
@@ -2505,10 +2509,11 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.26<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.28<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
-\u62D6\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
+\u62D6\u653E(\u53EF\u540C\u6642\u62D6\u5716\u6A94\u53CA\u5C0D\u61C9\u7684\u5EA7\u6A19\u6A94\uFF09\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C
+\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
 \u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u6309Ctrl\u8ABF\u6574\u5927\u5C0F\uFF0C\u540C\u6642\u6309Alt\u5FAE\u8ABF\u3002
 \u6309\u5716\u6846\u5DE6\u908A\u6C34\u5E73\u65B9\u5411\u79FB\u52D5\uFF0C\u6309\u9802\u908A\u5782\u76F4\u65B9\u5411\u79FB\u52D5\u3002
@@ -2524,6 +2529,7 @@
 \u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u5373<span class="filename svelte-hk4l6b">0001-001\u592901.zip</span>\u7684\u5EA7\u6A19\u6A94\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>
 \u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07<span class="filename svelte-hk4l6b">0001-001\u592901(3).json</span>\u66F4\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>\u518D\u4E0A\u50B3\u3002
 \u5982\u679C\u8F09\u5165\u5EA7\u6A19\u6A94\uFF08\u8F09\u5165\u5716\u6A94\u5F8C\u8981\u7ACB\u523B\u8F09\u5165\u5EA7\u6A19\u6A94\uFF09\uFF0C\u5B58\u6A94\u5F8C\u5C31\u4E0D\u662F\u653E\u5728\u700F\u89BD\u5668\u300C\u4E0B\u8F09\u300D\u6A94\u6848\u593E\uFF0C\u800C\u662F\u8986\u84CB\u8F09\u5165\u7684\u6A94\u6848\u3002
+\u5982\u679C\u7528\u65BD\u653E\u7684\u65B9\u5F0F\u540C\u6642\u8F09\u5165\u5716\u6A94\u53CA\u5EA7\u6A19\u6A94\uFF0C\u5247\u6309\u5132\u5B58\u4E00\u6A23\u6703\u653E\u5728\u300C\u4E0B\u8F09\u300D\u6587\u4EF6\u593E\uFF0C\u4E0D\u6703\u7834\u58DE\u539F\u4F86\u7684\u6A94\u6848\u3002
 \u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\uFF0C
 `;
         attr(pre, "class", "svelte-hk4l6b");
@@ -3277,10 +3283,31 @@
     component_subscribe($$self, nimage, ($$value) => $$invalidate(6, $nimage = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(7, $images = $$value));
     component_subscribe($$self, fileprefix, ($$value) => $$invalidate(4, $fileprefix = $$value));
-    const onDrop = (e) => {
-      const file = e[0];
-      if (file && (file.name.endsWith(".zip") || file.name.endsWith(".pdf"))) {
-        openWorkingFile(file);
+    const onDrop = async (files) => {
+      let jsonname = false, prefix = "", inputfiles = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.name.endsWith(".zip") || file.name.endsWith(".pdf") || file.name.endsWith("json")) {
+          inputfiles.push(file);
+        }
+      }
+      inputfiles.sort((a, b) => a.name == b.name ? 0 : a.name > a.name ? -1 : 1);
+      for (let i = 0; i < inputfiles.length; i++) {
+        const file = inputfiles[i];
+        console.log(file.name);
+        if (file.name.endsWith(".zip") || file.name.endsWith(".pdf")) {
+          await openWorkingFile(file);
+          prefix = file.name.replace(/\.[a-z]+$/, "");
+        }
+        if (file.name.endsWith(".json")) {
+          jsonname = file.name.replace(".json", "");
+          if (prefix && jsonname && jsonname !== prefix)
+            alert("filename mismatch");
+          else
+            await loadfile(file);
+        }
+        if (prefix && jsonname)
+          break;
       }
     };
     let imageurl = "", r = 1, height = 100, width = 100;
