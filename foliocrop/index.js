@@ -747,12 +747,12 @@
       alert("need images");
       return;
     }
-    const filehandles = await window.showOpenFilePicker(jsonOpts);
+    const filehandles = await window.showOpenFilePicker({ ...jsonOpts });
     const file = await filehandles[0].getFile();
     const json = JSON.parse(await file.text());
     framefile.set(filehandles[0]);
-    if (json.length !== imgs.length) {
-      alert("zip json missmatch");
+    if (json.length !== imgs.length || filehandles[0].name.replace(".json", "") !== get_store_value(fileprefix)) {
+      alert("zip json filename mismatch");
       return;
     }
     for (let i = 0; i < imgs.length; i++) {
