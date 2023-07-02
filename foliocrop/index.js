@@ -574,20 +574,30 @@
   var framefile = writable(null);
   var verticalstrip = writable(5);
   var horizontalstrip = writable(17);
+  var nanzang = writable(true);
   var defaultframe;
   var setTemplate = (name) => {
-    if (name == "shandong") {
+    if (name == "beizang") {
       defaultframe = function(idx) {
         return [1030 * (2 - idx) + 186, 139, 964, 2120];
       };
       pageframe.set(3);
-    } else if (name == "qindinglongcang") {
+      verticalstrip.set(5);
+    } else if (name == "longzang") {
+      verticalstrip.set(5);
       pageframe.set(2);
       defaultframe = function(idx) {
         return [385 * (1 - idx) + 18, 148, 364, 810];
       };
+    } else if (name == "nanzang") {
+      verticalstrip.set(6);
+      pageframe.set(3);
+      defaultframe = function(idx) {
+        return [880 * (2 - idx) + 220, 170, 790, 1822];
+      };
     }
   };
+  setTemplate("beizang");
   var caltotalframe = () => {
     const imgs = get_store_value(images);
     let out = 0;
@@ -612,7 +622,7 @@
     totalframe.set(caltotalframe());
     nimage.set(n);
     if (get_store_value(totalframe))
-      selectedframe.set(1);
+      selectedframe.set(0);
   };
   var genjson = () => {
     const imgs = get_store_value(images);
@@ -743,11 +753,12 @@
   };
   var loadfile = async (file) => {
     const imgs = get_store_value(images);
-    const json2 = JSON.parse(await file.text());
+    const json = JSON.parse(await file.text());
     for (let i = 0; i < imgs.length; i++) {
-      imgs[i].frames = json2[i].frames;
+      imgs[i].frames = json[i].frames;
     }
     images.set(imgs);
+    return json;
   };
   var load = async () => {
     const imgs = get_store_value(images);
@@ -758,11 +769,12 @@
     const filehandles = await window.showOpenFilePicker({ ...jsonOpts });
     const file = await filehandles[0].getFile();
     framefile.set(filehandles[0]);
-    if (json.length !== imgs.length || filehandles[0].name.replace(".json", "") !== get_store_value(fileprefix)) {
+    const json = await loadfile(file);
+    if (json.length !== imgs.length || filehandles.length > 1 && filehandles[0].name.replace(".json", "") !== get_store_value(fileprefix)) {
+      json.length = 0;
       alert("zip json filename mismatch");
       return;
     }
-    loadfile(file);
   };
   var save = async () => {
     selectimage(0);
@@ -796,7 +808,14 @@
     let button3;
     let t6;
     let t7;
+    let button4;
+    let t8_value = (
+      /*$verticalstrip*/
+      ctx[0] == 6 ? "\u5357" : "\u5317"
+    );
     let t8;
+    let t9;
+    let t10;
     let mounted;
     let dispose;
     return {
@@ -813,18 +832,22 @@
         button3 = element("button");
         t6 = text("\u{1F4D0}");
         t7 = space();
-        t8 = text(
+        button4 = element("button");
+        t8 = text(t8_value);
+        t9 = space();
+        t10 = text(
           /*$totalframe*/
-          ctx[1]
+          ctx[2]
         );
         attr(button0, "title", "Alt S, Save");
         button0.disabled = button0_disabled_value = !/*$dirty*/
-        ctx[0];
+        ctx[1];
         attr(button1, "title", "Alt F, Remove Frame");
         attr(button2, "title", "Alt R, Reset Frame");
         attr(button3, "title", "Alt L, Load Frame Setting");
         button3.disabled = /*$dirty*/
-        ctx[0];
+        ctx[1];
+        attr(button4, "title", "\u6C38\u6A02\u5357\u5317\u85CF\u5207\u63DB");
       },
       m(target, anchor) {
         insert(target, button0, anchor);
@@ -837,50 +860,63 @@
         insert(target, button3, anchor);
         append(button3, t6);
         insert(target, t7, anchor);
-        insert(target, t8, anchor);
+        insert(target, button4, anchor);
+        append(button4, t8);
+        insert(target, t9, anchor);
+        insert(target, t10, anchor);
         if (!mounted) {
           dispose = [
             listen(
               window,
               "keydown",
               /*handleKeydown*/
-              ctx[2]
+              ctx[3]
             ),
             listen(button0, "click", save),
             listen(
               button1,
               "click",
               /*deleteframe*/
-              ctx[4]
+              ctx[5]
             ),
             listen(
               button2,
               "click",
               /*reset*/
-              ctx[3]
+              ctx[4]
             ),
-            listen(button3, "click", load)
+            listen(button3, "click", load),
+            listen(
+              button4,
+              "click",
+              /*toggleNanzang*/
+              ctx[6]
+            )
           ];
           mounted = true;
         }
       },
       p(ctx2, [dirty2]) {
         if (dirty2 & /*$dirty*/
-        1 && button0_disabled_value !== (button0_disabled_value = !/*$dirty*/
-        ctx2[0])) {
+        2 && button0_disabled_value !== (button0_disabled_value = !/*$dirty*/
+        ctx2[1])) {
           button0.disabled = button0_disabled_value;
         }
         if (dirty2 & /*$dirty*/
-        1) {
+        2) {
           button3.disabled = /*$dirty*/
-          ctx2[0];
+          ctx2[1];
         }
+        if (dirty2 & /*$verticalstrip*/
+        1 && t8_value !== (t8_value = /*$verticalstrip*/
+        ctx2[0] == 6 ? "\u5357" : "\u5317"))
+          set_data(t8, t8_value);
         if (dirty2 & /*$totalframe*/
-        2)
+        4)
           set_data(
-            t8,
+            t10,
             /*$totalframe*/
-            ctx2[1]
+            ctx2[2]
           );
       },
       i: noop,
@@ -903,13 +939,18 @@
         if (detaching)
           detach(t7);
         if (detaching)
-          detach(t8);
+          detach(button4);
+        if (detaching)
+          detach(t9);
+        if (detaching)
+          detach(t10);
         mounted = false;
         run_all(dispose);
       }
     };
   }
   function instance($$self, $$props, $$invalidate) {
+    let $verticalstrip;
     let $frames;
     let $pageframe;
     let $ratio;
@@ -918,14 +959,15 @@
     let $images;
     let $nimage;
     let $totalframe;
-    component_subscribe($$self, frames, ($$value) => $$invalidate(5, $frames = $$value));
-    component_subscribe($$self, pageframe, ($$value) => $$invalidate(6, $pageframe = $$value));
-    component_subscribe($$self, ratio, ($$value) => $$invalidate(7, $ratio = $$value));
-    component_subscribe($$self, dirty, ($$value) => $$invalidate(0, $dirty = $$value));
-    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(8, $selectedframe = $$value));
-    component_subscribe($$self, images, ($$value) => $$invalidate(9, $images = $$value));
-    component_subscribe($$self, nimage, ($$value) => $$invalidate(10, $nimage = $$value));
-    component_subscribe($$self, totalframe, ($$value) => $$invalidate(1, $totalframe = $$value));
+    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(0, $verticalstrip = $$value));
+    component_subscribe($$self, frames, ($$value) => $$invalidate(7, $frames = $$value));
+    component_subscribe($$self, pageframe, ($$value) => $$invalidate(8, $pageframe = $$value));
+    component_subscribe($$self, ratio, ($$value) => $$invalidate(9, $ratio = $$value));
+    component_subscribe($$self, dirty, ($$value) => $$invalidate(1, $dirty = $$value));
+    component_subscribe($$self, selectedframe, ($$value) => $$invalidate(10, $selectedframe = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(11, $images = $$value));
+    component_subscribe($$self, nimage, ($$value) => $$invalidate(12, $nimage = $$value));
+    component_subscribe($$self, totalframe, ($$value) => $$invalidate(2, $totalframe = $$value));
     const previmage = () => {
       let n = $nimage;
       n--;
@@ -1040,7 +1082,22 @@
       frames.set(frms);
       selectedframe.set(0);
     };
-    return [$dirty, $totalframe, handleKeydown, reset, deleteframe];
+    const toggleNanzang = () => {
+      if ($verticalstrip == 6) {
+        setTemplate("beizang");
+      } else {
+        setTemplate("nanzang");
+      }
+    };
+    return [
+      $verticalstrip,
+      $dirty,
+      $totalframe,
+      handleKeydown,
+      reset,
+      deleteframe,
+      toggleNanzang
+    ];
   }
   var Toolbar = class extends SvelteComponent {
     constructor(options) {
@@ -2509,7 +2566,7 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.6.28<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.7.1<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S)  \u2796\u522A\u9664\u5716\u6846(Alt-D)  \u6578\u5B57\uFF1A\u76EE\u524D\u5716\u6846\u6578
 \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)    \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)   \u4E0B\u4E00\u62CD(Alt-N, Enter)   \u4E0A\u4E00\u62CD(Alt-P)
 \u62D6\u653E(\u53EF\u540C\u6642\u62D6\u5716\u6A94\u53CA\u5C0D\u61C9\u7684\u5EA7\u6A19\u6A94\uFF09\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C
@@ -2530,7 +2587,7 @@
 \u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07<span class="filename svelte-hk4l6b">0001-001\u592901(3).json</span>\u66F4\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>\u518D\u4E0A\u50B3\u3002
 \u5982\u679C\u8F09\u5165\u5EA7\u6A19\u6A94\uFF08\u8F09\u5165\u5716\u6A94\u5F8C\u8981\u7ACB\u523B\u8F09\u5165\u5EA7\u6A19\u6A94\uFF09\uFF0C\u5B58\u6A94\u5F8C\u5C31\u4E0D\u662F\u653E\u5728\u700F\u89BD\u5668\u300C\u4E0B\u8F09\u300D\u6A94\u6848\u593E\uFF0C\u800C\u662F\u8986\u84CB\u8F09\u5165\u7684\u6A94\u6848\u3002
 \u5982\u679C\u7528\u65BD\u653E\u7684\u65B9\u5F0F\u540C\u6642\u8F09\u5165\u5716\u6A94\u53CA\u5EA7\u6A19\u6A94\uFF0C\u5247\u6309\u5132\u5B58\u4E00\u6A23\u6703\u653E\u5728\u300C\u4E0B\u8F09\u300D\u6587\u4EF6\u593E\uFF0C\u4E0D\u6703\u7834\u58DE\u539F\u4F86\u7684\u6A94\u6848\u3002
-\u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\uFF0C
+\u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\u3002
 `;
         attr(pre, "class", "svelte-hk4l6b");
       },
