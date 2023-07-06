@@ -14,3 +14,41 @@ body {
    font-size: 100%;
    margin: 5px 5px 5px 0px;
 }
+
+.popup{
+   position:absolute;
+   top:0em;
+   left:40vh;
+   width:50vw;
+   color:black;
+   background-color:  rgb(243, 208, 160);;
+   z-index: 99;
+}
+
+
+
+.track {
+   margin: 2vh 2vh;
+   position: relative;
+   height: 2vh;
+   width: calc(100% - 4vh);
+   border-radius: 100vh;
+   background: var(--track-bg, #fffdf6);
+ }
+ 
+ .progress {
+   position: absolute;
+   left: 0;
+   right: 0;
+   top: 0;
+   bottom: 0;
+   border-radius: 100vh;
+   background: var(--progress-bg, #fef1a6);
+ }
+ 
+ .thumb {
+   width: 3vh;
+   height: 3vh;
+   border-radius: 100vh;
+   background: var(--thumb-bg, #d27700);
+ }
