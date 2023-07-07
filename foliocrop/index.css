@@ -160,19 +160,19 @@ a.svelte-1vigaic {
 }
 
 /* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */
-.framecount.svelte-12vaa8r {
+.framecount.svelte-arxl4l {
   font-weight: bold;
   border-bottom: 1px dotted silver;
 }
-.done.svelte-12vaa8r {
+.done.svelte-arxl4l {
   color: yellowgreen;
 }
-.filelist.svelte-12vaa8r {
+.filelist.svelte-arxl4l {
   cursor: pointer;
   overflow-y: auto;
-  height: 90vh;
+  height: 85vh;
 }
-.selected.svelte-12vaa8r {
+.selected.svelte-arxl4l {
   background-color: rgb(72, 72, 72);
 }
 

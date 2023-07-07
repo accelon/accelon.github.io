@@ -4480,7 +4480,7 @@
         span2 = element("span");
         t4 = text(t4_value);
         t5 = space();
-        attr(span0, "class", "svelte-12vaa8r");
+        attr(span0, "class", "svelte-arxl4l");
         toggle_class(
           span0,
           "done",
@@ -4494,8 +4494,8 @@
           /*image*/
           ctx[4].mark
         );
-        attr(span2, "class", "framecount svelte-12vaa8r");
-        attr(div, "class", "svelte-12vaa8r");
+        attr(span2, "class", "framecount svelte-arxl4l");
+        attr(div, "class", "svelte-arxl4l");
         toggle_class(
           div,
           "selected",
@@ -4639,7 +4639,7 @@
       c() {
         div = element("div");
         key_block.c();
-        attr(div, "class", "filelist svelte-12vaa8r");
+        attr(div, "class", "filelist svelte-arxl4l");
       },
       m(target, anchor) {
         insert(target, div, anchor);
