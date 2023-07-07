@@ -135,14 +135,14 @@ a.svelte-1vigaic {
 }
 
 /* fakecss:D:/2023/foliocrop/src/imageviewer.esbuild-svelte-fake-css */
-.image.svelte-megllf {
+.image.svelte-q92n05 {
   height: 99vh;
   z-index: 1;
 }
-.croppers.svelte-megllf {
+.croppers.svelte-q92n05 {
   position: absolute;
 }
-.fileprefix.svelte-megllf {
+.fileprefix.svelte-q92n05 {
   color: goldenrod;
   font-size: 125%;
   position: absolute;
@@ -151,11 +151,12 @@ a.svelte-1vigaic {
   padding-left: 0.5em;
   padding-right: 0.5em;
 }
-.dropzone.svelte-megllf {
+.dropzone.svelte-q92n05 {
   position: absolute;
   width: 120px;
   right: 0px;
   height: 70%;
+  z-index: 9999;
 }
 
 /* fakecss:D:/2023/foliocrop/src/filelist.esbuild-svelte-fake-css */

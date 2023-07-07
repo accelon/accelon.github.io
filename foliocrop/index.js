@@ -4132,7 +4132,7 @@
       c() {
         div = element("div");
         create_component(croppers.$$.fragment);
-        attr(div, "class", "croppers svelte-megllf");
+        attr(div, "class", "croppers svelte-q92n05");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -4180,12 +4180,12 @@
           if_block.c();
         t2 = space();
         img = element("img");
-        attr(span, "class", "fileprefix svelte-megllf");
+        attr(span, "class", "fileprefix svelte-q92n05");
         attr(img, "id", "image1");
         if (!src_url_equal(img.src, img_src_value = /*$activeimageurl*/
         ctx[0]))
           attr(img, "src", img_src_value);
-        attr(img, "class", "image svelte-megllf");
+        attr(img, "class", "image svelte-q92n05");
         attr(img, "alt", "noimage");
         attr(img, "style", img_style_value = "transform: rotate(" + /*$rotateangle*/
         ctx[1] / 60 + "deg);");
@@ -4295,7 +4295,7 @@
         t = space();
         if_block.c();
         if_block_anchor = empty();
-        attr(span, "class", "dropzone svelte-megllf");
+        attr(span, "class", "dropzone svelte-q92n05");
       },
       m(target, anchor) {
         insert(target, span, anchor);
