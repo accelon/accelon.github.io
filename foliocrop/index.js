@@ -9400,7 +9400,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         const url = await getImageURL(imgs, i);
         const img = new Image();
         img.src = url;
-        await sleep(30);
+        await sleep(100);
         const canvas = document.createElement("CANVAS");
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
@@ -9413,6 +9413,8 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           ctx.translate(-canvas.width / 2, -canvas.height / 2);
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           ctx.restore();
+        } else {
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         }
         for (let j2 = 0; j2 < frames2.length; j2++) {
           const canvas1 = document.createElement("CANVAS");
