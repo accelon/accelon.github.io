@@ -8956,6 +8956,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     }
     swipe = new swipe_default({ props: swipe_props });
     ctx[13](swipe);
+    swipe.$on(
+      "change",
+      /*swipeChanged*/
+      ctx[11]
+    );
     return {
       c() {
         div0 = element("div");
@@ -9036,12 +9041,6 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
               "wheel",
               /*mousewheel*/
               ctx[9]
-            ),
-            listen(
-              div1,
-              "change",
-              /*swipeChanged*/
-              ctx[11]
             )
           ];
           mounted = true;
@@ -9453,7 +9452,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     };
     const swipeChanged = (obj) => {
       const { active_item } = obj.detail;
-      defaultIndex;
+      $$invalidate(3, defaultIndex = active_item);
     };
     const click_handler = () => togglemark(items[previewimages.length - defaultIndex - 1]);
     function swipe_binding($$value) {
