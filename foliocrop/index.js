@@ -734,7 +734,6 @@
     }
     totalframe.set(caltotalframe());
     nimage.set(n);
-    console.log(imgs[n]);
     rotateangle.set(imgs[n]?.rotate || 0);
     if (get_store_value(totalframe))
       selectedframe.set(0);
@@ -745,11 +744,12 @@
     for (let i = 0; i < imgs.length; i++) {
       const frames2 = [];
       const rotate = imgs[i].rotate || 0;
+      const mark = imgs[i].mark || 0;
       for (let j2 = 0; j2 < imgs[i].frames?.length || 0; j2++) {
         const [x, y, w, h] = imgs[i].frames[j2];
         frames2.push([Math.round(x), Math.round(y), Math.round(w), Math.round(h)]);
       }
-      out.push('{"name":"' + imgs[i].name + '","frames":' + JSON.stringify(frames2) + (rotate ? ',"rotate":' + rotate : "") + "}");
+      out.push('{"name":"' + imgs[i].name + '","frames":' + JSON.stringify(frames2) + (rotate ? ',"rotate":' + rotate : "") + (mark ? ',"mark":' + mark : "") + "}");
     }
     return "[" + out.join(",\n") + "]";
   };
@@ -788,6 +788,11 @@
     }
     return imageurl;
   }
+  var togglemark = (idx2) => {
+    const arr = [...get_store_value(images)];
+    arr[idx2].mark = 1 - (arr[idx2].mark || 0);
+    images.set(arr);
+  };
 
   // ../ptk/platform/chromefs.ts
   var m = typeof navigator !== "undefined" && navigator.userAgent.match(/Chrome\/(\d+)/);
@@ -908,6 +913,7 @@
     for (let i = 0; i < imgs.length; i++) {
       imgs[i].frames = json[i].frames;
       imgs[i].rotate = json[i].rotate || 0;
+      imgs[i].mark = json[i].mark || 0;
     }
     images.set(imgs);
     totalframe.set(caltotalframe());
@@ -3494,12 +3500,13 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-hk4l6b">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.7.6<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-hk4l6b">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-hk4l6b">\u6E2C\u8A66\u6587\u4EF6</a>
-\u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S) \u2796\u522A\u9664\u5716\u6846(Alt-D) \u{1F441}\u9810\u89BD
-\u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R) \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L) \u4E0B\u62CD(Alt-N, Enter)  \u4E0A\u62CD(Alt-P)
-\u62D6\u653E(\u53EF\u540C\u6642\u62D6\u5716\u6A94\u53CA\u5C0D\u61C9\u7684\u5EA7\u6A19\u6A94\uFF09\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u6A94\u6848\uFF0C
-\u7528\u62D6\u653E\u53EF\u4EE5\u6700\u597D\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u8996\u7A97\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
-\u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002
+        pre.innerHTML = `<span class="title svelte-1vigaic">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.7.7<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-1vigaic">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-1vigaic">\u6E2C\u8A66\u6587\u4EF6</a>
+\u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S) \u2796\u522A\u9664\u5716\u6846(Alt-D) \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)  \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)
+\u{1F441}\u9810\u89BD\u8ABF\u6574\u6548\u679C\u3000\u5DF2\u5B8C\u6210\u6298\u6578  \u5317\u85CF/\u5357\u85CF\u3000\u5207\u63DB  \u62C9\u689D\u6539\u8B8A\u89D2\u5EA6\u3002\u4E0B\u4E00\u62CD(Enter)
+\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
+\u62D6\u653E\u6216\u9EDE\u64CA\u4EE5\u958B\u555F\u5716\u6A94\uFF0C\u9EDE\u4E00\u4E0B\u5716\u6A94\u540D\u5DE6\u908A\u7684\u25CB\u53EF\u6A19\u6CE8\u6709\u554F\u984C\u7684\u9801\u9762\u3002
+\u4FDD\u7559\u6A94\u6848\u7E3D\u7BA1\u5728\u5DE5\u4F5C\u76EE\u9304\uFF0C\u7BC0\u7701\u6BCF\u6B21\u9EDE\u64CA\u958B\u59CB\u5C0D\u8A71\u76D2\u9078\u6A94\u6642\u9593\u3002
+\u9EDE\u4EFB\u4F55\u4E00\u500B\u5716\u6846\uFF0C\u5E8F\u865F\u8B8A\u7D05\u8272\u6642\uFF0C\u8868\u793A\u9078\u53D6\uFF0C\u518D\u9EDE\u4E00\u4E0B\u53D6\u6D88\u9078\u53D6\u3002\u6309 1, 2 ,3 \u9078\u6846\u30020\u5168\u9078\u3002
 \u4E0A\u4E0B\u5DE6\u53F3\u9375\u79FB\u52D5\u5716\u6846\uFF08\u9078\u53D6\u4E2D\u6216\u5168\u90E8\uFF09\uFF0C\u6309Ctrl\u8ABF\u6574\u5927\u5C0F\uFF0C\u540C\u6642\u6309Alt\u5FAE\u8ABF\u3002
 \u6309\u5716\u6846\u5DE6\u908A\u6C34\u5E73\u65B9\u5411\u79FB\u52D5\uFF0C\u6309\u9802\u908A\u5782\u76F4\u65B9\u5411\u79FB\u52D5\u3002
 \u8B93\u5716\u6846\u7B2C\u4E00\u884C\u548C\u6700\u5F8C\u4E00\u884C\u6587\u5B57\u90FD\u5728\u7E2E\u5716\u5167\uFF0C\u4E26\u76E1\u91CF\u5C45\u4E2D\u5C0D\u9F4A\u3002
@@ -3507,17 +3514,18 @@
 \u53F3\u908A\u548C\u5E95\u908A\u8ABF\u6574\u5716\u6846\u5927\u5C0F\uFF0C\u8B93\u6BCF\u500B\u5B57\u5728\u5C0F\u683C\u5B50\u5167\uFF0C\u76E1\u91CF\u8B93\u6C34\u5E73\u7DDA\u5728\u5B57\u8207\u5B57\u4E4B\u9593\u3002
 \u5373\u4F7F\u6846\u5167\u5C11\u65BC\u4E94\u884C\u6587\u5B57\uFF0C\u4E5F\u8981\u5C0D\u9F4A\uFF0C\u5377\u672B\u6821\u6CE8\u548C\u593E\u6CE8\u53EF\u4EE5\u5927\u81F4\u5C0D\u9F4A\u5373\u53EF\uFF08\u5B57\u9AD4\u8F03\u5C0F\u6545\uFF09\u3002
 \u6C92\u6709\u5167\u6587\u6216\u6CE8\u91CB\u7684\u5716\u62CD\uFF0C\u5982\u5C01\u9762\u88E1\uFF0C\u9808\u522A\u6389\u5716\u6846\u3002\u4E00\u5377\u5167\u7B2C\u4E00\u62CD\u548C\u6700\u5F8C\u4E00\u62CD\u9810\u8A2D\u7121\u5716\u6846\u3002
-\u6309 1, 2 ,3 \u9078\u6846\u30020\u5168\u9078\u3002\u5E8F\u865F\u65C1\u7684\u6BD4\u4F8B\u8D8A\u63A5\u8FD1 2.2 \u8D8A\u597D\u3002
-\u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
 \u8ABF\u6574\u700F\u89BD\u8996\u7A97\u5927\u5C0F\u53CA\u6539\u8B8A\u7E2E\u653E\u6BD4\u4F8B\uFF0C\u6846\u7684\u4F4D\u7F6E\u53EF\u80FD\u6703\u8DD1\u6389\uFF0C\u6B64\u6642\u4E0D\u5FC5\u8ABF\u6574\uFF0C\u53EA\u8981\u9EDE\u5176\u4ED6\u62CD\uFF0C\u518D\u9EDE\u56DE\u4F86\u5373\u6B63\u5E38\u3002
-\u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F<span class="filename svelte-hk4l6b"> xxx(1).json , xxx(2).json </span>\u3002
-\u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u5373<span class="filename svelte-hk4l6b">0001-001\u592901.zip</span>\u7684\u5EA7\u6A19\u6A94\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>
-\u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07<span class="filename svelte-hk4l6b">0001-001\u592901(3).json</span>\u66F4\u540D\u70BA<span class="filename svelte-hk4l6b">0001-001\u592901.json</span>\u518D\u4E0A\u50B3\u3002
-\u5982\u679C\u8F09\u5165\u5EA7\u6A19\u6A94\uFF08\u8F09\u5165\u5716\u6A94\u5F8C\u8981\u7ACB\u523B\u8F09\u5165\u5EA7\u6A19\u6A94\uFF09\uFF0C\u5B58\u6A94\u5F8C\u5C31\u4E0D\u662F\u653E\u5728\u700F\u89BD\u5668\u300C\u4E0B\u8F09\u300D\u6A94\u6848\u593E\uFF0C\u800C\u662F\u8986\u84CB\u8F09\u5165\u7684\u6A94\u6848\u3002
+\u65B0\u589E\u5EA7\u6A19\u6A94\uFF1A
+\u5B58\u6A94\u5728\u700F\u89BD\u5668\u7684\u300C\u4E0B\u8F09\u300D(CTRL+J)\uFF0C\u540C\u4E00\u5377\u5B58\u6A94\u8D85\u904E\u4E00\u6B21\uFF0C\u700F\u89BD\u5668\u6703\u4F9D\u5E8F\u7522\u751F<span class="filename svelte-1vigaic"> xxx(1).json , xxx(2).json </span>\u3002
+\u53EA\u9808\u4E0A\u50B3\u6700\u65B0\u7684\u5B58\u6A94\uFF0C\u5B58\u6A94\u7684\u6A94\u540D\u5FC5\u9808\u548Czip/pdf\u4E00\u81F4\uFF0C\u5373<span class="filename svelte-1vigaic">0001-001\u592901.zip</span>\u7684\u5EA7\u6A19\u6A94\u540D\u70BA<span class="filename svelte-1vigaic">0001-001\u592901.json</span>
+\u4F8B\u5982\u540C\u4E00\u5377\u6309\u4E864\u6B21\u5B58\u6A94\uFF0C\u9808\u5C07<span class="filename svelte-1vigaic">0001-001\u592901(3).json</span>\u66F4\u540D\u70BA<span class="filename svelte-1vigaic">0001-001\u592901.json</span>\u518D\u4E0A\u50B3\u3002
+\u6AA2\u67E5\u5EA7\u6A19\u6A94\uFF1A
+\u8F09\u5165\u5716\u6A94\u5F8C\uFF0C\u63A5\u8457\u8F09\u5165\u5EA7\u6A19\u6A94\uFF0C\u5B58\u6A94\uFF08\u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\uFF09
+\u5F8C\u5C31\u4E0D\u662F\u653E\u5728\u700F\u89BD\u5668\u300C\u4E0B\u8F09\u300D\u6A94\u6848\u593E\uFF0C\u800C\u662F\u8986\u84CB\u9078\u64C7\u7684\u5EA7\u6A19\u6A94\u6240\u5728\u4F4D\u7F6E\u3002
 \u5982\u679C\u7528\u65BD\u653E\u7684\u65B9\u5F0F\u540C\u6642\u8F09\u5165\u5716\u6A94\u53CA\u5EA7\u6A19\u6A94\uFF0C\u5247\u6309\u5132\u5B58\u4E00\u6A23\u6703\u653E\u5728\u300C\u4E0B\u8F09\u300D\u6587\u4EF6\u593E\uFF0C\u4E0D\u6703\u7834\u58DE\u539F\u4F86\u7684\u6A94\u6848\u3002
-\u7B2C\u4E00\u6B21\u6309\u5B58\u6A94\u6703\u8981\u6C42\u5BEB\u5165\u7684\u6B0A\u9650\u3002
+\u6309\u{1F441}\uFF0C\u9010\u9801\u6AA2\u67E5\uFF08\u7522\u751F\u9810\u89BD\u9700\u6578\u79D2\uFF09\uFF0C\u6709\u554F\u984C\u5148\u6309\u25CB\u6A19\u6CE8\uFF0C\u518D\u4E00\u8D77\u4FEE\u6539\uFF0C\u6700\u5F8C\u7528\u9810\u89BD\u518D\u6AA2\u67E5\u4E00\u6B21\u3002
 `;
-        attr(pre, "class", "svelte-hk4l6b");
+        attr(pre, "class", "svelte-1vigaic");
       },
       m(target, anchor) {
         insert(target, pre, anchor);
@@ -4413,8 +4421,8 @@
   // src/filelist.svelte
   function get_each_context3(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[3] = list[i];
-    child_ctx[5] = i;
+    child_ctx[4] = list[i];
+    child_ctx[6] = i;
     return child_ctx;
   }
   function create_each_block3(ctx) {
@@ -4422,16 +4430,24 @@
     let span0;
     let t0_value = (
       /*image*/
-      ctx[3].name + ""
+      ctx[4].name + ""
     );
     let t0;
     let t1;
     let span1;
     let t2_value = (
       /*image*/
-      (ctx[3].frames?.length || "") + ""
+      ctx[4].mark ? "\u25CF" : "\u25CB"
     );
     let t2;
+    let t3;
+    let span2;
+    let t4_value = (
+      /*image*/
+      (ctx[4].frames?.length || "") + ""
+    );
+    let t4;
+    let t5;
     let mounted;
     let dispose;
     function click_handler() {
@@ -4439,7 +4455,16 @@
         /*click_handler*/
         ctx[2](
           /*idx*/
-          ctx[5]
+          ctx[6]
+        )
+      );
+    }
+    function click_handler_1() {
+      return (
+        /*click_handler_1*/
+        ctx[3](
+          /*idx*/
+          ctx[6]
         )
       );
     }
@@ -4451,20 +4476,31 @@
         t1 = space();
         span1 = element("span");
         t2 = text(t2_value);
+        t3 = space();
+        span2 = element("span");
+        t4 = text(t4_value);
+        t5 = space();
         attr(span0, "class", "svelte-12vaa8r");
         toggle_class(
           span0,
           "done",
           /*image*/
-          ctx[3].frames
+          ctx[4].frames
         );
-        attr(span1, "class", "framecount svelte-12vaa8r");
+        attr(span1, "class", "mark");
+        toggle_class(
+          span1,
+          "markon",
+          /*image*/
+          ctx[4].mark
+        );
+        attr(span2, "class", "framecount svelte-12vaa8r");
         attr(div, "class", "svelte-12vaa8r");
         toggle_class(
           div,
           "selected",
           /*idx*/
-          ctx[5] == /*$nimage*/
+          ctx[6] == /*$nimage*/
           ctx[0]
         );
       },
@@ -4475,8 +4511,15 @@
         append(div, t1);
         append(div, span1);
         append(span1, t2);
+        append(div, t3);
+        append(div, span2);
+        append(span2, t4);
+        append(div, t5);
         if (!mounted) {
-          dispose = listen(div, "click", click_handler);
+          dispose = [
+            listen(span1, "click", click_handler),
+            listen(div, "click", click_handler_1)
+          ];
           mounted = true;
         }
       },
@@ -4484,7 +4527,7 @@
         ctx = new_ctx;
         if (dirty2 & /*$images*/
         2 && t0_value !== (t0_value = /*image*/
-        ctx[3].name + ""))
+        ctx[4].name + ""))
           set_data(t0, t0_value);
         if (dirty2 & /*$images*/
         2) {
@@ -4492,20 +4535,33 @@
             span0,
             "done",
             /*image*/
-            ctx[3].frames
+            ctx[4].frames
           );
         }
         if (dirty2 & /*$images*/
         2 && t2_value !== (t2_value = /*image*/
-        (ctx[3].frames?.length || "") + ""))
+        ctx[4].mark ? "\u25CF" : "\u25CB"))
           set_data(t2, t2_value);
+        if (dirty2 & /*$images*/
+        2) {
+          toggle_class(
+            span1,
+            "markon",
+            /*image*/
+            ctx[4].mark
+          );
+        }
+        if (dirty2 & /*$images*/
+        2 && t4_value !== (t4_value = /*image*/
+        (ctx[4].frames?.length || "") + ""))
+          set_data(t4, t4_value);
         if (dirty2 & /*$nimage*/
         1) {
           toggle_class(
             div,
             "selected",
             /*idx*/
-            ctx[5] == /*$nimage*/
+            ctx[6] == /*$nimage*/
             ctx[0]
           );
         }
@@ -4514,7 +4570,7 @@
         if (detaching)
           detach(div);
         mounted = false;
-        dispose();
+        run_all(dispose);
       }
     };
   }
@@ -4544,7 +4600,7 @@
         insert(target, each_1_anchor, anchor);
       },
       p(ctx2, dirty2) {
-        if (dirty2 & /*$nimage, selectimage, $images*/
+        if (dirty2 & /*$nimage, selectimage, $images, togglemark*/
         3) {
           each_value = /*$images*/
           ctx2[1];
@@ -4615,8 +4671,9 @@
     let $images;
     component_subscribe($$self, nimage, ($$value) => $$invalidate(0, $nimage = $$value));
     component_subscribe($$self, images, ($$value) => $$invalidate(1, $images = $$value));
-    const click_handler = (idx2) => selectimage(idx2);
-    return [$nimage, $images, click_handler];
+    const click_handler = (idx2) => togglemark(idx2);
+    const click_handler_1 = (idx2) => selectimage(idx2);
+    return [$nimage, $images, click_handler, click_handler_1];
   }
   var Filelist = class extends SvelteComponent {
     constructor(options) {
@@ -8803,8 +8860,8 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   // src/preview.svelte
   function get_each_context5(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[14] = list[i];
-    child_ctx[16] = i;
+    child_ctx[19] = list[i];
+    child_ctx[21] = i;
     return child_ctx;
   }
   function create_else_block3(ctx) {
@@ -8850,9 +8907,33 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   }
   function create_if_block5(ctx) {
     let div0;
+    let span0;
+    let t0_value = (
+      /*$images*/
+      ctx[7][
+        /*items*/
+        ctx[5][
+          /*previewimages*/
+          ctx[6].length - /*defaultIndex*/
+          ctx[3] - 1
+        ]
+      ].mark ? "\u25CF" : "\u25CB"
+    );
+    let t0;
+    let t1;
+    let br0;
+    let t2;
+    let br1;
+    let t3;
+    let br2;
+    let t4;
+    let br3;
     let t5;
-    let span;
+    let br4;
+    let t6;
     let t7;
+    let span1;
+    let t9;
     let div1;
     let swipe;
     let current;
@@ -8860,13 +8941,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let dispose;
     const swipe_spread_levels = [
       /*swipeConfig*/
-      ctx[5],
-      {
-        defaultIndex: (
-          /*previewimages*/
-          ctx[4].length - 1
-        )
-      }
+      ctx[8],
+      { defaultIndex: (
+        /*defaultIndex*/
+        ctx[3]
+      ) }
     ];
     let swipe_props = {
       $$slots: { default: [create_default_slot2] },
@@ -8876,65 +8955,141 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       swipe_props = assign(swipe_props, swipe_spread_levels[i]);
     }
     swipe = new swipe_default({ props: swipe_props });
-    ctx[8](swipe);
+    ctx[13](swipe);
     return {
       c() {
         div0 = element("div");
-        div0.innerHTML = `\u5DE6\uFF1A\u4E0B\u4E00\u6298<br/>\u53F3\uFF1A\u4E0A\u4E00\u6298<br/>\u4E0A\uFF1A\u7B2C\u4E00\u6298\uFF0C<br/>\u4E0B\uFF1A\u6700\u672B\u6298<br/>\u9F20\u8F2A\uFF1A\u7FFB\u9801`;
-        t5 = space();
-        span = element("span");
-        span.textContent = "\u2716\uFE0F";
+        span0 = element("span");
+        t0 = text(t0_value);
+        t1 = space();
+        br0 = element("br");
+        t2 = text("\u5DE6\uFF1A\u4E0B\u4E00\u6298");
+        br1 = element("br");
+        t3 = text("\u53F3\uFF1A\u4E0A\u4E00\u6298");
+        br2 = element("br");
+        t4 = text("\u4E0A\uFF1A\u7B2C\u4E00\u6298\uFF0C");
+        br3 = element("br");
+        t5 = text("\u4E0B\uFF1A\u6700\u672B\u6298");
+        br4 = element("br");
+        t6 = text("\u9F20\u8F2A\uFF1A\u7FFB\u9801");
         t7 = space();
+        span1 = element("span");
+        span1.textContent = "\u2716\uFE0F";
+        t9 = space();
         div1 = element("div");
         create_component(swipe.$$.fragment);
-        attr(div0, "class", "message svelte-1jylqxn");
-        attr(span, "class", "closebtn svelte-1jylqxn");
-        attr(div1, "class", "swipe-holder svelte-1jylqxn");
+        attr(span0, "class", "bigmark");
+        toggle_class(
+          span0,
+          "markon",
+          /*$images*/
+          ctx[7][
+            /*items*/
+            ctx[5][
+              /*previewimages*/
+              ctx[6].length - /*defaultIndex*/
+              ctx[3] - 1
+            ]
+          ].mark
+        );
+        attr(div0, "class", "message svelte-jhy9u0");
+        attr(span1, "class", "closebtn svelte-jhy9u0");
+        attr(div1, "class", "swipe-holder svelte-jhy9u0");
       },
       m(target, anchor) {
         insert(target, div0, anchor);
-        insert(target, t5, anchor);
-        insert(target, span, anchor);
+        append(div0, span0);
+        append(span0, t0);
+        append(div0, t1);
+        append(div0, br0);
+        append(div0, t2);
+        append(div0, br1);
+        append(div0, t3);
+        append(div0, br2);
+        append(div0, t4);
+        append(div0, br3);
+        append(div0, t5);
+        append(div0, br4);
+        append(div0, t6);
         insert(target, t7, anchor);
+        insert(target, span1, anchor);
+        insert(target, t9, anchor);
         insert(target, div1, anchor);
         mount_component(swipe, div1, null);
         current = true;
         if (!mounted) {
           dispose = [
             listen(
-              span,
+              span0,
+              "click",
+              /*click_handler*/
+              ctx[12]
+            ),
+            listen(
+              span1,
               "click",
               /*close*/
-              ctx[7]
+              ctx[10]
             ),
             listen(
               div1,
               "wheel",
               /*mousewheel*/
-              ctx[6]
+              ctx[9]
+            ),
+            listen(
+              div1,
+              "change",
+              /*swipeChanged*/
+              ctx[11]
             )
           ];
           mounted = true;
         }
       },
       p(ctx2, dirty2) {
-        const swipe_changes = dirty2 & /*swipeConfig, previewimages*/
-        48 ? get_spread_update(swipe_spread_levels, [
+        if ((!current || dirty2 & /*$images, items, previewimages, defaultIndex*/
+        232) && t0_value !== (t0_value = /*$images*/
+        ctx2[7][
+          /*items*/
+          ctx2[5][
+            /*previewimages*/
+            ctx2[6].length - /*defaultIndex*/
+            ctx2[3] - 1
+          ]
+        ].mark ? "\u25CF" : "\u25CB"))
+          set_data(t0, t0_value);
+        if (!current || dirty2 & /*$images, items, previewimages, defaultIndex*/
+        232) {
+          toggle_class(
+            span0,
+            "markon",
+            /*$images*/
+            ctx2[7][
+              /*items*/
+              ctx2[5][
+                /*previewimages*/
+                ctx2[6].length - /*defaultIndex*/
+                ctx2[3] - 1
+              ]
+            ].mark
+          );
+        }
+        const swipe_changes = dirty2 & /*swipeConfig, defaultIndex*/
+        264 ? get_spread_update(swipe_spread_levels, [
           dirty2 & /*swipeConfig*/
-          32 && get_spread_object(
+          256 && get_spread_object(
             /*swipeConfig*/
-            ctx2[5]
+            ctx2[8]
           ),
-          dirty2 & /*previewimages*/
-          16 && {
-            defaultIndex: (
-              /*previewimages*/
-              ctx2[4].length - 1
-            )
-          }
+          dirty2 & /*defaultIndex*/
+          8 && { defaultIndex: (
+            /*defaultIndex*/
+            ctx2[3]
+          ) }
         ]) : {};
         if (dirty2 & /*$$scope, previewimages*/
-        131088) {
+        4194368) {
           swipe_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         swipe.$set(swipe_changes);
@@ -8953,14 +9108,14 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         if (detaching)
           detach(div0);
         if (detaching)
-          detach(t5);
-        if (detaching)
-          detach(span);
-        if (detaching)
           detach(t7);
         if (detaching)
+          detach(span1);
+        if (detaching)
+          detach(t9);
+        if (detaching)
           detach(div1);
-        ctx[8](null);
+        ctx[13](null);
         destroy_component(swipe);
         mounted = false;
         run_all(dispose);
@@ -8974,12 +9129,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       c() {
         img = element("img");
         attr(img, "alt", "no");
-        attr(img, "class", "swipe svelte-1jylqxn");
+        attr(img, "class", "swipe svelte-jhy9u0");
         if (!src_url_equal(img.src, img_src_value = /*previewimages*/
-        ctx[4][
+        ctx[6][
           /*previewimages*/
-          ctx[4].length - /*idx*/
-          ctx[16] - 1
+          ctx[6].length - /*idx*/
+          ctx[21] - 1
         ]))
           attr(img, "src", img_src_value);
       },
@@ -8988,11 +9143,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       },
       p(ctx2, dirty2) {
         if (dirty2 & /*previewimages*/
-        16 && !src_url_equal(img.src, img_src_value = /*previewimages*/
-        ctx2[4][
+        64 && !src_url_equal(img.src, img_src_value = /*previewimages*/
+        ctx2[6][
           /*previewimages*/
-          ctx2[4].length - /*idx*/
-          ctx2[16] - 1
+          ctx2[6].length - /*idx*/
+          ctx2[21] - 1
         ])) {
           attr(img, "src", img_src_value);
         }
@@ -9023,7 +9178,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       p(ctx2, dirty2) {
         const swipeitem_changes = {};
         if (dirty2 & /*$$scope, previewimages*/
-        131088) {
+        4194368) {
           swipeitem_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         swipeitem.$set(swipeitem_changes);
@@ -9048,7 +9203,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let current;
     let each_value = (
       /*previewimages*/
-      ctx[4]
+      ctx[6]
     );
     let each_blocks = [];
     for (let i = 0; i < each_value.length; i += 1) {
@@ -9075,9 +9230,9 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       },
       p(ctx2, dirty2) {
         if (dirty2 & /*previewimages*/
-        16) {
+        64) {
           each_value = /*previewimages*/
-          ctx2[4];
+          ctx2[6];
           let i;
           for (i = 0; i < each_value.length; i += 1) {
             const child_ctx = get_each_context5(ctx2, each_value, i);
@@ -9130,7 +9285,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     function select_block_type(ctx2, dirty2) {
       if (
         /*ready*/
-        ctx2[3]
+        ctx2[4]
       )
         return 0;
       return 1;
@@ -9190,9 +9345,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   function instance14($$self, $$props, $$invalidate) {
     let $verticalstrip;
     let $horizontalstrip;
-    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(9, $verticalstrip = $$value));
-    component_subscribe($$self, horizontalstrip, ($$value) => $$invalidate(10, $horizontalstrip = $$value));
+    let $images;
+    component_subscribe($$self, verticalstrip, ($$value) => $$invalidate(14, $verticalstrip = $$value));
+    component_subscribe($$self, horizontalstrip, ($$value) => $$invalidate(15, $horizontalstrip = $$value));
+    component_subscribe($$self, images, ($$value) => $$invalidate(7, $images = $$value));
+    let defaultIndex = 0;
     let _swiper, ready = false;
+    let items = [];
     const swipeConfig = {
       autoplay: false,
       delay: 0,
@@ -9204,7 +9363,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     });
     let jobs = 0, finished = 0;
     let previewimages = [];
-    const drawGrid = (ctx, w, h, vs, hs) => {
+    const drawGrid = (ctx, w, h, vs, hs, name2, nth) => {
       ctx.lineWidth = 1;
       ctx.beginPath();
       const unitw = w / vs;
@@ -9223,15 +9382,18 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     };
     const genpreview = async () => {
       const imgs = get_store_value(images);
-      $$invalidate(4, previewimages = []);
+      $$invalidate(6, previewimages = []);
       $$invalidate(1, jobs = 0), $$invalidate(2, finished = 0);
+      $$invalidate(5, items = []);
       for (let i = 0; i < imgs.length; i++) {
         $$invalidate(1, jobs += imgs[i].frames?.length || 0);
       }
       const hs = $horizontalstrip, vs = $verticalstrip;
       for (let i = 0; i < imgs.length; i++) {
         const frames2 = [];
-        for (let j2 = 0; j2 < imgs[i].frames?.length || 0; j2++) {
+        if (!imgs[i].frames?.length)
+          continue;
+        for (let j2 = 0; j2 < imgs[i].frames.length || 0; j2++) {
           const [x, y, w, h] = imgs[i].frames[j2];
           frames2.push([Math.round(x), Math.round(y), Math.round(w), Math.round(h)]);
         }
@@ -9252,18 +9414,20 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           ctx.restore();
         }
-        for (let i2 = 0; i2 < frames2.length; i2++) {
+        for (let j2 = 0; j2 < frames2.length; j2++) {
           const canvas1 = document.createElement("CANVAS");
           const ctx1 = canvas1.getContext("2d");
           const w = 250;
           const h = w * 2.2;
           canvas1.width = w;
           canvas1.height = h;
-          ctx1.drawImage(canvas, frames2[i2][0], frames2[i2][1], frames2[i2][2], frames2[i2][3], 0, 0, canvas1.width, canvas1.height);
-          drawGrid(ctx1, w, h, vs, hs);
+          items.push(i);
+          ctx1.drawImage(canvas, frames2[j2][0], frames2[j2][1], frames2[j2][2], frames2[j2][3], 0, 0, canvas1.width, canvas1.height);
+          drawGrid(ctx1, w, h, vs, hs, imgs[i].name, j2 + 1);
           canvas1.toBlob(function(b) {
             previewimages.push(URL.createObjectURL(b));
             $$invalidate(2, finished++, finished);
+            $$invalidate(3, defaultIndex = previewimages.length - 1);
           });
         }
       }
@@ -9285,6 +9449,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     const close = () => {
       showpreview.set(false);
     };
+    const swipeChanged = (obj) => {
+      const { active_item } = obj.detail;
+      defaultIndex;
+    };
+    const click_handler = () => togglemark(items[previewimages.length - defaultIndex - 1]);
     function swipe_binding($$value) {
       binding_callbacks[$$value ? "unshift" : "push"](() => {
         _swiper = $$value;
@@ -9300,7 +9469,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       if ($$self.$$.dirty & /*jobs, finished*/
       6) {
         $:
-          $$invalidate(3, ready = jobs == finished);
+          $$invalidate(4, ready = jobs == finished);
       }
     };
     $:
@@ -9309,11 +9478,16 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       _swiper,
       jobs,
       finished,
+      defaultIndex,
       ready,
+      items,
       previewimages,
+      $images,
       swipeConfig,
       mousewheel,
       close,
+      swipeChanged,
+      click_handler,
       swipe_binding
     ];
   }

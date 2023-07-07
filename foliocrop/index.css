@@ -96,17 +96,17 @@ input.svelte-1nnnvg0 {
 }
 
 /* fakecss:D:/2023/foliocrop/src/help.esbuild-svelte-fake-css */
-pre.svelte-hk4l6b {
-  font-size: 150%;
+pre.svelte-1vigaic {
+  font-size: 130%;
   margin: 0px;
 }
-.title.svelte-hk4l6b {
-  font-size: 200%;
+.title.svelte-1vigaic {
+  font-size: 180%;
 }
-a.svelte-hk4l6b {
+a.svelte-1vigaic {
   color: darkcyan;
 }
-.filename.svelte-hk4l6b {
+.filename.svelte-1vigaic {
   color: darkcyan;
 }
 
@@ -252,21 +252,22 @@ canvas.svelte-o0r9bs {
 }
 
 /* fakecss:D:/2023/foliocrop/src/preview.esbuild-svelte-fake-css */
-.swipe-holder.svelte-1jylqxn {
+.swipe-holder.svelte-jhy9u0 {
   z-index: 999;
   height: 100vh;
 }
-.message.svelte-1jylqxn {
+.message.svelte-jhy9u0 {
   position: absolute;
   height: 1px;
+  z-index: 299;
 }
-.swipe.svelte-1jylqxn {
+.swipe.svelte-jhy9u0 {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
-.closebtn.svelte-1jylqxn {
+.closebtn.svelte-jhy9u0 {
   position: absolute;
   right: 0em;
   z-index: 999;
