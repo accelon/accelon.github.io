@@ -9,6 +9,9 @@ html {
    stroke: silver;
 
 }
+:root{
+   --selected-color:rgb(255, 173, 42);
+ }
 body {
    font-family:"Tahoma","San-Serif" , "Microsoft Yahei UI Light";
    font-size: 125%;
@@ -19,7 +22,7 @@ body {
 }
 
 .offtag {
-   color: purple;
+   color: rgb(190, 119, 13);
 }
 
 .juan {
@@ -27,5 +30,24 @@ body {
 }
 
 .pb {
-   color: yellowgreen;
+   color: gold;
 }
+.lb {
+   color:yellowgreen;
+}
+
+.folio {
+   color:pink
+}
+
+@keyframes cursorblinker {
+   50% {
+     opacity: 0.1
+   }
+ }
+ .foliocursor {
+   background:red;
+   z-index:999;
+   position:absolute;
+   animation: cursorblinker 1s linear infinite;
+ }
