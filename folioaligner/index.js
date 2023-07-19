@@ -7850,7 +7850,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       c() {
         div = element("div");
         div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.19</span> 
-<a href="https://www.youtube.com/watch?v=7DMXmf4v3UQ" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
+<a href="https://youtu.be/SDOKhGfdWRc" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
 \u6A19\u8A18\uFF1A^pb\u5206\u9801 ^lb\u5206\u884C  ^folio\u5377  ^gatha\u5048\u980C
 
 Enter \u5206\u53E5\uFF0CSpace \u52A0\u5165\u7A7A\u683C\uFF0CBackspace/Delete \u522A\u9664\u6A19\u8A18\u6216\u7A7A\u683C\u3002
