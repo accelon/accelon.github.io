@@ -782,7 +782,11 @@
         width = document.getElementById("image1").width;
         r = width / naturalWidth;
         ratio.set(r);
-        const frms = (images2[nimg].frames || [defaultframe(0), defaultframe(1), defaultframe(2)]).map((f) => resizeframe(f, r));
+        let newframe = [defaultframe(0), defaultframe(1), defaultframe(2)];
+        if (nimg > 0 && images2[nimg - 1].frames?.length == 3) {
+          newframe = [].concat(images2[nimg - 1].frames);
+        }
+        const frms = (images2[nimg].frames || newframe).map((f) => resizeframe(f, r));
         frames.set(frms);
       }, 100);
     }
@@ -3500,7 +3504,7 @@
     return {
       c() {
         pre = element("pre");
-        pre.innerHTML = `<span class="title svelte-1vigaic">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.7.7<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-1vigaic">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-1vigaic">\u6E2C\u8A66\u6587\u4EF6</a>
+        pre.innerHTML = `<span class="title svelte-1vigaic">FolioCrop\u5716\u6846\u88C1\u5207</span> 2023.7.16<a href="https://youtu.be/YxdzYUatZvI" target="_new" class="svelte-1vigaic">\u64CD\u4F5C\u793A\u7BC4</a> <a href="https://drive.google.com/file/d/1b_0Qzd4mtDsOQlov0GvDQdI7uzM7UWfR/view?usp=sharing" target="_new" class="svelte-1vigaic">\u6E2C\u8A66\u6587\u4EF6</a>
 \u{1F4BE}\u5132\u5B58\u5EA7\u6A19\u6A94(Alt-S) \u2796\u522A\u9664\u5716\u6846(Alt-D) \u267B\uFE0F\u91CD\u7F6E\u5716\u6846(Alt-R)  \u{1F4D0}\u8F09\u5165\u5EA7\u6A19\u6A94(Alt-L)
 \u{1F441}\u9810\u89BD\u8ABF\u6574\u6548\u679C\u3000\u5DF2\u5B8C\u6210\u6298\u6578  \u5317\u85CF/\u5357\u85CF\u3000\u5207\u63DB  \u62C9\u689D\u6539\u8B8A\u89D2\u5EA6\u3002\u4E0B\u4E00\u62CD(Enter)
 \u4E00\u958B\u59CB\u6309F11\u9032\u5165\u5168\u87A2\u5E55\u6A21\u5F0F\u3002\u6309 Ctrl + - \u8ABF\u6574\u597D\u700F\u89BD\u5668\u7684\u89E3\u6790\u5EA6\uFF0C\u7121\u9808\u7D93\u5E38\u6539\u52D5\u3002
