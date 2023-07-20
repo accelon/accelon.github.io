@@ -637,10 +637,11 @@
   var AppPrefix = "folioaligner.";
   var loadSettings = () => {
     const panepos2 = parseInt(localStorage.getItem(AppPrefix + "panepos")) || 30;
-    const _savedpos = localStorage.getItem(AppPrefix + "_savedpos") || "{}";
+    const _savedpos = localStorage.getItem(AppPrefix + "savedpos") || "{}";
     let savedpos2 = {};
     try {
       savedpos2 = JSON.parse(_savedpos);
+      console.log(savedpos2);
     } catch (e) {
       console.log(e);
       savedpos2 = {};
@@ -4774,6 +4775,7 @@
     for (let i = from.line; i < from.line + text2.length; i++) {
       markOfftext(cm, i);
     }
+    dirty.set(true);
   };
   var countPB = (text2) => {
     let count = 0;
@@ -4963,7 +4965,7 @@
     }
     const newsavedpos = Object.assign({}, get_store_value(savedpos));
     newsavedpos[filehandle.name] = get_store_value(thecm).getCursor().line;
-    updateSettings({ savepos: newsavedpos });
+    updateSettings({ savedpos: newsavedpos });
   };
 
   // src/3rdparty/switch.svelte
@@ -7849,11 +7851,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     return {
       c() {
         div = element("div");
-        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.19</span> 
+        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.20</span> 
 <a href="https://youtu.be/SDOKhGfdWRc" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
 \u6A19\u8A18\uFF1A^pb\u5206\u9801 ^lb\u5206\u884C  ^folio\u5377  ^gatha\u5048\u980C
 
 Enter \u5206\u53E5\uFF0CSpace \u52A0\u5165\u7A7A\u683C\uFF0CBackspace/Delete \u522A\u9664\u6A19\u8A18\u6216\u7A7A\u683C\u3002
+\u5317\u85CF(\u4E00\u62985\u884C)\u6BCF4\u500Blb\u7522\u751F\u4E00\u500Bpb 
+\u5357\u85CF(\u4E00\u62986\u884C)\u6BCF5\u500Blb\u7522\u751F\u4E00\u500Bpb
 
 \u81EA\u7531\u7DE8\u8F2F\u6A21\u5F0F\u6253\u958B\u624D\u53EF\u7DE8\u8F2F\u6587\u5B57\u3002
 \u4E0D\u6539\u7570\u9AD4\u5B57\uFF0C\u53EA\u88DC\u5F71\u97FF\u5206\u884C\u7684\u6F0F\u5B57\u548C\u522A\u53BB\u8D05\u5B57\u3002
