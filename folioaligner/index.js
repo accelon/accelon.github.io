@@ -737,7 +737,7 @@
   var thecm = writable(null);
   var cursorline = writable(0);
   var cursormark = writable(0);
-  var folioLines = writable(6);
+  var folioLines = writable(5);
   var localfile = writable();
   var juan = writable(1);
   var pb = writable(1);
@@ -4752,6 +4752,8 @@
       const m4 = offtag.match(/lines=(\d+)/);
       if (m4)
         foliolines = parseInt(m4[1]) || 5;
+      else
+        foliolines = 5;
       const m22 = offtag.match(/folio#([a-z\d\-_]+)/);
       if (m22)
         folio = m22[1];
@@ -5544,7 +5546,7 @@
             button,
             "click",
             /*tryit*/
-            ctx[11]
+            ctx[12]
           );
           mounted = true;
         }
@@ -5583,7 +5585,7 @@
         ),
         onChange: (
           /*onJuanChange*/
-          ctx[9]
+          ctx[10]
         )
       }
     });
@@ -5599,7 +5601,7 @@
         ),
         onChange: (
           /*onPageChange*/
-          ctx[10]
+          ctx[11]
         )
       }
     });
@@ -5688,7 +5690,7 @@
     let updating_value;
     let current;
     function switch_1_value_binding(value) {
-      ctx[14](value);
+      ctx[15](value);
     }
     let switch_1_props = {
       label: "\u81EA\u7531\u7DE8\u8F2FF2",
@@ -5754,6 +5756,9 @@
       /*$editfreely*/
       ctx[8]
     );
+    let t4;
+    let t5;
+    let t6;
     let current;
     let mounted;
     let dispose;
@@ -5770,7 +5775,7 @@
     current_block_type_index = select_block_type(ctx, -1);
     if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     function inputnumber_value_binding(value) {
-      ctx[13](value);
+      ctx[14](value);
     }
     let inputnumber_props = {
       onChange: setCursorLine,
@@ -5801,10 +5806,16 @@
         create_component(inputnumber.$$.fragment);
         t3 = space();
         key_block.c();
+        t4 = text(" \u6BCF\u9801");
+        t5 = text(
+          /*$folioLines*/
+          ctx[9]
+        );
+        t6 = text("\u884C");
         button.disabled = button_disabled_value = /*$dirty*/
         ctx[2] && /*$filename*/
         ctx[3];
-        attr(button, "title", "alt-p");
+        attr(button, "title", "alt-o");
         attr(button, "class", "clickable");
         attr(span, "class", "Toolbar svelte-119h3k5");
       },
@@ -5818,6 +5829,9 @@
         mount_component(inputnumber, span, null);
         append(span, t3);
         key_block.m(span, null);
+        append(span, t4);
+        append(span, t5);
+        append(span, t6);
         current = true;
         if (!mounted) {
           dispose = [
@@ -5825,7 +5839,7 @@
               window,
               "keydown",
               /*handleKeydown*/
-              ctx[12]
+              ctx[13]
             ),
             listen(button, "click", openOff)
           ];
@@ -5881,10 +5895,17 @@
           key_block = create_key_block(ctx2);
           key_block.c();
           transition_in(key_block, 1);
-          key_block.m(span, null);
+          key_block.m(span, t4);
         } else {
           key_block.p(ctx2, dirty2);
         }
+        if (!current || dirty2 & /*$folioLines*/
+        512)
+          set_data(
+            t5,
+            /*$folioLines*/
+            ctx2[9]
+          );
       },
       i(local) {
         if (current)
@@ -5921,6 +5942,7 @@
     let $cursorline;
     let $maxline;
     let $editfreely;
+    let $folioLines;
     component_subscribe($$self, pb, ($$value) => $$invalidate(0, $pb = $$value));
     component_subscribe($$self, juan, ($$value) => $$invalidate(1, $juan = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(2, $dirty = $$value));
@@ -5930,6 +5952,7 @@
     component_subscribe($$self, cursorline, ($$value) => $$invalidate(6, $cursorline = $$value));
     component_subscribe($$self, maxline, ($$value) => $$invalidate(7, $maxline = $$value));
     component_subscribe($$self, editfreely, ($$value) => $$invalidate(8, $editfreely = $$value));
+    component_subscribe($$self, folioLines, ($$value) => $$invalidate(9, $folioLines = $$value));
     const onJuanChange = (v) => {
       maxjuan.set(sutra.juanpage.length);
       set_store_value(pb, $pb = 1, $pb);
@@ -5973,6 +5996,7 @@
       $cursorline,
       $maxline,
       $editfreely,
+      $folioLines,
       onJuanChange,
       onPageChange,
       tryit,
