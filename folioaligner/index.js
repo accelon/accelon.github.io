@@ -737,6 +737,7 @@
   var thecm = writable(null);
   var cursorline = writable(0);
   var cursormark = writable(0);
+  var cursorchar = writable("");
   var folioLines = writable(5);
   var localfile = writable();
   var juan = writable(1);
@@ -4726,17 +4727,21 @@
   var getMarkPos = (pagetext) => {
     if (!pagetext || !pagetext.length)
       return 0;
-    let ch = 0, line = 0;
+    let ch = 0, line = 0, thechar = "";
     for (let i = 0; i < pagetext.length; i++) {
       const linetext2 = pagetext[i];
-      const at = linetext2.indexOf(Cursormarker);
+      let at = linetext2.indexOf(Cursormarker);
       if (~at) {
         ch = concreateLength(linetext2.slice(0, at));
+        while (at > 1 && !CJKRangeName(linetext2.slice(at - 1, at))) {
+          at--;
+        }
+        thechar = linetext2.slice(at - 1, at);
         line = i;
         break;
       }
     }
-    return line * (FolioChars + 255) + ch;
+    return [line * (FolioChars + 255) + ch, thechar];
   };
   var folioAtLine = (cm, line) => {
     let foliolines = 5, folio = "";
@@ -4790,7 +4795,9 @@
   };
   var cursorActivity = (cm) => {
     const [pb2, pagetext] = getCursorPage(cm, true);
-    cursormark.set(getMarkPos(pagetext));
+    const [pos, ch] = getMarkPos(pagetext);
+    cursormark.set(pos);
+    cursorchar.set(ch);
     const line = cm.getCursor().line;
     cursorline.set(line);
     activepb.set(pb2);
@@ -7271,8 +7278,8 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   // src/folioview.svelte
   function get_each_context3(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[19] = list[i];
-    child_ctx[21] = i;
+    child_ctx[21] = list[i];
+    child_ctx[23] = i;
     return child_ctx;
   }
   function create_else_block3(ctx) {
@@ -7306,13 +7313,17 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   }
   function create_if_block6(ctx) {
     let swipe;
-    let t;
-    let div;
-    let div_style_value;
+    let t0;
+    let div0;
+    let div0_style_value;
+    let t1;
+    let div1;
+    let t2;
+    let div1_style_value;
     let current;
     const swipe_spread_levels = [
       /*swipeConfig*/
-      ctx[6],
+      ctx[7],
       { defaultIndex: (
         /*defaultIndex*/
         ctx[0]
@@ -7326,38 +7337,53 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       swipe_props = assign(swipe_props, swipe_spread_levels[i]);
     }
     swipe = new swipe_default({ props: swipe_props });
-    ctx[12](swipe);
+    ctx[14](swipe);
     swipe.$on("click", onclick);
     swipe.$on(
       "change",
       /*swipeChanged*/
-      ctx[8]
+      ctx[9]
     );
     return {
       c() {
         create_component(swipe.$$.fragment);
-        t = space();
-        div = element("div");
-        attr(div, "class", "foliocursor");
-        attr(div, "style", div_style_value = /*folioCursorStyle*/
-        ctx[9](
+        t0 = space();
+        div0 = element("div");
+        t1 = space();
+        div1 = element("div");
+        t2 = text(
+          /*$cursorchar*/
+          ctx[6]
+        );
+        attr(div0, "class", "foliocursor");
+        attr(div0, "style", div0_style_value = /*folioCursorStyle*/
+        ctx[10](
+          /*$cursormark*/
+          ctx[5]
+        ));
+        attr(div1, "class", "foliochar");
+        attr(div1, "style", div1_style_value = /*folioCursorCharStyle*/
+        ctx[11](
           /*$cursormark*/
           ctx[5]
         ));
       },
       m(target, anchor) {
         mount_component(swipe, target, anchor);
-        insert(target, t, anchor);
-        insert(target, div, anchor);
+        insert(target, t0, anchor);
+        insert(target, div0, anchor);
+        insert(target, t1, anchor);
+        insert(target, div1, anchor);
+        append(div1, t2);
         current = true;
       },
       p(ctx2, dirty2) {
         const swipe_changes = dirty2 & /*swipeConfig, defaultIndex*/
-        65 ? get_spread_update(swipe_spread_levels, [
+        129 ? get_spread_update(swipe_spread_levels, [
           dirty2 & /*swipeConfig*/
-          64 && get_spread_object(
+          128 && get_spread_object(
             /*swipeConfig*/
-            ctx2[6]
+            ctx2[7]
           ),
           dirty2 & /*defaultIndex*/
           1 && { defaultIndex: (
@@ -7366,17 +7392,32 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           ) }
         ]) : {};
         if (dirty2 & /*$$scope, images*/
-        4194308) {
+        16777220) {
           swipe_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         swipe.$set(swipe_changes);
         if (!current || dirty2 & /*$cursormark*/
-        32 && div_style_value !== (div_style_value = /*folioCursorStyle*/
-        ctx2[9](
+        32 && div0_style_value !== (div0_style_value = /*folioCursorStyle*/
+        ctx2[10](
           /*$cursormark*/
           ctx2[5]
         ))) {
-          attr(div, "style", div_style_value);
+          attr(div0, "style", div0_style_value);
+        }
+        if (!current || dirty2 & /*$cursorchar*/
+        64)
+          set_data(
+            t2,
+            /*$cursorchar*/
+            ctx2[6]
+          );
+        if (!current || dirty2 & /*$cursormark*/
+        32 && div1_style_value !== (div1_style_value = /*folioCursorCharStyle*/
+        ctx2[11](
+          /*$cursormark*/
+          ctx2[5]
+        ))) {
+          attr(div1, "style", div1_style_value);
         }
       },
       i(local) {
@@ -7390,12 +7431,16 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         current = false;
       },
       d(detaching) {
-        ctx[12](null);
+        ctx[14](null);
         destroy_component(swipe, detaching);
         if (detaching)
-          detach(t);
+          detach(t0);
         if (detaching)
-          detach(div);
+          detach(div0);
+        if (detaching)
+          detach(t1);
+        if (detaching)
+          detach(div1);
       }
     };
   }
@@ -7411,7 +7456,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         ctx[2][
           /*images*/
           ctx[2].length - /*idx*/
-          ctx[21] - 1
+          ctx[23] - 1
         ]))
           attr(img, "src", img_src_value);
       },
@@ -7424,7 +7469,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         ctx2[2][
           /*images*/
           ctx2[2].length - /*idx*/
-          ctx2[21] - 1
+          ctx2[23] - 1
         ])) {
           attr(img, "src", img_src_value);
         }
@@ -7455,7 +7500,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       p(ctx2, dirty2) {
         const swipeitem_changes = {};
         if (dirty2 & /*$$scope, images*/
-        4194308) {
+        16777220) {
           swipeitem_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         swipeitem.$set(swipeitem_changes);
@@ -7586,7 +7631,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
             div,
             "wheel",
             /*mousewheel*/
-            ctx[7]
+            ctx[8]
           );
           mounted = true;
         }
@@ -7639,12 +7684,14 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let $folioLines;
     let $foliopath;
     let $cursormark;
-    component_subscribe($$self, activepb, ($$value) => $$invalidate(10, $activepb = $$value));
-    component_subscribe($$self, activefolioid, ($$value) => $$invalidate(11, $activefolioid = $$value));
-    component_subscribe($$self, maxpage, ($$value) => $$invalidate(13, $maxpage = $$value));
-    component_subscribe($$self, folioLines, ($$value) => $$invalidate(14, $folioLines = $$value));
-    component_subscribe($$self, foliopath, ($$value) => $$invalidate(15, $foliopath = $$value));
+    let $cursorchar;
+    component_subscribe($$self, activepb, ($$value) => $$invalidate(12, $activepb = $$value));
+    component_subscribe($$self, activefolioid, ($$value) => $$invalidate(13, $activefolioid = $$value));
+    component_subscribe($$self, maxpage, ($$value) => $$invalidate(15, $maxpage = $$value));
+    component_subscribe($$self, folioLines, ($$value) => $$invalidate(16, $folioLines = $$value));
+    component_subscribe($$self, foliopath, ($$value) => $$invalidate(17, $foliopath = $$value));
     component_subscribe($$self, cursormark, ($$value) => $$invalidate(5, $cursormark = $$value));
+    component_subscribe($$self, cursorchar, ($$value) => $$invalidate(6, $cursorchar = $$value));
     let defaultIndex = 0;
     let swiper2;
     let images = [];
@@ -7729,6 +7776,17 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       const style = `left:${left}px;top:${top}px;width:${unitw}px;height:12px`;
       return style;
     };
+    const folioCursorCharStyle = (mark) => {
+      const line = Math.floor(mark / (FolioChars + 255));
+      const ch = mark % (FolioChars + 255);
+      const frame = imageFrame();
+      const unitw = frame.width / $folioLines || 0;
+      const unith = frame.height / FolioChars || 0;
+      const left = Math.floor(($folioLines - line - 1) * unitw);
+      const top = Math.floor(unith * ch) - unith;
+      const style = `left:${left}px;top:${top}px`;
+      return style;
+    };
     const gotoPb = (pb2) => {
       if (!$maxpage || !swiper2)
         return;
@@ -7745,12 +7803,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     }
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*$activefolioid*/
-      2048) {
+      8192) {
         $:
           loadZip($activefolioid);
       }
       if ($$self.$$.dirty & /*$activepb*/
-      1024) {
+      4096) {
         $:
           gotoPb($activepb);
       }
@@ -7762,10 +7820,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       message,
       ready,
       $cursormark,
+      $cursorchar,
       swipeConfig,
       mousewheel,
       swipeChanged,
       folioCursorStyle,
+      folioCursorCharStyle,
       $activepb,
       $activefolioid,
       swipe_binding
@@ -7887,7 +7947,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     return {
       c() {
         div = element("div");
-        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.21</span> 
+        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.22</span> 
 <a href="https://youtu.be/SDOKhGfdWRc" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
 \u6A19\u8A18\uFF1A^pb\u5206\u9801 ^lb\u5206\u884C  ^folio\u5377  ^gatha\u5048\u980C
 
