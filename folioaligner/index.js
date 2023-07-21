@@ -4740,24 +4740,28 @@
   };
   var folioAtLine = (cm, line) => {
     let foliolines = 5, folio = "";
+    const foliomarklines = [];
     for (let i = 0; i < foliomarks.length; i++) {
       const mark = foliomarks[i].find();
-      if (!mark)
+      if (!mark || mark.from.line > line)
         continue;
-      const { from, to } = mark;
-      if (from.line > line)
-        break;
-      const linetext2 = cm.getLine(from.line);
-      const offtag = linetext2.slice(from.ch, to.ch);
-      const m4 = offtag.match(/lines=(\d+)/);
-      if (m4)
-        foliolines = parseInt(m4[1]) || 5;
-      else
-        foliolines = 5;
-      const m22 = offtag.match(/folio#([a-z\d\-_]+)/);
-      if (m22)
-        folio = m22[1];
+      foliomarklines.push([mark.from.line, i]);
     }
+    foliomarklines.sort((a, b) => b[0] - a[0]);
+    if (!foliomarklines.length)
+      return { lines: 0, folio: "" };
+    const closestmark = foliomarks[foliomarklines[0][1]].find();
+    const { from, to } = closestmark;
+    const linetext2 = cm.getLine(from.line);
+    const offtag = linetext2.slice(from.ch, to.ch);
+    const m4 = offtag.match(/lines=(\d+)/);
+    if (m4)
+      foliolines = parseInt(m4[1]) || 5;
+    else
+      foliolines = 5;
+    const m22 = offtag.match(/folio#([a-z\d\-_]+)/);
+    if (m22)
+      folio = m22[1];
     return { lines: foliolines, folio };
   };
   var changingtext = false;
@@ -7875,7 +7879,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     return {
       c() {
         div = element("div");
-        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.20</span> 
+        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.21</span> 
 <a href="https://youtu.be/SDOKhGfdWRc" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
 \u6A19\u8A18\uFF1A^pb\u5206\u9801 ^lb\u5206\u884C  ^folio\u5377  ^gatha\u5048\u980C
 
