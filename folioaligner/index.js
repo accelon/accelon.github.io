@@ -4823,6 +4823,14 @@
       }
       now++;
     }
+    while (now < linetext2.length) {
+      const c2 = linetext2.charAt(now);
+      const r = CJKRangeName(c2);
+      if (r || c2 == "\u300C" || c2 == "\u300E" || c2 == "^") {
+        break;
+      }
+      now++;
+    }
     return now;
   };
   var keyDown = (cm, e) => {
