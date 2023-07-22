@@ -92,10 +92,6 @@
     }
     return -1;
   }
-  function set_store_value(store, ret, value) {
-    store.set(value);
-    return ret;
-  }
   function action_destroyer(action_result) {
     return action_result && is_function(action_result.destroy) ? action_result.destroy : noop;
   }
@@ -196,6 +192,13 @@
   }
   function set_input_value(input, value) {
     input.value = value == null ? "" : value;
+  }
+  function set_style(node, key, value, important) {
+    if (value == null) {
+      node.style.removeProperty(key);
+    } else {
+      node.style.setProperty(key, value, important ? "important" : "");
+    }
   }
   var crossorigin;
   function is_crossorigin() {
@@ -733,15 +736,13 @@
   // src/store.js
   var activefolioid = writable("");
   var panepos = writable(settings.panepos);
-  var dirty = writable(false);
+  var dirty = writable(0);
   var thecm = writable(null);
   var cursorline = writable(0);
   var cursormark = writable(0);
   var cursorchar = writable("");
   var folioLines = writable(5);
   var localfile = writable();
-  var juan = writable(1);
-  var pb = writable(1);
   var filename = writable("");
   var editfreely = writable("off");
   var activepb = writable(0);
@@ -4552,12 +4553,12 @@
         if (i === 0)
           this.zipStart = offset;
         offset += 30 /* fileHeaderLength */ + namelen;
-        let content2;
+        let content;
         const inbuf = centralOffset - coffset;
         if (offset - inbuf >= 0) {
-          content2 = this.zipbuf.subarray(offset - inbuf, offset - inbuf + size);
+          content = this.zipbuf.subarray(offset - inbuf, offset - inbuf + size);
         }
-        this.files.push({ name: name2, offset, size, content: content2 });
+        this.files.push({ name: name2, offset, size, content });
       }
     }
     loadEndRecord() {
@@ -4658,9 +4659,7 @@
   tokenizeIASTPunc.isToken = (w) => w.match(/^([“‘]*[a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*[’।॥\.,;?\!…”–]* *)$/);
 
   // src/editor.js
-  var juans = [];
   var pbs = [];
-  var folios = [];
   var Cursormarker = "\u25BC";
   var FolioChars = 17;
   var foliomarks = [];
@@ -4688,9 +4687,9 @@
       return;
     const { line, ch } = cm.getCursor();
     let lines = [];
-    let from = line - 20;
-    let till = line + 30;
-    let pb2 = 0, pbindex = 0;
+    let from = line - 100;
+    let till = line + 100;
+    let pb = 0, pbindex = 0;
     if (from < 0)
       from = 0;
     if (till > last - 1)
@@ -4706,9 +4705,9 @@
       const linetext2 = cm.getLine(markpos.from.line);
       const m4 = linetext2.match(/\^pb(\d+)/);
       if (m4)
-        pb2 = parseInt(m4[1]) - 1 || 0;
-      if (pb2 < 0)
-        pb2 = 0;
+        pb = parseInt(m4[1]) - 1 || 0;
+      if (pb < 0)
+        pb = 0;
       pbindex = cm.indexFromPos(markpos.from);
       const start = uppermarks[0].find().from;
       const end = lowermarks.length ? lowermarks[0].find().to : { line: start.line + 10, ch: 0 };
@@ -4721,8 +4720,8 @@
       }
     }
     let foliolines = toFolioText(lines);
-    foliolines = foliolines.join("\n").replace(/【[^】]+】/, "").split("\n");
-    return [pb2, foliolines, pbindex];
+    foliolines = foliolines.join("\n").replace(/[（【][^】]+[）】]/, "").split("\n");
+    return [pb, foliolines, pbindex];
   };
   var getMarkPos = (pagetext) => {
     if (!pagetext || !pagetext.length)
@@ -4786,7 +4785,7 @@
     for (let i = from.line; i < from.line + text2.length; i++) {
       markOfftext(cm, i);
     }
-    dirty.set(true);
+    dirty.set(get_store_value(dirty) + 1);
   };
   var countPB = (text2) => {
     let count = 0;
@@ -4794,13 +4793,13 @@
     return count;
   };
   var cursorActivity = (cm) => {
-    const [pb2, pagetext] = getCursorPage(cm, true);
+    const [pb, pagetext] = getCursorPage(cm, true);
     const [pos, ch] = getMarkPos(pagetext);
     cursormark.set(pos);
     cursorchar.set(ch);
     const line = cm.getCursor().line;
     cursorline.set(line);
-    activepb.set(pb2);
+    activepb.set(pb);
     const { lines, folio } = folioAtLine(cm, line);
     folioLines.set(lines);
     activefolioid.set(folio);
@@ -4816,16 +4815,33 @@
     cm.replaceRange(newtext2, { line, ch: 0 }, { line, ch: oldtext.length });
   };
   var nextLb = (cm, line, ch) => {
-    let nextline = line + 1 < cm.lineCount() ? cm.getLine(line + 1) : "";
-    let nextline2 = line + 2 < cm.lineCount() ? cm.getLine(line + 2) : "";
-    let nextline3 = line + 3 < cm.lineCount() ? cm.getLine(line + 3) : "";
-    let linetext2 = cm.getLine(line).slice(ch) + "\n" + nextline + "\n" + nextline2 + "\n" + nextline3;
+    let nextline = line + 1 < cm.lineCount() ? "\n" + cm.getLine(line + 1) : "";
+    let nextline2 = line + 2 < cm.lineCount() ? "\n" + cm.getLine(line + 2) : "";
+    let nextline3 = line + 3 < cm.lineCount() ? "\n" + cm.getLine(line + 3) : "";
+    let linetext2 = cm.getLine(line).slice(ch);
+    if (!linetext2.endsWith("\uFF1A")) {
+      linetext2 += nextline + nextline2 + nextline3;
+    } else {
+      linetext2 += "\n";
+    }
+    linetext2 = linetext2.replace(/[【（]([^】]+)[）】]/g, (m4, m1) => "\u3010" + "\u3011".repeat(m4.length + 1));
     let remain = FolioChars;
-    let now = 0;
+    let now = 0, ingatha = false;
     while (remain > 0 && now < linetext2.length) {
-      const c2 = linetext2.charAt(now);
+      let c2 = linetext2.charAt(now);
+      if (c2 == "\n" && now + 1 < linetext2.length) {
+        now++;
+        c2 = linetext2.charAt(now);
+        if (ingatha && !~linetext2.slice(now).indexOf("^gatha")) {
+          break;
+        }
+      }
+      if (linetext2.slice(now).startsWith("^gatha"))
+        ingatha = true;
       const r = CJKRangeName(c2);
       if (r || c2 == "\u3000") {
+        remain--;
+      } else if (ingatha && ~"\u3002\uFF1B\uFF01\uFF1F\uFF0C".indexOf(c2)) {
         remain--;
       }
       now++;
@@ -4858,11 +4874,11 @@
     if (e.key == "Enter") {
       if (!insidetag) {
         const linetext3 = cm.getLine(cursor.line);
-        const [pb2, lines, pbindex] = getCursorPage(cm);
+        const [pb, lines, pbindex] = getCursorPage(cm);
         const lfs = countPB(getRangeText(cm, cm.posFromIndex(pbindex), cursor).join(""), cursor.line, cursor.ch);
         let toinsert = "^lb";
         if (lfs + 1 >= get_store_value(folioLines)) {
-          toinsert = "^pb" + (pb2 + 2);
+          toinsert = "^pb" + (pb + 2);
         }
         touchtext(() => {
           newtext = linetext3.slice(0, cursor.ch) + toinsert + linetext3.slice(cursor.ch);
@@ -4907,14 +4923,26 @@
       });
     }
   };
+  var getJuanLine = (juan) => {
+    const cm = get_store_value(thecm);
+    const folios = cm.getAllMarks().filter((it) => it.className == "folio");
+    for (let i = 0; i < folios.length; i++) {
+      const { from, to } = folios[i].find();
+      const linetext2 = cm.getLine(from.line);
+      const m4 = linetext2.match(/\^folio#[a-z]+(\d*)/);
+      if (m4 && parseInt(m4[1]) == juan) {
+        return from.line;
+      }
+    }
+    return 1;
+  };
   var loadCMText = (text2) => {
     const cm = get_store_value(thecm);
     const line = cm.getCursor().line;
     cm.doc.setValue(text2);
     const lines = text2.split("\n");
-    juans.length = 0;
     pbs.length = 0;
-    folios.length = 0;
+    maxjuan.set(1);
     cm.operation(() => {
       for (let i = 0; i < lines.length; i++)
         markOfftext(cm, i);
@@ -4938,6 +4966,10 @@
       } else if (m1.startsWith("folio")) {
         const foliomark = cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "folio" });
         foliomarks.push(foliomark);
+        const juan = cm.getLine(line).slice(ch, ch + m4.length).match(/\^folio#[a-z]+(\d*)/);
+        if (juan && parseInt(juan[1]) > get_store_value(maxjuan)) {
+          maxjuan.set(parseInt(juan[1]));
+        }
       } else {
         cm.doc.markText({ line, ch }, { line, ch: ch + m4.length }, { className: "offtag" });
       }
@@ -4951,7 +4983,6 @@
   };
 
   // src/workingfile.js
-  var sutra;
   var filehandle;
   var pickerOpts = {
     types: [{ description: "Offtext", accept: { "off/*": [".off"] } }],
@@ -4981,7 +5012,7 @@
       const writable2 = await filehandle.createWritable();
       await writable2.write(get_store_value(thecm).getValue());
       await writable2.close();
-      dirty.set(false);
+      dirty.set(0);
       localStorage.setItem("aligner_" + filehandle.name, get_store_value(cursorline));
     }
     const newsavedpos = Object.assign({}, get_store_value(savedpos));
@@ -5565,7 +5596,7 @@
             button,
             "click",
             /*tryit*/
-            ctx[12]
+            ctx[9]
           );
           mounted = true;
         }
@@ -5586,64 +5617,72 @@
     let t0;
     let button_disabled_value;
     let t1;
-    let inputnumber0;
+    let inputnumber;
+    let updating_max;
+    let updating_value;
     let t2;
-    let inputnumber1;
+    let if_block_anchor;
     let current;
     let mounted;
     let dispose;
-    inputnumber0 = new inputnumber_default({
-      props: {
-        max: (
-          /*$maxjuan*/
-          ctx[4]
-        ),
-        value: (
-          /*$juan*/
-          ctx[1]
-        ),
-        onChange: (
-          /*onJuanChange*/
-          ctx[10]
-        )
-      }
-    });
-    inputnumber1 = new inputnumber_default({
-      props: {
-        max: (
-          /*$maxpage*/
-          ctx[5]
-        ),
-        value: (
-          /*$pb*/
-          ctx[0]
-        ),
-        onChange: (
-          /*onPageChange*/
-          ctx[11]
-        )
-      }
-    });
+    function inputnumber_max_binding(value) {
+      ctx[12](value);
+    }
+    function inputnumber_value_binding(value) {
+      ctx[13](value);
+    }
+    let inputnumber_props = {
+      onChange: (
+        /*onJuanChange*/
+        ctx[8]
+      ),
+      min: 1
+    };
+    if (
+      /*$maxjuan*/
+      ctx[3] !== void 0
+    ) {
+      inputnumber_props.max = /*$maxjuan*/
+      ctx[3];
+    }
+    if (
+      /*juan*/
+      ctx[0] !== void 0
+    ) {
+      inputnumber_props.value = /*juan*/
+      ctx[0];
+    }
+    inputnumber = new inputnumber_default({ props: inputnumber_props });
+    binding_callbacks.push(() => bind(inputnumber, "max", inputnumber_max_binding));
+    binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
+    let if_block = (
+      /*$dirty*/
+      ctx[1] > 50 && create_if_block_13(ctx)
+    );
     return {
       c() {
         button = element("button");
         t0 = text("\u{1F4BE}");
         t1 = text("\n\u5377");
-        create_component(inputnumber0.$$.fragment);
-        t2 = text("\n\u9801");
-        create_component(inputnumber1.$$.fragment);
+        create_component(inputnumber.$$.fragment);
+        t2 = space();
+        if (if_block)
+          if_block.c();
+        if_block_anchor = empty();
         button.disabled = button_disabled_value = !/*$dirty*/
-        ctx[2] || !/*$filename*/
-        ctx[3];
+        ctx[1] || !/*$filename*/
+        ctx[2];
         attr(button, "title", "alt-s");
       },
       m(target, anchor) {
         insert(target, button, anchor);
         append(button, t0);
         insert(target, t1, anchor);
-        mount_component(inputnumber0, target, anchor);
+        mount_component(inputnumber, target, anchor);
         insert(target, t2, anchor);
-        mount_component(inputnumber1, target, anchor);
+        if (if_block)
+          if_block.m(target, anchor);
+        insert(target, if_block_anchor, anchor);
         current = true;
         if (!mounted) {
           dispose = listen(button, "click", save);
@@ -5652,42 +5691,50 @@
       },
       p(ctx2, dirty2) {
         if (!current || dirty2 & /*$dirty, $filename*/
-        12 && button_disabled_value !== (button_disabled_value = !/*$dirty*/
-        ctx2[2] || !/*$filename*/
-        ctx2[3])) {
+        6 && button_disabled_value !== (button_disabled_value = !/*$dirty*/
+        ctx2[1] || !/*$filename*/
+        ctx2[2])) {
           button.disabled = button_disabled_value;
         }
-        const inputnumber0_changes = {};
-        if (dirty2 & /*$maxjuan*/
-        16)
-          inputnumber0_changes.max = /*$maxjuan*/
-          ctx2[4];
-        if (dirty2 & /*$juan*/
-        2)
-          inputnumber0_changes.value = /*$juan*/
-          ctx2[1];
-        inputnumber0.$set(inputnumber0_changes);
-        const inputnumber1_changes = {};
-        if (dirty2 & /*$maxpage*/
-        32)
-          inputnumber1_changes.max = /*$maxpage*/
-          ctx2[5];
-        if (dirty2 & /*$pb*/
-        1)
-          inputnumber1_changes.value = /*$pb*/
+        const inputnumber_changes = {};
+        if (!updating_max && dirty2 & /*$maxjuan*/
+        8) {
+          updating_max = true;
+          inputnumber_changes.max = /*$maxjuan*/
+          ctx2[3];
+          add_flush_callback(() => updating_max = false);
+        }
+        if (!updating_value && dirty2 & /*juan*/
+        1) {
+          updating_value = true;
+          inputnumber_changes.value = /*juan*/
           ctx2[0];
-        inputnumber1.$set(inputnumber1_changes);
+          add_flush_callback(() => updating_value = false);
+        }
+        inputnumber.$set(inputnumber_changes);
+        if (
+          /*$dirty*/
+          ctx2[1] > 50
+        ) {
+          if (if_block) {
+          } else {
+            if_block = create_if_block_13(ctx2);
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
       },
       i(local) {
         if (current)
           return;
-        transition_in(inputnumber0.$$.fragment, local);
-        transition_in(inputnumber1.$$.fragment, local);
+        transition_in(inputnumber.$$.fragment, local);
         current = true;
       },
       o(local) {
-        transition_out(inputnumber0.$$.fragment, local);
-        transition_out(inputnumber1.$$.fragment, local);
+        transition_out(inputnumber.$$.fragment, local);
         current = false;
       },
       d(detaching) {
@@ -5695,12 +5742,32 @@
           detach(button);
         if (detaching)
           detach(t1);
-        destroy_component(inputnumber0, detaching);
+        destroy_component(inputnumber, detaching);
         if (detaching)
           detach(t2);
-        destroy_component(inputnumber1, detaching);
+        if (if_block)
+          if_block.d(detaching);
+        if (detaching)
+          detach(if_block_anchor);
         mounted = false;
         dispose();
+      }
+    };
+  }
+  function create_if_block_13(ctx) {
+    let span;
+    return {
+      c() {
+        span = element("span");
+        span.textContent = "\u66F4\u52D5\u591A\u8655\u8ACB\u5B58\u6A94";
+        set_style(span, "color", "red");
+      },
+      m(target, anchor) {
+        insert(target, span, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(span);
       }
     };
   }
@@ -5718,10 +5785,10 @@
     };
     if (
       /*$editfreely*/
-      ctx[8] !== void 0
+      ctx[6] !== void 0
     ) {
       switch_1_props.value = /*$editfreely*/
-      ctx[8];
+      ctx[6];
     }
     switch_1 = new switch_default({ props: switch_1_props });
     binding_callbacks.push(() => bind(switch_1, "value", switch_1_value_binding));
@@ -5736,10 +5803,10 @@
       p(ctx2, dirty2) {
         const switch_1_changes = {};
         if (!updating_value && dirty2 & /*$editfreely*/
-        256) {
+        64) {
           updating_value = true;
           switch_1_changes.value = /*$editfreely*/
-          ctx2[8];
+          ctx2[6];
           add_flush_callback(() => updating_value = false);
         }
         switch_1.$set(switch_1_changes);
@@ -5773,7 +5840,7 @@
     let t3;
     let previous_key = (
       /*$editfreely*/
-      ctx[8]
+      ctx[6]
     );
     let t4;
     let t5;
@@ -5786,14 +5853,14 @@
     function select_block_type(ctx2, dirty2) {
       if (
         /*$filename*/
-        ctx2[3]
+        ctx2[2]
       )
         return 0;
       return 1;
     }
     current_block_type_index = select_block_type(ctx, -1);
     if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
-    function inputnumber_value_binding(value) {
+    function inputnumber_value_binding_1(value) {
       ctx[14](value);
     }
     let inputnumber_props = {
@@ -5801,18 +5868,18 @@
       min: 1,
       max: (
         /*$maxline*/
-        ctx[7]
+        ctx[5]
       )
     };
     if (
       /*$cursorline*/
-      ctx[6] !== void 0
+      ctx[4] !== void 0
     ) {
       inputnumber_props.value = /*$cursorline*/
-      ctx[6];
+      ctx[4];
     }
     inputnumber = new inputnumber_default({ props: inputnumber_props });
-    binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
+    binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding_1));
     let key_block = create_key_block(ctx);
     return {
       c() {
@@ -5828,12 +5895,12 @@
         t4 = text(" \u6BCF\u9801");
         t5 = text(
           /*$folioLines*/
-          ctx[9]
+          ctx[7]
         );
         t6 = text("\u884C");
         button.disabled = button_disabled_value = /*$dirty*/
-        ctx[2] && /*$filename*/
-        ctx[3];
+        ctx[1] && /*$filename*/
+        ctx[2];
         attr(button, "title", "alt-o");
         attr(button, "class", "clickable");
         attr(span, "class", "Toolbar svelte-119h3k5");
@@ -5858,7 +5925,7 @@
               window,
               "keydown",
               /*handleKeydown*/
-              ctx[13]
+              ctx[10]
             ),
             listen(button, "click", openOff)
           ];
@@ -5867,9 +5934,9 @@
       },
       p(ctx2, [dirty2]) {
         if (!current || dirty2 & /*$dirty, $filename*/
-        12 && button_disabled_value !== (button_disabled_value = /*$dirty*/
-        ctx2[2] && /*$filename*/
-        ctx2[3])) {
+        6 && button_disabled_value !== (button_disabled_value = /*$dirty*/
+        ctx2[1] && /*$filename*/
+        ctx2[2])) {
           button.disabled = button_disabled_value;
         }
         let previous_block_index = current_block_type_index;
@@ -5894,20 +5961,20 @@
         }
         const inputnumber_changes = {};
         if (dirty2 & /*$maxline*/
-        128)
+        32)
           inputnumber_changes.max = /*$maxline*/
-          ctx2[7];
+          ctx2[5];
         if (!updating_value && dirty2 & /*$cursorline*/
-        64) {
+        16) {
           updating_value = true;
           inputnumber_changes.value = /*$cursorline*/
-          ctx2[6];
+          ctx2[4];
           add_flush_callback(() => updating_value = false);
         }
         inputnumber.$set(inputnumber_changes);
         if (dirty2 & /*$editfreely*/
-        256 && safe_not_equal(previous_key, previous_key = /*$editfreely*/
-        ctx2[8])) {
+        64 && safe_not_equal(previous_key, previous_key = /*$editfreely*/
+        ctx2[6])) {
           group_outros();
           transition_out(key_block, 1, 1, noop);
           check_outros();
@@ -5919,11 +5986,11 @@
           key_block.p(ctx2, dirty2);
         }
         if (!current || dirty2 & /*$folioLines*/
-        512)
+        128)
           set_data(
             t5,
             /*$folioLines*/
-            ctx2[9]
+            ctx2[7]
           );
       },
       i(local) {
@@ -5952,35 +6019,28 @@
     };
   }
   function instance4($$self, $$props, $$invalidate) {
-    let $pb;
-    let $juan;
+    let $activefolioid;
+    let $thecm;
     let $dirty;
     let $filename;
     let $maxjuan;
-    let $maxpage;
     let $cursorline;
     let $maxline;
     let $editfreely;
     let $folioLines;
-    component_subscribe($$self, pb, ($$value) => $$invalidate(0, $pb = $$value));
-    component_subscribe($$self, juan, ($$value) => $$invalidate(1, $juan = $$value));
-    component_subscribe($$self, dirty, ($$value) => $$invalidate(2, $dirty = $$value));
-    component_subscribe($$self, filename, ($$value) => $$invalidate(3, $filename = $$value));
-    component_subscribe($$self, maxjuan, ($$value) => $$invalidate(4, $maxjuan = $$value));
-    component_subscribe($$self, maxpage, ($$value) => $$invalidate(5, $maxpage = $$value));
-    component_subscribe($$self, cursorline, ($$value) => $$invalidate(6, $cursorline = $$value));
-    component_subscribe($$self, maxline, ($$value) => $$invalidate(7, $maxline = $$value));
-    component_subscribe($$self, editfreely, ($$value) => $$invalidate(8, $editfreely = $$value));
-    component_subscribe($$self, folioLines, ($$value) => $$invalidate(9, $folioLines = $$value));
+    component_subscribe($$self, activefolioid, ($$value) => $$invalidate(11, $activefolioid = $$value));
+    component_subscribe($$self, thecm, ($$value) => $$invalidate(16, $thecm = $$value));
+    component_subscribe($$self, dirty, ($$value) => $$invalidate(1, $dirty = $$value));
+    component_subscribe($$self, filename, ($$value) => $$invalidate(2, $filename = $$value));
+    component_subscribe($$self, maxjuan, ($$value) => $$invalidate(3, $maxjuan = $$value));
+    component_subscribe($$self, cursorline, ($$value) => $$invalidate(4, $cursorline = $$value));
+    component_subscribe($$self, maxline, ($$value) => $$invalidate(5, $maxline = $$value));
+    component_subscribe($$self, editfreely, ($$value) => $$invalidate(6, $editfreely = $$value));
+    component_subscribe($$self, folioLines, ($$value) => $$invalidate(7, $folioLines = $$value));
+    let juan;
     const onJuanChange = (v) => {
-      maxjuan.set(sutra.juanpage.length);
-      set_store_value(pb, $pb = 1, $pb);
-      set_store_value(juan, $juan = v, $juan);
-      maxpage.set(sutra.juanpage[v - 1]);
-      onPageChange($pb);
-      return v;
-    };
-    const onPageChange = (v) => {
+      const line = 1 + (getJuanLine(v) || 0);
+      $thecm.setCursor({ line, ch: 0 });
       return v;
     };
     const tryit = () => {
@@ -5997,7 +6057,22 @@
         save();
       }
     }
+    const setjuan = (folioid) => {
+      const m4 = folioid.match(/(\d+)$/);
+      if (m4) {
+        return parseInt(m4[1]);
+      }
+      return 1;
+    };
+    function inputnumber_max_binding(value) {
+      $maxjuan = value;
+      maxjuan.set($maxjuan);
+    }
     function inputnumber_value_binding(value) {
+      juan = value;
+      $$invalidate(0, juan), $$invalidate(11, $activefolioid);
+    }
+    function inputnumber_value_binding_1(value) {
       $cursorline = value;
       cursorline.set($cursorline);
     }
@@ -6005,22 +6080,29 @@
       $editfreely = value;
       editfreely.set($editfreely);
     }
+    $$self.$$.update = () => {
+      if ($$self.$$.dirty & /*$activefolioid*/
+      2048) {
+        $:
+          $$invalidate(0, juan = setjuan($activefolioid));
+      }
+    };
     return [
-      $pb,
-      $juan,
+      juan,
       $dirty,
       $filename,
       $maxjuan,
-      $maxpage,
       $cursorline,
       $maxline,
       $editfreely,
       $folioLines,
       onJuanChange,
-      onPageChange,
       tryit,
       handleKeydown,
+      $activefolioid,
+      inputnumber_max_binding,
       inputnumber_value_binding,
+      inputnumber_value_binding_1,
       switch_1_value_binding
     ];
   }
@@ -7787,10 +7869,10 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       const style = `left:${left}px;top:${top}px`;
       return style;
     };
-    const gotoPb = (pb2) => {
+    const gotoPb = (pb) => {
       if (!$maxpage || !swiper2)
         return;
-      const go = $maxpage - pb2 - 1;
+      const go = $maxpage - pb - 1;
       if (go !== defaultIndex) {
         swiper2.goTo(go);
       }
@@ -7947,7 +8029,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     return {
       c() {
         div = element("div");
-        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.22</span> 
+        div.innerHTML = `<span style="font-size:120%">\u5716\u7248\u9010\u53E5\u5C0D\u9F4A</span><span>\u3000ver 2023.7.22-2</span> 
 <a href="https://youtu.be/SDOKhGfdWRc" target="_new" class="svelte-npiq7h">\u64CD\u4F5C\u793A\u7BC4\u5F71\u7247</a><pre>\u{1F4C2}\u958B\u6A94 \u{1F4BE}\u5B58\u6A94  \u884C\u6578
 \u6A19\u8A18\uFF1A^pb\u5206\u9801 ^lb\u5206\u884C  ^folio\u5377  ^gatha\u5048\u980C
 
@@ -8045,7 +8127,7 @@ Enter \u5206\u53E5\uFF0CSpace \u52A0\u5165\u7A7A\u683C\uFF0CBackspace/Delete \u5
       }
     };
   }
-  function create_if_block_13(ctx) {
+  function create_if_block_14(ctx) {
     let replacing_1;
     let current;
     replacing_1 = new replacing_default({});
@@ -8108,7 +8190,7 @@ Enter \u5206\u53E5\uFF0CSpace \u52A0\u5165\u7A7A\u683C\uFF0CBackspace/Delete \u5
     let t1;
     let div0;
     let current;
-    const if_block_creators = [create_if_block_13, create_else_block4];
+    const if_block_creators = [create_if_block_14, create_else_block4];
     const if_blocks = [];
     function select_block_type(ctx2, dirty2) {
       if (dirty2 & /*$replacing*/
