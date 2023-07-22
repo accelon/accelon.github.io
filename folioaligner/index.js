@@ -4819,6 +4819,7 @@
     let nextline2 = line + 2 < cm.lineCount() ? "\n" + cm.getLine(line + 2) : "";
     let nextline3 = line + 3 < cm.lineCount() ? "\n" + cm.getLine(line + 3) : "";
     let linetext2 = cm.getLine(line);
+    let ingatha = ~linetext2.indexOf("^gatha");
     if (!~linetext2.indexOf("^gatha") && ~nextline.indexOf("^gatha")) {
       linetext2 = linetext2.slice(ch) + "\n";
     } else {
@@ -4826,7 +4827,7 @@
     }
     linetext2 = linetext2.replace(/[【（]([^】]+)[）】]/g, (m4, m1) => "\u3010" + "\u3011".repeat(m4.length + 1));
     let remain = FolioChars;
-    let now = 0, ingatha = false;
+    let now = 0;
     while (remain > 0 && now < linetext2.length) {
       let c2 = linetext2.charAt(now);
       if (c2 == "\n" && now + 1 < linetext2.length) {
