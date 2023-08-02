@@ -1,0 +1,74 @@
+html {
+    /* position: relative;  */
+    overflow-x:hidden;
+    overflow-y:hidden; 
+    /* width: 100%; */
+   height: 100%; 
+   background:#333333;
+   color:silver;
+   stroke: silver;
+
+}
+:root{
+   --selected-color:rgb(255, 204, 123);
+ }
+body {
+   font-family:"Tahoma","San-Serif" , "Microsoft Yahei UI Light";
+   font-size: 125%;
+   margin: 0px 0px 0px 0px;
+}
+.clickable {
+   cursor: pointer;
+}
+
+.offtag {
+   color: rgb(190, 119, 13);
+}
+
+.juan {
+   color: goldenrod;
+}
+
+.pb {
+   color: gold;
+}
+.lb {
+   color:yellowgreen;
+}
+
+.folio {
+   color:pink
+}
+
+@keyframes cursorblinker {
+   50% {
+     opacity: 0.1
+   }
+ }
+ .foliocursor {
+   background:lightcoral;
+   z-index:999;
+   position:absolute;
+   animation: cursorblinker 2s linear infinite;
+ }
+ .foliochar {
+   color:brown;
+   font-weight: bolder;
+   font-size:1.5em;
+   z-index:999;
+   position:absolute;
+ }
+
+ .timestamps {user-select:none;position: absolute;overflow-y:auto;height: 90vh;width:50%}
+ .pb {color:rgb(207, 95, 95);padding-left:0.5em;cursor:pointer}
+ .timestamp{cursor:pointer;color:gray;font-family: 'Courier New', Courier, monospace;font-size:90%;font-weight: bold;}
+ .pagenumber {position:absolute ; bottom:0.5em;font-size: 2em;left:0.5em;z-index: 99;color:brown;pointer-events: none;}
+ .selected {background:var(--selected-color)}
+ .pane {height:100vh;vertical-align: top;}
+ .timeadjust {cursor:pointer;padding-left:0.3em;padding-right:0.3em;user-select: none;}
+ .help {pointer-events:none;position:absolute;padding-left:50%}
+ .setted {color:green}
+ audio {user-select: none;}
+ .wrong {color:red}
+ select {font-size:1em}
+ input {font-size:1em}
