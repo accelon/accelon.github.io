@@ -59,14 +59,14 @@ body {
    position:absolute;
  }
 
- .timestamps {user-select:none;position: absolute;overflow-y:auto;height: 90vh;width:50%}
+ .timestamps {user-select:none;position: absolute;overflow-y:auto;height: 90vh;width:40%}
  .pb {color:rgb(207, 95, 95);padding-left:0.5em;cursor:pointer}
  .timestamp{cursor:pointer;color:gray;font-family: 'Courier New', Courier, monospace;font-size:90%;font-weight: bold;}
  .pagenumber {position:absolute ; bottom:0.5em;font-size: 2em;left:0.5em;z-index: 99;color:brown;pointer-events: none;}
  .selected {background:var(--selected-color)}
  .pane {height:100vh;vertical-align: top;}
  .timeadjust {cursor:pointer;padding-left:0.3em;padding-right:0.3em;user-select: none;}
- .help {pointer-events:none;position:absolute;padding-left:50%}
+ .help {pointer-events:none;position:absolute;padding-left:40%}
  .setted {color:green}
  audio {user-select: none;}
  .wrong {color:red}

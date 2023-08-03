@@ -74,19 +74,18 @@
   transform: translate(-0%, -0%);
 }
 
-/* fakecss:d:/2023/timestamper/src/comps/inputnumber.esbuild-svelte-fake-css */
-.numinput.svelte-5fv0ws {
-  user-select: none;
+/* fakecss:d:/2023/timestamper/src/foliolastlineview.esbuild-svelte-fake-css */
+.container.svelte-1brohz3 {
+  z-index: 999;
+  height: 100vh;
 }
-.stepper.svelte-5fv0ws {
-  cursor: pointer;
-}
-.disabled.svelte-5fv0ws {
-  color: var(--button-unselected);
-  cursor: default;
+canvas.svelte-1brohz3 {
+  height: 100%;
 }
 
 /* fakecss:d:/2023/timestamper/src/app.esbuild-svelte-fake-css */
-.app.svelte-1ypjrgx {
+.app.svelte-18dlsay {
   height: 100vh;
+  display: flex;
+  flex-direction: row;
 }
