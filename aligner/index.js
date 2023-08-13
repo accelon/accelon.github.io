@@ -1,4 +1,83 @@
 (() => {
+  var __create = Object.create;
+  var __defProp = Object.defineProperty;
+  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __getProtoOf = Object.getPrototypeOf;
+  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __commonJS = (cb, mod) => function __require() {
+    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+  };
+  var __copyProps = (to, from, except, desc) => {
+    if (from && typeof from === "object" || typeof from === "function") {
+      for (let key of __getOwnPropNames(from))
+        if (!__hasOwnProp.call(to, key) && key !== except)
+          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+    }
+    return to;
+  };
+  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+    // If the importer is in node compatibility mode or this is not an ESM
+    // file that has been converted to a CommonJS file using a Babel-
+    // compatible transform (i.e. "__esModule" has not been set), then set
+    // "default" to the CommonJS "module.exports" for node compatibility.
+    isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+    mod
+  ));
+
+  // ../ptk/cli/colors.cjs
+  var require_colors = __commonJS({
+    "../ptk/cli/colors.cjs"(exports) {
+      var FORCE_COLOR;
+      var NODE_DISABLE_COLORS;
+      var NO_COLOR;
+      var TERM;
+      var isTTY = true;
+      if (typeof process !== "undefined") {
+        ({ FORCE_COLOR, NODE_DISABLE_COLORS, NO_COLOR, TERM } = process.env || {});
+        isTTY = process.stdout && process.stdout.isTTY;
+      }
+      var $ = exports.$ = {
+        enabled: !NODE_DISABLE_COLORS && NO_COLOR == null && TERM !== "dumb" && (FORCE_COLOR != null && FORCE_COLOR !== "0" || isTTY)
+      };
+      function init2(x, y) {
+        let rgx = new RegExp(`\\x1b\\[${y}m`, "g");
+        let open = `\x1B[${x}m`, close = `\x1B[${y}m`;
+        return function(txt) {
+          if (!$.enabled || txt == null)
+            return txt;
+          return open + (!!~("" + txt).indexOf(close) ? txt.replace(rgx, close + open) : txt) + close;
+        };
+      }
+      exports.reset = init2(0, 0);
+      exports.bold = init2(1, 22);
+      exports.dim = init2(2, 22);
+      exports.italic = init2(3, 23);
+      exports.underline = init2(4, 24);
+      exports.inverse = init2(7, 27);
+      exports.hidden = init2(8, 28);
+      exports.strikethrough = init2(9, 29);
+      exports.black = init2(30, 39);
+      exports.red = init2(31, 39);
+      exports.green = init2(32, 39);
+      exports.yellow = init2(33, 39);
+      exports.blue = init2(34, 39);
+      exports.magenta = init2(35, 39);
+      exports.cyan = init2(36, 39);
+      exports.white = init2(37, 39);
+      exports.gray = init2(90, 39);
+      exports.grey = init2(90, 39);
+      exports.bgBlack = init2(40, 49);
+      exports.bgRed = init2(41, 49);
+      exports.bgGreen = init2(42, 49);
+      exports.bgYellow = init2(43, 49);
+      exports.bgBlue = init2(44, 49);
+      exports.bgMagenta = init2(45, 49);
+      exports.bgCyan = init2(46, 49);
+      exports.bgWhite = init2(47, 49);
+    }
+  });
+
   // node_modules/svelte/internal/index.mjs
   function noop() {
   }
@@ -3800,41 +3879,12 @@
   var pageSize = 65536;
   var crcBuffer = makeUint8Array(m2).subarray(pageSize);
 
-  // ../ptk/denote/tokenizers.ts
-  var isIASTToken = (w) => w.match(/^[a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*$/);
-  var tokenizeIAST = (str, opts = {}) => {
-    const pattern = opts.pattern || /([a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*)/ig;
-    let o = str.split(pattern).filter((it) => !!it);
-    if (opts.removeBlank)
-      o = o.filter(isIASTToken);
-    if (opts.tokenOnly)
-      return o;
-    else
-      return o.map((raw) => {
-        return [raw, null];
-      });
-  };
-  tokenizeIAST.splitPunc = (str) => str;
-  tokenizeIAST.isToken = isIASTToken;
-  var tokenizeIASTPunc = (str, opts = {}) => {
-    opts.pattern = /([“‘]*[a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*[’।॥\.,;?\!…”–]* *)/ig;
-    return tokenizeIAST(str, opts);
-  };
-  tokenizeIASTPunc.splitPunc = (token) => {
-    const mlead = token.match(/^([“‘]*)/);
-    let lead, tail;
-    if (mlead) {
-      lead = mlead[1];
-      token = token.slice(lead.length);
-    }
-    const mtail = token.match(/(\d*[’।॥\.,;?\!…”–]* *)$/);
-    if (mtail) {
-      tail = mtail[1];
-      token = token.slice(0, token.length - tail.length);
-    }
-    return [lead, token, tail];
-  };
-  tokenizeIASTPunc.isToken = (w) => w.match(/^([“‘]*[a-zA-Zḍṭṇñḷṃṁṣśṅṛāīūâîû]+\d*[’।॥\.,;?\!…”–]* *)$/);
+  // ../ptk/align/breaker.ts
+  var SENTENCESEP = String.fromCodePoint(12287);
+  var SENTENCESEP1 = String.fromCodePoint(12286);
+
+  // ../ptk/utils/diff.ts
+  var import_colors = __toESM(require_colors(), 1);
 
   // src/editor.ts
   var markOfftext = (cm, line, segs = null, lines = null) => {
@@ -4000,6 +4050,9 @@
   var urls = [
     ["\u676D\u5DDE\u4F5B\u5B78\u9662", "https://raw.githubusercontent.com/accelon/sutra-mobi/main/cs-hz.offtext/<>.hz.off"],
     ["Sutta Central", "https://raw.githubusercontent.com/accelon/sc/main/off/<>.sc.off"],
+    ["\u838A\u6625\u6C5F", "https://raw.githubusercontent.com/accelon/ccc/main/off/<>.ccc.off"],
+    ["\u856D\u5F0F\u7403", "https://raw.githubusercontent.com/accelon/xsq/main/off/<>.xsq.off"],
+    ["\u5143\u4EAB\u5BFA", "https://raw.githubusercontent.com/accelon/cb-n/main/off/<>.yh.off"],
     ["Pali", "https://dhamma.github.io/sc-ro/<>.ms.off"]
     //generated by accelon/sc/gen-ro.js
   ];
