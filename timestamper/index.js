@@ -768,6 +768,7 @@
   var maxjuan = writable(1);
   var maxline = writable(1);
   var timestamps = writable([]);
+  var adjusttime = writable(0);
   var host = document.location.host;
   var localhost = ~host.indexOf("127.0.0.1") || ~host.indexOf("localhost");
   var foliopath = writable(localhost ? "folio/" : "https://dharmacloud.github.io/swipegallery/folio/");
@@ -785,6 +786,17 @@
     return style;
   };
   var sutra = writable({});
+  var getTimestamp = (cursor) => {
+    const arr = get_store_value(timestamps);
+    cursor = cursor || get_store_value(timestampcursor);
+    const o = arr[get_store_value(activepb)];
+    if (!o)
+      return null;
+    return o[cursor];
+  };
+  timestampcursor.subscribe((cursor) => {
+    adjusttime.set(getTimestamp(cursor));
+  });
   var setTimestamp = (ts) => {
     const arr = get_store_value(timestamps);
     const cursor = get_store_value(timestampcursor);
@@ -800,6 +812,13 @@
   };
   var settrack = (t) => {
     get_store_value(theaudio).currentTime = t;
+  };
+  var humantime = (ts, frag) => {
+    const t = Math.round(ts);
+    const h = Math.floor(t / 3600);
+    const m4 = Math.floor((t - h * 3600) / 60).toString();
+    let s = ts - h * 3600 - m4 * 60;
+    return (h ? h + ":" : "") + m4.padStart(2, "0") + ":" + (frag ? s.toFixed(2) : Math.round(s).toString().padStart(2, "0"));
   };
 
   // src/3rdparty/swipe.svelte
@@ -2391,7 +2410,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       if (e.code == "Space") {
         if (e.target.nodeName == "AUDIO")
           return;
-        audio.paused ? audio.play() : audio.pause();
+        if (audio.paused) {
+          const ts = getTimestamp();
+          $$invalidate(0, audio.currentTime = ts, audio);
+          audio.play();
+        } else {
+          audio.pause();
+        }
         e.preventDefault();
       } else if (e.code == "Enter" || e.code == "NumpadEnter") {
         setTimestamp(audio.currentTime - $stampdelay);
@@ -2424,8 +2449,27 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           timestampcursor.set($timestampcursor - 1);
           e.preventDefault();
         }
+      } else if (e.key == "-") {
+        let ts = getTimestamp();
+        if (typeof ts == "number") {
+          ts -= 0.25;
+          if (ts < 0)
+            ts = 0.01;
+          adjusttime.set(ts);
+          $$invalidate(0, audio.currentTime = ts, audio);
+          setTimestamp(ts);
+        }
+      } else if (e.key == "+" || e.key == "=") {
+        let ts = getTimestamp();
+        if (typeof ts == "number") {
+          ts += 0.25;
+          adjusttime.set(ts);
+          $$invalidate(0, audio.currentTime = ts, audio);
+          setTimestamp(ts);
+        }
       } else if (e.key == "Backspace") {
         seektrack(-3);
+        adjusttime.set(audio.currentTime);
       } else if (e.key == "Delete") {
         if ($timestampcursor > 0) {
           const cursor = $timestampcursor - 1;
@@ -6538,15 +6582,22 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let button2;
     let t7;
     let t8;
+    let t9_value = humantime(
+      /*$adjusttime*/
+      ctx[4],
+      true
+    ) + "";
+    let t9;
+    let t10;
     let slider;
     let updating_value;
-    let t9;
+    let t11;
     let player;
     let current;
     let mounted;
     let dispose;
     function slider_value_binding(value) {
-      ctx[9](value);
+      ctx[10](value);
     }
     let slider_props = {
       max: 300,
@@ -6565,7 +6616,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     binding_callbacks.push(() => bind(slider, "value", slider_value_binding));
     slider.$on("input", debounce(
       /*setPlayrate*/
-      ctx[5],
+      ctx[6],
       300
     ));
     player = new player_default({});
@@ -6576,7 +6627,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         t1 = space();
         button1 = element("button");
         t2 = text("\u{1F4BE}");
-        t3 = text("\n\n\u5716");
+        t3 = text("\n\u5716");
         input0 = element("input");
         t4 = text("\n\u97F3");
         input1 = element("input");
@@ -6586,8 +6637,10 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         button2 = element("button");
         t7 = text("\u{1F4C4}");
         t8 = space();
+        t9 = text(t9_value);
+        t10 = space();
         create_component(slider.$$.fragment);
-        t9 = space();
+        t11 = space();
         create_component(player.$$.fragment);
         button0.disabled = button0_disabled_value = /*$dirty*/
         ctx[1] && /*$filehandle*/
@@ -6636,8 +6689,10 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         insert(target, button2, anchor);
         append(button2, t7);
         insert(target, t8, anchor);
-        mount_component(slider, target, anchor);
         insert(target, t9, anchor);
+        insert(target, t10, anchor);
+        mount_component(slider, target, anchor);
+        insert(target, t11, anchor);
         mount_component(player, target, anchor);
         current = true;
         if (!mounted) {
@@ -6646,7 +6701,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
               window,
               "keydown",
               /*handleKeydown*/
-              ctx[4]
+              ctx[5]
             ),
             listen(button0, "click", openfile),
             listen(button1, "click", savefile),
@@ -6654,19 +6709,19 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
               input0,
               "input",
               /*input0_input_handler*/
-              ctx[6]
+              ctx[7]
             ),
             listen(
               input1,
               "input",
               /*input1_input_handler*/
-              ctx[7]
+              ctx[8]
             ),
             listen(
               input2,
               "input",
               /*input2_input_handler*/
-              ctx[8]
+              ctx[9]
             ),
             listen(button2, "click", newfile)
           ];
@@ -6718,9 +6773,16 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           button2.disabled = /*$dirty*/
           ctx2[1];
         }
+        if ((!current || dirty2 & /*$adjusttime*/
+        16) && t9_value !== (t9_value = humantime(
+          /*$adjusttime*/
+          ctx2[4],
+          true
+        ) + ""))
+          set_data(t9, t9_value);
         const slider_changes = {};
         if (dirty2 & /*$$scope, rate*/
-        2049) {
+        4097) {
           slider_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         if (!updating_value && dirty2 & /*rate*/
@@ -6769,9 +6831,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           detach(button2);
         if (detaching)
           detach(t8);
-        destroy_component(slider, detaching);
         if (detaching)
           detach(t9);
+        if (detaching)
+          detach(t10);
+        destroy_component(slider, detaching);
+        if (detaching)
+          detach(t11);
         destroy_component(player, detaching);
         mounted = false;
         run_all(dispose);
@@ -6783,10 +6849,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let $dirty;
     let $filehandle;
     let $sutra;
-    component_subscribe($$self, theaudio, ($$value) => $$invalidate(10, $theaudio = $$value));
+    let $adjusttime;
+    component_subscribe($$self, theaudio, ($$value) => $$invalidate(11, $theaudio = $$value));
     component_subscribe($$self, dirty, ($$value) => $$invalidate(1, $dirty = $$value));
     component_subscribe($$self, filehandle, ($$value) => $$invalidate(2, $filehandle = $$value));
     component_subscribe($$self, sutra, ($$value) => $$invalidate(3, $sutra = $$value));
+    component_subscribe($$self, adjusttime, ($$value) => $$invalidate(4, $adjusttime = $$value));
     let rate = [100, 0];
     function handleKeydown(evt) {
       const key = evt.key.toLowerCase();
@@ -6826,6 +6894,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       $dirty,
       $filehandle,
       $sutra,
+      $adjusttime,
       handleKeydown,
       setPlayrate,
       input0_input_handler,
@@ -6845,20 +6914,17 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
   // src/pagetimestamp.svelte
   function get_each_context3(ctx, list, i) {
     const child_ctx = ctx.slice();
-    child_ctx[6] = list[i];
-    child_ctx[8] = i;
+    child_ctx[5] = list[i];
+    child_ctx[7] = i;
     return child_ctx;
   }
   function create_each_block3(ctx) {
     let span;
     let t_value = (
       /*ts*/
-      (ctx[6] ? (
-        /*humantime*/
-        ctx[2](
-          /*ts*/
-          ctx[6]
-        )
+      (ctx[5] ? humantime(
+        /*ts*/
+        ctx[5]
       ) : "00:00") + " "
     );
     let t;
@@ -6868,11 +6934,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     function click_handler() {
       return (
         /*click_handler*/
-        ctx[5](
+        ctx[4](
           /*idx*/
-          ctx[8],
+          ctx[7],
           /*ts*/
-          ctx[6]
+          ctx[5]
         )
       );
     }
@@ -6881,35 +6947,34 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         span = element("span");
         t = text(t_value);
         attr(span, "class", "timestamp");
-        attr(span, "title", span_title_value = /*humantime*/
-        ctx[2](
+        attr(span, "title", span_title_value = humantime(
           /*ts*/
-          ctx[6],
+          ctx[5],
           true
         ));
         toggle_class(
           span,
           "wrong",
           /*ts*/
-          ctx[6] && /*idx*/
-          ctx[8] > 0 && /*timestamp*/
+          ctx[5] && /*idx*/
+          ctx[7] > 0 && /*timestamp*/
           ctx[0][
             /*idx*/
-            ctx[8] - 1
+            ctx[7] - 1
           ] > /*ts*/
-          ctx[6]
+          ctx[5]
         );
         toggle_class(
           span,
           "setted",
           /*ts*/
-          ctx[6]
+          ctx[5]
         );
         toggle_class(
           span,
           "selected",
           /*idx*/
-          ctx[8] == /*cursor*/
+          ctx[7] == /*cursor*/
           ctx[1]
         );
       },
@@ -6925,19 +6990,15 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         ctx = new_ctx;
         if (dirty2 & /*timestamp*/
         1 && t_value !== (t_value = /*ts*/
-        (ctx[6] ? (
-          /*humantime*/
-          ctx[2](
-            /*ts*/
-            ctx[6]
-          )
+        (ctx[5] ? humantime(
+          /*ts*/
+          ctx[5]
         ) : "00:00") + " "))
           set_data(t, t_value);
         if (dirty2 & /*timestamp*/
-        1 && span_title_value !== (span_title_value = /*humantime*/
-        ctx[2](
+        1 && span_title_value !== (span_title_value = humantime(
           /*ts*/
-          ctx[6],
+          ctx[5],
           true
         ))) {
           attr(span, "title", span_title_value);
@@ -6948,13 +7009,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
             span,
             "wrong",
             /*ts*/
-            ctx[6] && /*idx*/
-            ctx[8] > 0 && /*timestamp*/
+            ctx[5] && /*idx*/
+            ctx[7] > 0 && /*timestamp*/
             ctx[0][
               /*idx*/
-              ctx[8] - 1
+              ctx[7] - 1
             ] > /*ts*/
-            ctx[6]
+            ctx[5]
           );
         }
         if (dirty2 & /*timestamp*/
@@ -6963,7 +7024,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
             span,
             "setted",
             /*ts*/
-            ctx[6]
+            ctx[5]
           );
         }
         if (dirty2 & /*cursor*/
@@ -6972,7 +7033,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
             span,
             "selected",
             /*idx*/
-            ctx[8] == /*cursor*/
+            ctx[7] == /*cursor*/
             ctx[1]
           );
         }
@@ -7012,7 +7073,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       },
       p(ctx2, [dirty2]) {
         if (dirty2 & /*humantime, timestamp, cursor, gototimestamp*/
-        15) {
+        7) {
           each_value = /*timestamp*/
           ctx2[0];
           let i;
@@ -7045,13 +7106,6 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let { timestamp = [] } = $$props;
     let { cursor } = $$props;
     let { pb } = $$props;
-    const humantime = (ts, frag) => {
-      const t = Math.round(ts);
-      const h = Math.floor(t / 3600);
-      const m4 = Math.floor((t - h * 3600) / 60).toString();
-      let s = ts - h * 3600 - m4 * 60;
-      return (h ? h + ":" : "") + m4.padStart(2, "0") + ":" + (frag ? s.toFixed(2) : Math.round(s).toString().padStart(2, "0"));
-    };
     const gototimestamp = (idx2, ts) => {
       timestampcursor.set(idx2);
       activepb.set(pb);
@@ -7066,14 +7120,14 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       if ("cursor" in $$props2)
         $$invalidate(1, cursor = $$props2.cursor);
       if ("pb" in $$props2)
-        $$invalidate(4, pb = $$props2.pb);
+        $$invalidate(3, pb = $$props2.pb);
     };
-    return [timestamp, cursor, humantime, gototimestamp, pb, click_handler];
+    return [timestamp, cursor, gototimestamp, pb, click_handler];
   }
   var Pagetimestamp = class extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance10, create_fragment9, safe_not_equal, { timestamp: 0, cursor: 1, pb: 4 });
+      init(this, options, instance10, create_fragment9, safe_not_equal, { timestamp: 0, cursor: 1, pb: 3 });
     }
   };
   var pagetimestamp_default = Pagetimestamp;
@@ -7235,7 +7289,8 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
 <br/>\u8F38\u5165\u5716\u6A94\u53CA\u97F3\u6A94\u540D\u7A31\uFF0C\u884C\u6578(\u53175\u53576)\uFF0C\u6309\u65B0\u589E\u3002
 <br/>\u4E0A\u4E0B\u9375 \u4E0A\u4E0B\u6298
 <br/>\u5DE6\u53F3\u9375 \u524D\u5F8C\u53E5
-<br/>\u7A7A\u767D \u64AD\u653E/\u66AB\u505C
+<br/>-\u6E1B0.25\u79D2\uFF0C =\u52A00.25\u79D2
+<br/>\u7A7A\u767D\u5F9E\u6E38\u6A19\u91CD\u64AD/\u66AB\u505C
 <br/>Enter \u8A2D\u5B9A\u6642\u9593\u6233
 <br/>Backspace \u5F80\u56DE\u8DF3\u4E09\u79D2
 <br/>Del \u4FEE\u6B63\u4E0A\u4E00\u53E5
