@@ -5809,7 +5809,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     if (!json.foliolines)
       json.foliolines = 5;
     loadFolio(json.folio, (pbcount) => {
-      json.timestamps = createTimestamps(pbcount, json.foliolines);
+      if (!json.timestamps || !json.timestamps.length) {
+        json.timestamps = createTimestamps(pbcount, json.foliolines);
+      } else {
+        json.timestamps.length = pbcount;
+      }
       timestamps.set(json.timestamps);
     });
     sutra.set(json);
@@ -7227,7 +7231,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         }
         t0 = space();
         td1 = element("td");
-        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.8.23
+        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.8.24
 <br/>\u8F38\u5165\u5716\u6A94\u53CA\u97F3\u6A94\u540D\u7A31\uFF0C\u884C\u6578(\u53175\u53576)\uFF0C\u6309\u65B0\u589E\u3002
 <br/>\u4E0A\u4E0B\u9375 \u4E0A\u4E0B\u6298
 <br/>\u5DE6\u53F3\u9375 \u524D\u5F8C\u53E5
