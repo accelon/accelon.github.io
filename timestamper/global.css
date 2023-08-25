@@ -73,9 +73,4 @@ body {
  select {font-size:1em}
  input {font-size:1em}
 
- .thumb {
-   width: 1.2em;
-   height: 1.2em;
-   border-radius: 0.6em;
-   background: var(--thumb-bg, #f8b358);
- }
+ 

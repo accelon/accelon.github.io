@@ -792,7 +792,7 @@
     const o = arr[get_store_value(activepb)];
     if (!o)
       return null;
-    return o[cursor];
+    return o[cursor] || o[cursor - 1] || 0;
   };
   timestampcursor.subscribe((cursor) => {
     adjusttime.set(getTimestamp(cursor));
@@ -6097,7 +6097,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     return {
       c() {
         div = element("div");
-        attr(div, "class", "thumb");
+        attr(div, "class", "thumb svelte-ghmuf1");
       },
       m(target, anchor) {
         insert(target, div, anchor);
@@ -6113,13 +6113,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let current;
     const default_slot_template = (
       /*#slots*/
-      ctx[10].default
+      ctx[11].default
     );
     const default_slot = create_slot(
       default_slot_template,
       ctx,
       /*$$scope*/
-      ctx[13],
+      ctx[14],
       null
     );
     const default_slot_or_fallback = default_slot || fallback_block_1(ctx);
@@ -6137,20 +6137,20 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       p(ctx2, dirty2) {
         if (default_slot) {
           if (default_slot.p && (!current || dirty2 & /*$$scope*/
-          8192)) {
+          16384)) {
             update_slot_base(
               default_slot,
               default_slot_template,
               ctx2,
               /*$$scope*/
-              ctx2[13],
+              ctx2[14],
               !current ? get_all_dirty_from_scope(
                 /*$$scope*/
-                ctx2[13]
+                ctx2[14]
               ) : get_slot_changes(
                 default_slot_template,
                 /*$$scope*/
-                ctx2[13],
+                ctx2[14],
                 dirty2,
                 null
               ),
@@ -6179,13 +6179,13 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let current;
     const left_slot_template = (
       /*#slots*/
-      ctx[10].left
+      ctx[11].left
     );
     const left_slot = create_slot(
       left_slot_template,
       ctx,
       /*$$scope*/
-      ctx[13],
+      ctx[14],
       get_left_slot_context
     );
     const left_slot_or_fallback = left_slot || fallback_block(ctx);
@@ -6203,20 +6203,20 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       p(ctx2, dirty2) {
         if (left_slot) {
           if (left_slot.p && (!current || dirty2 & /*$$scope*/
-          8192)) {
+          16384)) {
             update_slot_base(
               left_slot,
               left_slot_template,
               ctx2,
               /*$$scope*/
-              ctx2[13],
+              ctx2[14],
               !current ? get_all_dirty_from_scope(
                 /*$$scope*/
-                ctx2[13]
+                ctx2[14]
               ) : get_slot_changes(
                 left_slot_template,
                 /*$$scope*/
-                ctx2[13],
+                ctx2[14],
                 dirty2,
                 get_left_slot_changes
               ),
@@ -6225,7 +6225,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           }
         } else {
           if (left_slot_or_fallback && left_slot_or_fallback.p && (!current || dirty2 & /*$$scope*/
-          8192)) {
+          16384)) {
             left_slot_or_fallback.p(ctx2, !current ? -1 : dirty2);
           }
         }
@@ -6259,8 +6259,10 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     let updating_pos;
     let t2;
     let current;
+    let mounted;
+    let dispose;
     function thumb_pos_binding(value) {
-      ctx[11](value);
+      ctx[12](value);
     }
     let thumb_props = {
       $$slots: { default: [create_default_slot2] },
@@ -6278,17 +6280,17 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
     thumb.$on(
       "active",
       /*active_handler*/
-      ctx[12]
+      ctx[13]
     );
     const caption_slot_template = (
       /*#slots*/
-      ctx[10].caption
+      ctx[11].caption
     );
     const caption_slot = create_slot(
       caption_slot_template,
       ctx,
       /*$$scope*/
-      ctx[13],
+      ctx[14],
       get_caption_slot_context
     );
     return {
@@ -6308,15 +6310,15 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         ctx[0][0];
         attr(input, "name", input_name_value = /*name*/
         ctx[1][0]);
-        attr(input, "class", "svelte-89zwb0");
-        attr(div0, "class", "progress svelte-89zwb0");
+        attr(input, "class", "svelte-ghmuf1");
+        attr(div0, "class", "progress svelte-ghmuf1");
         attr(
           div0,
           "style",
           /*progress*/
           ctx[4]
         );
-        attr(div1, "class", "track svelte-89zwb0");
+        attr(div1, "class", "track svelte-ghmuf1");
       },
       m(target, anchor) {
         insert(target, div2, anchor);
@@ -6331,6 +6333,15 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
           caption_slot.m(div1, null);
         }
         current = true;
+        if (!mounted) {
+          dispose = listen(
+            div1,
+            "click",
+            /*adjust*/
+            ctx[5]
+          );
+          mounted = true;
+        }
       },
       p(ctx2, [dirty2]) {
         if (!current || dirty2 & /*value*/
@@ -6354,7 +6365,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         }
         const thumb_changes = {};
         if (dirty2 & /*$$scope*/
-        8192) {
+        16384) {
           thumb_changes.$$scope = { dirty: dirty2, ctx: ctx2 };
         }
         if (!updating_pos && dirty2 & /*pos*/
@@ -6367,20 +6378,20 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         thumb.$set(thumb_changes);
         if (caption_slot) {
           if (caption_slot.p && (!current || dirty2 & /*$$scope*/
-          8192)) {
+          16384)) {
             update_slot_base(
               caption_slot,
               caption_slot_template,
               ctx2,
               /*$$scope*/
-              ctx2[13],
+              ctx2[14],
               !current ? get_all_dirty_from_scope(
                 /*$$scope*/
-                ctx2[13]
+                ctx2[14]
               ) : get_slot_changes(
                 caption_slot_template,
                 /*$$scope*/
-                ctx2[13],
+                ctx2[14],
                 dirty2,
                 get_caption_slot_changes
               ),
@@ -6407,6 +6418,8 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         destroy_component(thumb);
         if (caption_slot)
           caption_slot.d(detaching);
+        mounted = false;
+        dispose();
       }
     };
   }
@@ -6439,10 +6452,19 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       setPos(value);
       setValue(pos);
     }
+    function adjust(e) {
+      if (e.target.classList[0] == "progress") {
+        setPos([(value[0] || min) - step, value[1]]);
+        setValue(pos);
+      } else if (e.target.classList[0] == "track") {
+        setPos([(value[0] || min) + step, value[1]]);
+        setValue(pos);
+      }
+    }
     function thumb_pos_binding(value2) {
       if ($$self.$$.not_equal(pos[0], value2)) {
         pos[0] = value2;
-        $$invalidate(2, pos), $$invalidate(5, range), $$invalidate(9, order), $$invalidate(3, active);
+        $$invalidate(2, pos), $$invalidate(6, range), $$invalidate(10, order), $$invalidate(3, active);
       }
     }
     const active_handler = ({ detail: v }) => $$invalidate(3, active = v);
@@ -6450,23 +6472,23 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       if ("name" in $$props2)
         $$invalidate(1, name2 = $$props2.name);
       if ("range" in $$props2)
-        $$invalidate(5, range = $$props2.range);
+        $$invalidate(6, range = $$props2.range);
       if ("min" in $$props2)
-        $$invalidate(6, min = $$props2.min);
+        $$invalidate(7, min = $$props2.min);
       if ("max" in $$props2)
-        $$invalidate(7, max = $$props2.max);
+        $$invalidate(8, max = $$props2.max);
       if ("step" in $$props2)
-        $$invalidate(8, step = $$props2.step);
+        $$invalidate(9, step = $$props2.step);
       if ("value" in $$props2)
         $$invalidate(0, value = $$props2.value);
       if ("order" in $$props2)
-        $$invalidate(9, order = $$props2.order);
+        $$invalidate(10, order = $$props2.order);
       if ("$$scope" in $$props2)
-        $$invalidate(13, $$scope = $$props2.$$scope);
+        $$invalidate(14, $$scope = $$props2.$$scope);
     };
     $$self.$$.update = () => {
       if ($$self.$$.dirty & /*range, order, active, pos*/
-      556) {
+      1100) {
         $:
           if (range && order && active)
             $$invalidate(2, pos = checkPos(pos));
@@ -6484,12 +6506,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
             setPos(value);
       }
       if ($$self.$$.dirty & /*min, max*/
-      192) {
+      384) {
         $:
           min, max, clamp();
       }
       if ($$self.$$.dirty & /*range, pos*/
-      36) {
+      68) {
         $:
           $$invalidate(4, progress = `
     left: ${range ? Math.min(pos[0], pos[1]) * 100 : 0}%;
@@ -6503,6 +6525,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       pos,
       active,
       progress,
+      adjust,
       range,
       min,
       max,
@@ -6519,12 +6542,12 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       super();
       init(this, options, instance8, create_fragment7, safe_not_equal, {
         name: 1,
-        range: 5,
-        min: 6,
-        max: 7,
-        step: 8,
+        range: 6,
+        min: 7,
+        max: 8,
+        step: 9,
         value: 0,
-        order: 9
+        order: 10
       });
     }
   };
