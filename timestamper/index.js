@@ -7308,8 +7308,10 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         }
         t0 = space();
         td1 = element("td");
-        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.8.24
-<br/>\u8F38\u5165\u5716\u6A94\u53CA\u97F3\u6A94\u540D\u7A31\uFF0C\u884C\u6578(\u53175\u53576)\uFF0C\u6309\u65B0\u589E\u3002
+        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.9.12 
+<br/>\u6559\u5B78\u8996\u983B<a href="https://youtu.be/BEv4NZ9b_MY" target="_new">Youtube</a> 
+<a href="https://nissaya.cn/video/timestamper.mp4" target="_new">\u7121\u6CD5\u8A2A\u554F\u6CB9\u7BA1\u9EDE\u6B64</a> 
+<div><br/>\u8F38\u5165\u5716\u6A94\u53CA\u97F3\u6A94\u540D\u7A31\uFF0C\u884C\u6578(\u53175\u53576)\uFF0C\u6309\u65B0\u589E\u3002
 <br/>\u4E0A\u4E0B\u9375 \u4E0A\u4E0B\u6298
 <br/>\u5DE6\u53F3\u9375 \u524D\u5F8C\u53E5
 <br/>-\u6E1B0.25\u79D2\uFF0C =\u52A00.25\u79D2
@@ -7321,7 +7323,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
 <br/>\u9EDE\u7DA0\u8272\u6578\u5B57\u79FB\u5230\u97F3\u983B\u53CA\u5716\u6A94\u4F4D\u7F6E\u3002
 <br/>\u7D05\u8272\u6578\u5B57\u8868\u793A\u932F\u8AA4\uFF0C\u4E0D\u5F97\u5C0F\u65BC\u4E4B\u524D\u7684\u6642\u9593\u3002
 <br/>alt-n \u65B0\u6A94\u{1F4C4} alt-s \u5B58\u6A94\u{1F4BE} alt-o \u958B\u6A94\u{1F4C2} 
-<br/>agmd\u9577\uFF0Cagmm\u4E2D\uFF0Cagms\u96DC\uFF0Cagmu\u589E</div>`;
+<br/>agmd\u9577\uFF0Cagmm\u4E2D\uFF0Cagms\u96DC\uFF0Cagmu\u589E</div></div>`;
         attr(div0, "class", "timestamps");
       },
       m(target, anchor) {
