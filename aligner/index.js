@@ -4157,13 +4157,45 @@
       }
     };
   }
+  function create_if_block(ctx) {
+    let a0;
+    let t1;
+    let a1;
+    return {
+      c() {
+        a0 = element("a");
+        a0.textContent = "Youtube\u6559\u5B78\u8996\u983B";
+        t1 = space();
+        a1 = element("a");
+        a1.textContent = "\u65E0\u6CD5\u8BBF\u95EE\u6CB9\u7BA1\u70B9\u6B64";
+        attr(a0, "href", "https://youtu.be/2TskfhLQ9Jk");
+        attr(a0, "target", "_new");
+        attr(a0, "class", "svelte-2aqs7u");
+        attr(a1, "href", "https://nissaya.cn/video/aligner.mp4");
+        attr(a1, "target", "_new");
+        attr(a1, "class", "svelte-2aqs7u");
+      },
+      m(target, anchor) {
+        insert(target, a0, anchor);
+        insert(target, t1, anchor);
+        insert(target, a1, anchor);
+      },
+      d(detaching) {
+        if (detaching)
+          detach(a0);
+        if (detaching)
+          detach(t1);
+        if (detaching)
+          detach(a1);
+      }
+    };
+  }
   function create_fragment(ctx) {
     let div;
     let span0;
     let span1;
     let t2;
     let t3;
-    let a;
     let each_value = (
       /*$references*/
       ctx[0]
@@ -4172,11 +4204,13 @@
     for (let i = 0; i < each_value.length; i += 1) {
       each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     }
+    let if_block = !/*$references*/
+    ctx[0].length && create_if_block(ctx);
     return {
       c() {
         div = element("div");
         span0 = element("span");
-        span0.textContent = "\u5C0D\u9F4A";
+        span0.textContent = "\u5E73\u884C\u85CF\u5BF9\u9F50";
         span1 = element("span");
         span1.textContent = `${APPVER}`;
         t2 = space();
@@ -4184,12 +4218,9 @@
           each_blocks[i].c();
         }
         t3 = space();
-        a = element("a");
-        a.textContent = "\u793A\u7BC4";
+        if (if_block)
+          if_block.c();
         set_style(span0, "font-size", "120%");
-        attr(a, "href", "https://youtu.be/2TskfhLQ9Jk");
-        attr(a, "target", "_new");
-        attr(a, "class", "svelte-2aqs7u");
         attr(div, "class", "Toolbar svelte-2aqs7u");
       },
       m(target, anchor) {
@@ -4203,7 +4234,8 @@
           }
         }
         append(div, t3);
-        append(div, a);
+        if (if_block)
+          if_block.m(div, null);
       },
       p(ctx2, [dirty2]) {
         if (dirty2 & /*$selectedRef, loadReference, $references*/
@@ -4226,6 +4258,18 @@
           }
           each_blocks.length = each_value.length;
         }
+        if (!/*$references*/
+        ctx2[0].length) {
+          if (if_block) {
+          } else {
+            if_block = create_if_block(ctx2);
+            if_block.c();
+            if_block.m(div, null);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
+        }
       },
       i: noop,
       o: noop,
@@ -4233,6 +4277,8 @@
         if (detaching)
           detach(div);
         destroy_each(each_blocks, detaching);
+        if (if_block)
+          if_block.d();
       }
     };
   }
@@ -4303,7 +4349,7 @@
       }
     };
   }
-  function create_if_block(ctx) {
+  function create_if_block2(ctx) {
     let span;
     let mounted;
     let dispose;
@@ -4365,7 +4411,7 @@
     );
     let if_block1 = (
       /*stepper*/
-      ctx[1] && create_if_block(ctx)
+      ctx[1] && create_if_block2(ctx)
     );
     return {
       c() {
@@ -4451,7 +4497,7 @@
           if (if_block1) {
             if_block1.p(ctx2, dirty2);
           } else {
-            if_block1 = create_if_block(ctx2);
+            if_block1 = create_if_block2(ctx2);
             if_block1.c();
             if_block1.m(span, null);
           }
@@ -4564,7 +4610,7 @@
 
   // src/editortoolbar.svelte
   var { window: window_1 } = globals;
-  function create_if_block2(ctx) {
+  function create_if_block3(ctx) {
     let button;
     let mounted;
     let dispose;
@@ -4637,7 +4683,7 @@
     inputnumber = new inputnumber_default({ props: inputnumber_props });
     binding_callbacks.push(() => bind(inputnumber, "value", inputnumber_value_binding));
     let if_block = !/*$references*/
-    ctx[4].length && create_if_block2(ctx);
+    ctx[4].length && create_if_block3(ctx);
     return {
       c() {
         button0 = element("button");
@@ -4737,7 +4783,7 @@
           if (if_block) {
             if_block.p(ctx2, dirty2);
           } else {
-            if_block = create_if_block2(ctx2);
+            if_block = create_if_block3(ctx2);
             if_block.c();
             if_block.m(if_block_anchor.parentNode, if_block_anchor);
           }
@@ -4871,7 +4917,7 @@
   var get_b_slot_context = (ctx) => ({});
   var get_a_slot_changes = (dirty2) => ({});
   var get_a_slot_context = (ctx) => ({});
-  function create_if_block3(ctx) {
+  function create_if_block4(ctx) {
     let div;
     return {
       c() {
@@ -4930,7 +4976,7 @@
     );
     let if_block = (
       /*dragging*/
-      ctx[6] && create_if_block3(ctx)
+      ctx[6] && create_if_block4(ctx)
     );
     return {
       c() {
@@ -5102,7 +5148,7 @@
         ) {
           if (if_block) {
           } else {
-            if_block = create_if_block3(ctx2);
+            if_block = create_if_block4(ctx2);
             if_block.c();
             if_block.m(if_block_anchor.parentNode, if_block_anchor);
           }
