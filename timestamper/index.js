@@ -2419,7 +2419,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         }
         e.preventDefault();
       } else if (e.code == "Enter" || e.code == "NumpadEnter") {
-        setTimestamp(audio.currentTime - $stampdelay);
+        setTimestamp(audio?.currentTime - $stampdelay);
         if ($timestampcursor + 1 < $sutra.foliolines)
           timestampcursor.set($timestampcursor + 1);
         else {
@@ -5858,6 +5858,11 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
       } else {
         json.timestamps.length = pbcount;
       }
+      for (let i = 0; i < json.timestamps.length; i++) {
+        if (!json.timestamps[i])
+          json.timestamps[i] = new Array(json.foliolines);
+        json.timestamps[i].length = json.foliolines;
+      }
       timestamps.set(json.timestamps);
     });
     sutra.set(json);
@@ -7308,7 +7313,7 @@ transition-duration: ${touch_end ? transitionDuration : "0"}ms;
         }
         t0 = space();
         td1 = element("td");
-        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.9.12 
+        td1.innerHTML = `<div class="help">\u8AA6\u7D93\u6642\u9593\u8EF8 2023.9.13 
 <br/>\u6559\u5B78\u8996\u983B<a href="https://youtu.be/BEv4NZ9b_MY" target="_new">Youtube</a> 
 <a href="https://nissaya.cn/video/timestamper.mp4" target="_new">\u7121\u6CD5\u8A2A\u554F\u6CB9\u7BA1\u9EDE\u6B64</a> 
 <div><br/>\u8F38\u5165\u5716\u6A94\u53CA\u97F3\u6A94\u540D\u7A31\uFF0C\u884C\u6578(\u53175\u53576)\uFF0C\u6309\u65B0\u589E\u3002
