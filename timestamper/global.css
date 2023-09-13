@@ -61,7 +61,7 @@ body {
 
  .timestamps {user-select:none;position: absolute;overflow-y:auto;height: 90vh;width:40%}
  .pb {color:rgb(207, 95, 95);padding-left:0.5em;cursor:pointer}
- .timestamp{cursor:pointer;color:gray;font-family: 'Courier New', Courier, monospace;font-size:90%;font-weight: bold;}
+ .timestamp{cursor:pointer;color:gray;font-family: 'Courier New', Courier, monospace;font-size:75%;font-weight: bold;}
  .pagenumber {position:absolute ; bottom:0.5em;font-size: 2em;left:0.5em;z-index: 99;color:brown;pointer-events: none;}
  .selected {background:var(--selected-color)}
  .pane {height:100vh;vertical-align: top;}
