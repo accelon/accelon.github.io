@@ -671,7 +671,7 @@
   var cm2 = writable(null);
   var cursorline = writable(0);
   var selectedRef = writable(0);
-  var APPVER = "2023.8.31";
+  var APPVER = "2023.9.14";
 
   // ../ptk/offtext/constants.ts
   var OFFTAG_REGEX_G = /\^([#@\/\.\:a-z_\-\d~]+)(<(?:\\.|.)*?>)?/g;
@@ -4047,10 +4047,1043 @@
     return line;
   };
 
+  // ../provident-pali/src/utils.js
+  var doParts = (parts, charpat, onPart) => {
+    let out = "";
+    if (typeof parts == "string")
+      parts = [parts];
+    for (let j2 = 0; j2 < parts.length; j2++) {
+      if (!parts[j2])
+        continue;
+      if (parts[j2][0] == "<" || parts[j2][0] == "^") {
+        out += parts[j2];
+        continue;
+      }
+      const units = parts[j2].split(charpat);
+      units.forEach((s) => {
+        const m4 = s.match(charpat);
+        if (!m4) {
+          out += s;
+        } else {
+          out += onPart(s);
+        }
+      });
+    }
+    return out;
+  };
+
+  // ../provident-pali/src/iast.js
+  var beginVowels = {
+    "a": "a",
+    "\u0101": "aA",
+    "i": "i",
+    "\u012B": "iI",
+    "u": "u",
+    "\u016B": "uU",
+    "o": "o",
+    "e": "e"
+  };
+  var i2p = {
+    // '|':'|', //allow | in a word, convert from । ॥ and 
+    "\u0964": "\u0964",
+    "\u0965": "\u0965",
+    //as it is
+    "k": "k",
+    "t": "t",
+    "\xF1": "Y",
+    "\u1E45": "N",
+    "\u1E47": "N",
+    "\u1E0D": "F",
+    "\u1E6D": "W",
+    "p": "p",
+    "c": "c",
+    "j": "j",
+    "s": "s",
+    "b": "b",
+    "y": "y",
+    "g": "g",
+    "d": "d",
+    "h": "h",
+    "m": "m",
+    "l": "l",
+    "v": "v",
+    "r": "r",
+    "n": "n",
+    "\u1E37": "L",
+    "kh": "K",
+    "gh": "G",
+    "jh": "J",
+    "ch": "C",
+    "\u1E6Dh": "X",
+    "\u1E0Dh": "Q",
+    "th": "T",
+    "dh": "D",
+    "ph": "P",
+    "bh": "B",
+    "kk": "kVk",
+    "kkh": "kVK",
+    "gg": "gVg",
+    "ggh": "gVG",
+    "tt": "tVt",
+    "tth": "tVT",
+    "\u1E6D\u1E6D": "WVW",
+    "\u1E6D\u1E6Dh": "WVX",
+    "pp": "pVp",
+    "pph": "pVP",
+    "bb": "bVb",
+    "bbh": "bVB",
+    "jj": "jVj",
+    "jjh": "jVJ",
+    "cc": "cVc",
+    "cch": "cVC",
+    "ll": "lVl",
+    "mm": "mVm",
+    "nn": "nVn",
+    "\xF1\xF1": "YVY",
+    "dd": "dVd",
+    "ddh": "dVD",
+    "\u1E0D\u1E0D": "FVF",
+    "\u1E0D\u1E0Dh": "FVQ",
+    "ss": "sVs",
+    "yy": "yVy",
+    "\u1E47\u1E47": "NVN",
+    "\u1E45gh": "NVG",
+    "\u1E45g": "NVg",
+    "\u1E45kh": "NVK",
+    "\u1E45k": "NVk",
+    "\u1E45khy": "NVKVy",
+    "dr": "dVr",
+    "dv": "dVv",
+    "ndr": "nVdVr",
+    "br": "bVr",
+    "khv": "KVv",
+    "hm": "hVm",
+    "ly": "lVy",
+    "mbh": "mVB",
+    "mh": "mVh",
+    "mp": "mVp",
+    "mb": "mVb",
+    "nd": "nVd",
+    "ndh": "nVD",
+    "\u1E47\u1E6Dh": "NVX",
+    "\xF1c": "YVc",
+    "\xF1j": "YVj",
+    "\xF1jh": "YVJ",
+    "\u1E47\u1E6D": "NVW",
+    "nt": "nVt",
+    "\u1E47\u1E0D": "NVF",
+    "sv": "sVv",
+    "sm": "sVm",
+    "tv": "tVv",
+    //not in font ligature
+    "\u1E37h": "LVh",
+    "nth": "nVT",
+    "yh": "yVh",
+    "tr": "tVr",
+    "mph": "mVP",
+    "nh": "nVh",
+    "\xF1ch": "YVC",
+    "vh": "vVh",
+    "nv": "nVv",
+    "ky": "kVy",
+    "gy": "gVy",
+    "ntv": "nVtVv",
+    "my": "mVy",
+    "ty": "tVy",
+    "gr": "gVr",
+    "kr": "kVr",
+    "sn": "sVn",
+    "kl": "kVl",
+    "st": "sVt",
+    "khy": "KVy",
+    "pl": "pVl",
+    "nty": "nVtVy",
+    "hv": "hVv",
+    "sy": "sVy",
+    "dm": "dVm",
+    "\u1E47y": "NVy",
+    "kv": "kVv",
+    "\u1E47h": "NVh",
+    //newly added
+    "\xF1h": "YVh",
+    "vy": "vVy",
+    "by": "bVy",
+    "py": "pVy",
+    "yv": "yVv",
+    "\u1E6Dy": "WVy",
+    "bhy": "BVy",
+    "tthy": "tVTVy",
+    //titthyā
+    "tn": "tVn",
+    //ratnapīṭha
+    "dhv": "DVv",
+    //Madhvāsava
+    "dhy": "DVy",
+    //sādhya
+    "ny": "nVy",
+    //Nyāsa
+    "gv": "gVv",
+    //gvākappa
+    "nky": "nVkVy",
+    //Mālunkyāputta
+    "hy": "hVy",
+    //corehyahāriya
+    "\u1E47v": "NVv",
+    //Ṇvarabhakkha
+    "kkhy": "kVKVy",
+    //alakkhyā
+    "ntr": "nVtVr",
+    //tantra 
+    "bhm": "BVm",
+    //Subhmā , only found in s0513m note of 442. Saṅkhajātakaṃ
+    "dy": "dVy",
+    //rare yadyāyaṃ only found in s0514  "ja534:43.3":
+    "sp": "sVp"
+    //rare Vanaspatīni only found in s0514 <note>वनस्पतीनि च (सी॰ पी॰), वनप्पतिञ्‍च (स्या॰ क॰)</note>
+  };
+  var p2i = {};
+  for (let key in i2p)
+    p2i[i2p[key]] = key;
+  for (let key in beginVowels)
+    p2i[beginVowels[key]] = key;
+  var toIASTWord = (p) => {
+    let ch = "", out = "", i = 0;
+    ch = p[0];
+    const leadv = "aeiou".indexOf(ch);
+    if (leadv > -1) {
+      if (p[0] == "a" && p[1] == "A") {
+        out += "\u0101";
+        i++;
+      } else if (p[0] == "i" && p[1] == "I") {
+        out += "\u012B";
+        i++;
+      } else if (p[0] == "u" && p[1] == "U") {
+        out += "\u016B";
+        i++;
+      } else
+        out += ch;
+      i++;
+      ch = p[i];
+    }
+    let needvowel = false, noEndingA = false;
+    if (p.charAt(p.length - 1) == "V") {
+      noEndingA = true;
+      p = p.slice(0, p.length - 1);
+    }
+    while (i < p.length) {
+      ch = p[i];
+      const v = "MAEIOU".indexOf(ch);
+      if (v > -1) {
+        if (v == 0 && needvowel)
+          out += "a";
+        if (p[i + 1] == "A" || p[i + 1] == "I" || p[i + 1] == "U") {
+          i++;
+          if (v == 1)
+            out += "\u0101";
+          else if (v == 2)
+            out += "\u0113";
+          else if (v == 3)
+            out += "\u012B";
+          else if (v == 4)
+            out += "\u014D";
+          else if (v == 5)
+            out += "\u016B";
+          else
+            console.log("wrong vowel");
+        } else
+          out += "\u1E43\u0101eiou"[v] || "";
+        i++;
+        needvowel = false;
+      } else {
+        if (needvowel)
+          out += "a";
+        let cons = p[i];
+        if (cons == "V")
+          return out + "??1" + p;
+        while (i < p.length && p[i + 1] == "V") {
+          cons += "V" + p[i + 2];
+          needvowel = true;
+          i += 2;
+        }
+        const c2 = p2i[cons];
+        if (!c2) {
+          if (isNaN(parseInt(cons))) {
+            return out + "??2" + p;
+          } else {
+            return out + cons;
+          }
+        } else {
+          needvowel = "aeiou\u0964\u0965".indexOf(c2) == -1;
+          if (c2 == "a" && p[i + 1] == "A") {
+            i++;
+            out += "\u0101";
+          } else {
+            out += c2;
+          }
+          i++;
+        }
+      }
+    }
+    if (needvowel && !noEndingA)
+      out += "a";
+    return out;
+  };
+  var OFFTAG_REGEX = /(\^[a-z_]+[#@\/\.\:~a-z_\-\d]*)(\[(?:\\.|.)*?\])?/;
+  var toIASTOffText = (parts) => {
+    if (!parts)
+      return "";
+    if (typeof parts === "string")
+      parts = parts.split(OFFTAG_REGEX);
+    return doParts(parts, /([a-zA-Z]+)/, toIASTWord).replace(/।/g, ".").replace(/॥/g, ".");
+  };
+
+  // ../provident-pali/src/order.js
+  var CharOrder = [];
+  var Order = "aiueokKgGMcCjJYWXFQNtTdDnpPbBmhHyrRlLvsSZAIUEOV";
+  for (let i = 0; i < Order.length; i++) {
+    CharOrder[Order.charCodeAt(i)] = i + 1;
+  }
+
+  // ../provident-pali/src/lexeme.js
+  var NormLexeme = {
+    "bODI": "bOjVJ",
+    "smVbODI": "smVbOjVJ"
+    // 'vVyy':'bVby',
+    // 'vVyyYV':'bVbyYV', //can be removed if smarter
+  };
+  var DeNormLexeme = {};
+  var samecount = (s1, s2) => {
+    let c2 = 0, i1 = 0, i2 = 0;
+    while (i1 < s1.length && i2 < s2.length) {
+      if (s1[i1] == s2[i2])
+        c2++;
+      else
+        break;
+      i1++;
+      i2++;
+    }
+    return c2;
+  };
+  var sameendcount = (s1, s2) => {
+    let c2 = 0, i1 = s1.length - 1, i2 = s2.length - 1;
+    while (i1 > 0 && i2 > 0) {
+      if (s1[i1] == s2[i2])
+        c2++;
+      else
+        break;
+      i1--;
+      i2--;
+    }
+    return c2;
+  };
+  for (let key in NormLexeme) {
+    const rkey = NormLexeme[key];
+    if (key.indexOf(">") > -1)
+      continue;
+    const cnt = samecount(rkey, key);
+    if (cnt) {
+      DeNormLexeme[rkey] = cnt ? key.slice(0, cnt) + "<" + key.slice(cnt) : key;
+    } else {
+      const cnt2 = sameendcount(rkey, key);
+      DeNormLexeme[rkey] = cnt2 ? key.slice(0, key.length - cnt2) + ">" + key.slice(key.length - cnt2) : key;
+    }
+  }
+
+  // ../provident-pali/src/sandhi.js
+  var InsertRules = { "65": "A" };
+  var InsertRuleReverse = {};
+  var Rules = {
+    //規則號不得為 0,1,2
+    // A+B=C    A<B=C   A>B=C    A-B=C
+    //   C        AC     BC       ACB     替換結果
+    //
+    "a<A=A": "3",
+    "a<A=m": "4",
+    "a<A=Vv": "5",
+    "a<A=d": "6",
+    "a-A=r": "7",
+    "a<A=t": "9",
+    "a-AA=r": "3",
+    "a<I=E": "3",
+    "a<I=A": "4",
+    "a<I=IA": "5",
+    "a-I=y": "6",
+    "a-I=m": "7",
+    "a<E=E": "3",
+    "a<E=A": "4",
+    "a-E=d": "5",
+    "a-E=m": "6",
+    "a-E=y": "7",
+    "a<E=": "8",
+    "a<g=gVg": "3",
+    //因為不是 gVG ，所以無法 autorule
+    "a<g=NVg": "4",
+    "a<p=pVp": "3",
+    "a<U=O": "3",
+    "a<U=A": "4",
+    "a<U=U": "5",
+    "a<U=UA": "6",
+    "a<O=U": "3",
+    "a<\u016A=UA": "3",
+    //左邊的 UA 要用 Ū 表示，但sandhi 不用
+    "a<\u012A=IA": "4",
+    // IA 也是 ， 
+    "a<\u012A=E": "5",
+    "a<t=nVt": "4",
+    "a<v=bVb": "5",
+    "A<AA=": "3",
+    //但 AA 不轉為 Ā
+    "A+U=UA": "3",
+    "A+I=IA": "3",
+    "A+I=E": "4",
+    "A-I=y": "5",
+    "A-I=r": "6",
+    "A-I=t": "7",
+    "A-E=y": "4",
+    "A<A=y": "3",
+    "A<A=m": "4",
+    "A+A=E": "5",
+    "A+A=A": "6",
+    "A+A=": "7",
+    "M>AA=m": "3",
+    //kImAnIsMs << kIM-aAnIsMs, remove left, keep right
+    "M+A=A": "3",
+    "M+A=m": "4",
+    "M+A=d": "5",
+    "M+A=": "6",
+    "M+A=nA": "7",
+    "M+E=A": "3",
+    "M+b=bVb": "3",
+    "M+U=UA": "3",
+    "M+I=IA": "3",
+    "M+I=I": "4",
+    "M>I=y": "5",
+    "M+I=": "6",
+    "M+\u012A=A": "3",
+    "M+g=NVg": "3",
+    "M+p=pVp": "3",
+    "M+k=NVk": "3",
+    "M+J=jVJ": "3",
+    "M+X=WVX": "3",
+    "M+y=YVY": "3",
+    //sukhaññeva=sukhaṃ-yeva
+    "I+I=IA": "3",
+    "I+I=E": "4",
+    "I-I=y": "5",
+    "I-I=r": "6",
+    "I+A=jVJ": "2",
+    //this is a special rule for bodhi+anga
+    "I+A=IA": "3",
+    "I+A=A": "4",
+    "I+A=Vy": "6",
+    "I<A=m": "7",
+    "I<A=y": "8",
+    "I<A=r": "9",
+    "I+A=": "10",
+    "I<d=nVd": "3",
+    "I+U=UA": "3",
+    // 'I>aA=':'3',  //use 1 instead
+    "I+AA=I": "4",
+    "I-AA=r": "5",
+    "I<AA=": "6",
+    //kucchisayā=kucchi-āsayā
+    "I>E=Vv": "3",
+    "I>E=Vp": "4",
+    "I-E=d": "5",
+    "I-E=m": "7",
+    "I-E=r": "8",
+    "I<D=nVD": "3",
+    "I>t=IA": "3",
+    //只有接 t可能長音化
+    "I>k=IA": "3",
+    //長音化
+    "\u012A+A=A": "3",
+    "\u012A+U=UA": "3",
+    "U+A=UA": "3",
+    //長音化
+    "U+A=Vv": "4",
+    "U+A=A": "5",
+    "U+A=VvA": "6",
+    "U+A=O": "7",
+    "U+A=": "8",
+    "U+I=U": "3",
+    "U+I=O": "4",
+    "U+I=UA": "5",
+    "U+U=UA": "3",
+    "U-U=h": "4",
+    "U>E=Vv": "3",
+    "U-E=d": "4",
+    "U-E=r": "5",
+    "U>AA=Vv": "3",
+    "U<v=bVb": "3",
+    "U<D=nVD": "3",
+    "U>t=UA": "3",
+    //長音化
+    "U<t=tVt": "4",
+    "U<tA=tVt": "4",
+    "E+A=A": "3",
+    "E+A=Vy": "4",
+    "E+A=VyA": "5",
+    "E>AA=Vy": "5",
+    "E+A=": "6",
+    "E+U=UA": "3",
+    "E-I=r": "3",
+    "O+A=": "3",
+    "O+A=Vv": "4",
+    "O+A=A": "5",
+    "O+A=VvA": "6",
+    "O>I=Vv": "3",
+    "O-I=r": "4",
+    "O>E=Vv": "3",
+    "O-E=y": "4",
+    "O-E=v": "5",
+    "O>AA=Vv": "3",
+    "O-U=v": "3",
+    //vammikovupacīyati=vammiko-upacīyati
+    "V+A=": "3",
+    "V+A=A": "4",
+    "V+U=UA": "3",
+    // might be vri typo , need to fix original text
+    "V+v=": "4",
+    //sātaccamuccati=sātaccam-vuccati
+    "M+v=m": "4",
+    //nibbānamuccati [ 'nibbānaṃ', 'vuccati' ]
+    "a<s=r": "9"
+    //pahūtarattaratanāya [ 'pahūta', 'satta', 'ratanāya' ]
+    //reserve rules
+    //01 => A insert A
+    // 'y+v=bVb':'2', //this is a special rule for udaya+vaya  ==>udayabbaya
+  };
+  var PAIRING = "|";
+  var EQUAL = "=";
+  var ELIDENONE = 0;
+  var ELIDELEFT = 1;
+  var ELIDERIGHT = 2;
+  var ELIDEBOTH = 3;
+  var RuleKeys = { [ELIDENONE]: "-", [ELIDELEFT]: ">", [ELIDERIGHT]: "<", [ELIDEBOTH]: "+" };
+  var RuleKeysRegEx = /([<>\-+])/;
+  var JoinTypes = {};
+  var BuildRules = () => {
+    for (let rule in Rules) {
+      const joiner = Rules[rule];
+      if (!JoinTypes[joiner])
+        JoinTypes[joiner] = {};
+      const at = rule.indexOf(EQUAL);
+      const sandhi = rule.slice(at + 1);
+      const [left, elision, right] = rule.slice(0, at).split(RuleKeysRegEx);
+      const pair = left + PAIRING + right;
+      if (JoinTypes[joiner][pair])
+        console.log("key ", pair, "exists");
+      JoinTypes[joiner][pair] = elision + sandhi;
+    }
+    for (let joiner in InsertRules) {
+      InsertRuleReverse[InsertRules[joiner]] = joiner;
+    }
+  };
+  BuildRules();
+
+  // ../provident-pali/src/tables.js
+  var devanagari = {
+    "\u0915": "k",
+    "\u0916": "K",
+    "\u0917": "g",
+    "\u0918": "G",
+    "\u0919": "NG",
+    "\u0939": "h",
+    // NG 會變為 provident 的 N, 不能重覆故(做反向表時val 變key)
+    "\u091A": "c",
+    "\u091B": "C",
+    "\u091C": "j",
+    "\u091D": "J",
+    "\u091E": "Y",
+    "\u092F": "y",
+    "\u0936": "Z",
+    "\u091F": "W",
+    "\u0920": "X",
+    "\u0921": "F",
+    "\u0922": "Q",
+    "\u0923": "N",
+    "\u0930": "r",
+    "\u0937": "S",
+    "\u0924": "t",
+    "\u0925": "T",
+    "\u0926": "d",
+    "\u0927": "D",
+    "\u0928": "n",
+    "\u0932": "l",
+    "\u0938": "s",
+    "\u092A": "p",
+    "\u092B": "P",
+    "\u092C": "b",
+    "\u092D": "B",
+    "\u092E": "m",
+    "\u0935": "v",
+    "\u0933": "L",
+    "\u0902": "M",
+    "\u0970": "",
+    //abbreviation use only by pe...and inside note (版本略符)
+    "\u0905": "a",
+    "\u0907": "i",
+    "\u0909": "u",
+    "\u090F": "e",
+    "\u0913": "o",
+    "\u0906": "aA",
+    "\u0908": "iI",
+    "\u090A": "uU",
+    "\u0910": "ai",
+    "\u0914": "au",
+    "\u093E": "A",
+    "\u093F": "I",
+    "\u0940": "II",
+    "\u0941": "U",
+    "\u0942": "UU",
+    "\u0947": "E",
+    "\u094B": "O",
+    "\u094D": "V",
+    //virama , 連接下個輔音。
+    "\u0966": "0",
+    "\u0967": "1",
+    "\u0968": "2",
+    "\u0969": "3",
+    "\u096A": "4",
+    "\u096B": "5",
+    "\u096C": "6",
+    "\u096D": "7",
+    "\u096E": "8",
+    "\u096F": "9",
+    // '।':'|','॥':'||',
+    "\u0964": "\u0964",
+    "\u0965": "\u0965",
+    "\u094C": "aU",
+    //invalid in pali
+    "\u0948": "aI",
+    //invalid in pali
+    "\u090B": "R",
+    "\u0903": "H"
+    //visarga, rare
+  };
+  var sinhala = {
+    "\u0D9A": "k",
+    "\u0D9B": "K",
+    "\u0D9C": "g",
+    "\u0D9D": "G",
+    "\u0D9E": "NG",
+    "\u0DC4": "h",
+    "\u0DA0": "c",
+    "\u0DA1": "C",
+    "\u0DA2": "j",
+    "\u0DA3": "J",
+    "\u0DA4": "Y",
+    "\u0DBA": "y",
+    "\u0936": "Z",
+    "\u0DA7": "W",
+    "\u0DA8": "X",
+    "\u0DA9": "F",
+    "\u0DAA": "Q",
+    "\u0DAB": "N",
+    "\u0DBB": "r",
+    "\u0937": "S",
+    "\u0DAD": "t",
+    "\u0DAE": "T",
+    "\u0DAF": "d",
+    "\u0DB0": "D",
+    "\u0DB1": "n",
+    "\u0DBD": "l",
+    "\u0DC3": "s",
+    "\u0DB4": "p",
+    "\u0DB5": "P",
+    "\u0DB6": "b",
+    "\u0DB7": "B",
+    "\u0DB8": "m",
+    "\u0DC0": "v",
+    "\u0DC5": "L",
+    "\u0D82": "M",
+    "\u0D85": "a",
+    "\u0D89": "i",
+    "\u0D8B": "u",
+    "\u0D91": "e",
+    "\u0D94": "o",
+    "\u0D86": "aA",
+    "\u0D8A": "iI",
+    "\u0D8C": "uU",
+    "\u0DCF": "A",
+    "\u0DD2": "I",
+    "\u0DD3": "II",
+    "\u0DD4": "U",
+    "\u0DD6": "UU",
+    "\u0DD9": "E",
+    "\u0DDC": "O",
+    "\u0DCA": "V"
+  };
+  var myanmar = {
+    "\u1000": "k",
+    "\u1001": "K",
+    "\u1002": "g",
+    "\u1003": "G",
+    "\u1004": "NG",
+    "\u101F": "h",
+    "\u1005": "c",
+    "\u1006": "C",
+    "\u1007": "j",
+    "\u1008": "J",
+    "\u1009": "Y",
+    "\u101A": "y",
+    "\u0936": "Z",
+    "\u100B": "W",
+    "\u100C": "X",
+    "\u100D": "F",
+    "\u100E": "Q",
+    "\u100F": "N",
+    "\u101B": "r",
+    "\u0937": "S",
+    "\u1010": "t",
+    "\u1011": "T",
+    "\u1012": "d",
+    "\u1013": "D",
+    "\u1014": "n",
+    "\u101C": "l",
+    "\u101E": "s",
+    "\u1015": "p",
+    "\u1016": "P",
+    "\u1017": "b",
+    "\u1018": "B",
+    "\u1019": "m",
+    "\u101D": "v",
+    "\u1020": "L",
+    "\u1036": "M",
+    "\u1021": "a",
+    "\u1023": "i",
+    "\u1025": "u",
+    "\u1027": "e",
+    "\u1029": "o",
+    "\u1021\u102C": "aA",
+    "\u1024": "iI",
+    "\u1026": "uU",
+    "\u102C": "A",
+    "\u102D": "I",
+    "\u102E": "II",
+    "\u102F": "U",
+    "\u1030": "UU",
+    "\u1031": "E",
+    "\u1031\u102C": "O",
+    "\u1039": "V",
+    "\u1040": "0",
+    "\u1041": "1",
+    "\u1042": "2",
+    "\u1043": "3",
+    "\u1044": "4",
+    "\u1045": "5",
+    "\u1046": "6",
+    "\u1047": "7",
+    "\u1048": "8",
+    "\u1049": "9",
+    " \u103A": "",
+    //ASAT
+    "\u104A": "\u0964",
+    "\u104B": "\u0965"
+  };
+  var thai = {
+    "\u0E01": "k",
+    "\u0E02": "K",
+    "\u0E04": "g",
+    "\u0E06": "G",
+    "\u0E07": "NG",
+    "\u0E2B": "h",
+    "\u0E08": "c",
+    "\u0E09": "C",
+    "\u0E0A": "j",
+    "\u0E0C": "J",
+    "\u0E0D": "Y",
+    "\u0E22": "y",
+    "\u0936": "Z",
+    "\u0E0F": "W",
+    "\u0E10": "X",
+    "\u0E11": "F",
+    "\u0E12": "Q",
+    "\u0E13": "N",
+    "\u0E23": "r",
+    "\u0937": "S",
+    "\u0E15": "t",
+    "\u0E16": "T",
+    "\u0E17": "d",
+    "\u0E18": "D",
+    "\u0E19": "n",
+    "\u0E25": "l",
+    "\u0E2A": "s",
+    "\u0E1B": "p",
+    "\u0E1C": "P",
+    "\u0E1E": "b",
+    "\u0E20": "B",
+    "\u0E21": "m",
+    "\u0E27": "v",
+    "\u0E2C": "L",
+    "\u0E4D": "M",
+    "\u0E2D": "a",
+    "\u0E2D\u0E34": "i",
+    "\u0E2D\u0E38": "u",
+    "\u0E40\u0E2D": "e",
+    "\u0E42\u0E2D": "o",
+    "\u0E2D\u0E32": "aA",
+    "\u0E2D\u0E35": "iI",
+    "\u0E2D\u0E39": "uU",
+    "\u0E32": "A",
+    "\u0E34": "I",
+    "\u0E35": "II",
+    "\u0E38": "U",
+    "\u0E39": "UU",
+    "\u0E40": "E",
+    "\u0E42": "O",
+    "\u0E3A": "V",
+    "\u0E50": "0",
+    "\u0E51": "1",
+    "\u0E52": "2",
+    "\u0E53": "3",
+    "\u0E54": "4",
+    "\u0E55": "5",
+    "\u0E56": "6",
+    "\u0E57": "7",
+    "\u0E58": "8",
+    "\u0E59": "9"
+  };
+  var khmer = {
+    "\u1780": "k",
+    "\u1781": "K",
+    "\u1782": "g",
+    "\u1783": "G",
+    "\u1784": "NG",
+    "\u17A0": "h",
+    "\u1785": "c",
+    "\u1786": "C",
+    "\u1787": "j",
+    "\u1788": "J",
+    "\u1789": "Y",
+    "\u1799": "y",
+    "\u0936": "Z",
+    "\u178A": "W",
+    "\u178B": "X",
+    "\u178C": "F",
+    "\u178D": "Q",
+    "\u178E": "N",
+    "\u179A": "r",
+    "\u0937": "S",
+    "\u178F": "t",
+    "\u1790": "T",
+    "\u1791": "d",
+    "\u1792": "D",
+    "\u1793": "n",
+    "\u179B": "l",
+    "\u179F": "s",
+    "\u1794": "p",
+    "\u1795": "P",
+    "\u1796": "b",
+    "\u1797": "B",
+    "\u1798": "m",
+    "\u179C": "v",
+    "\u17A1": "L",
+    "\u17C6": "M",
+    "\u17A2": "a",
+    "\u17A5": "i",
+    "\u17A7": "u",
+    "\u17AF": "e",
+    "\u17B1": "o",
+    "\u17A2\u17B6": "aA",
+    "\u17A6": "iI",
+    "\u17A9": "uU",
+    "\u17B6": "A",
+    "\u17B7": "I",
+    "\u17B8": "II",
+    "\u17BB": "U",
+    "\u17BC": "UU",
+    "\u17C1": "E",
+    "\u17C4": "O",
+    "\u17D2": "V",
+    "\u17E0": "0",
+    "\u17E1": "1",
+    "\u17E2": "2",
+    "\u17E3": "3",
+    "\u17E4": "4",
+    "\u17E5": "5",
+    "\u17E6": "6",
+    "\u17E7": "7",
+    "\u17E8": "8",
+    "\u17E9": "9"
+  };
+  var laos = {
+    "\u0E81": "k",
+    "\u0E82": "K",
+    "\u0E84": "g",
+    "\u0E86": "G",
+    "\u0E87": "NG",
+    "\u0EAB": "h",
+    "\u0E88": "c",
+    "\u0E89": "C",
+    "\u0E8A": "j",
+    "\u0E8C": "J",
+    "\u0E8E": "Y",
+    "\u0E8D": "y",
+    "\u0936": "Z",
+    "\u0E8F": "W",
+    "\u0E90": "X",
+    "\u0E91": "F",
+    "\u0E92": "Q",
+    "\u0E93": "N",
+    "\u0EA3": "r",
+    "\u0937": "S",
+    "\u0E95": "t",
+    "\u0E96": "T",
+    "\u0E97": "d",
+    "\u0E98": "D",
+    "\u0E99": "n",
+    "\u0EA5": "l",
+    "\u0EAA": "s",
+    "\u0E9B": "p",
+    "\u0E9C": "P",
+    "\u0E9E": "b",
+    "\u0EA0": "B",
+    "\u0EA1": "m",
+    "\u0EA7": "v",
+    "\u0EAC": "L",
+    "\u0ECD": "M",
+    "\u0EAD": "a",
+    "\u0EAD\u0EB4": "i",
+    "\u0EAD\u0EB8": "u",
+    "\u0EC0\u0EAD": "e",
+    "\u0EC2\u0EAD": "o",
+    "\u0EAD\u0EB2": "aA",
+    "\u0EAD\u0EB5": "iI",
+    "\u0EAD\u0EB9": "uU",
+    "\u0EB2": "A",
+    "\u0EB4": "I",
+    "\u0EB5": "II",
+    "\u0EB8": "U",
+    "\u0EB9": "UU",
+    "\u0EC0": "E",
+    "\u0EC2": "O",
+    "\u0EBA": "V",
+    "\u0ED0": "0",
+    "\u0ED1": "1",
+    "\u0ED2": "2",
+    "\u0ED3": "3",
+    "\u0ED4": "4",
+    "\u0ED5": "5",
+    "\u0ED6": "6",
+    "\u0ED7": "7",
+    "\u0ED8": "8",
+    "\u0ED9": "9"
+  };
+  var tibetan = {
+    "\u0F40": "k",
+    "\u0F41": "K",
+    "\u0F42": "g",
+    "\u0F43": "G",
+    "\u0F44": "NG",
+    "\u0F67": "h",
+    "\u0F59": "c",
+    "\u0F5A": "C",
+    "\u0F5B": "j",
+    "\u0F5C": "J",
+    "\u0F49": "Y",
+    "\u0F61": "y",
+    "\u0936": "Z",
+    "\u0F4A": "W",
+    "\u0F4B": "X",
+    "\u0F4C": "F",
+    "\u0F4D": "Q",
+    "\u0F4E": "N",
+    "\u0F62": "r",
+    "\u0937": "S",
+    "\u0F4F": "t",
+    "\u0F50": "T",
+    "\u0F51": "d",
+    "\u0F52": "D",
+    "\u0F53": "n",
+    "\u0F63": "l",
+    "\u0F66": "s",
+    "\u0F54": "p",
+    "\u0F55": "P",
+    "\u0F56": "b",
+    "\u0F57": "B",
+    "\u0F58": "m",
+    "\u0F5D": "v",
+    "\u0F63\u0F39": "L",
+    "\u0F7E": "M",
+    "\u0F68": "a",
+    "\u0F68\u0F72": "i",
+    "\u0F68\u0F74": "u",
+    "\u0F68\u0F7A": "e",
+    "\u0F68\u0F7C": "o",
+    "\u0F68\u0F71": "aA",
+    "\u0F68\u0F71\u0F72": "iI",
+    "\u0F68\u0F71\u0F74": "uU",
+    "\u0F71": "A",
+    "\u0F72": "I",
+    "\u0F71\u0F72": "II",
+    "\u0F74": "U",
+    "\u0F71\u0F74": "UU",
+    "\u0F7A": "E",
+    "\u0F7C": "O",
+    "\u0F84": "V",
+    "\u0F20": "0",
+    "\u0F21": "1",
+    "\u0F22": "2",
+    "\u0F23": "3",
+    "\u0F24": "4",
+    "\u0F25": "5",
+    "\u0F26": "6",
+    "\u0F27": "7",
+    "\u0F28": "8",
+    "\u0F29": "9",
+    //subjoin
+    "\u0F90": "Vk",
+    "\u0F91": "VK",
+    "\u0F92": "Vg",
+    "\u0F93": "VG",
+    "\u0F94": "VN",
+    "\u0F95\u0F96\u0F97": "Vc",
+    "\u0F96": "VC",
+    "\u0F97": "Vj",
+    "\u0F99": "VY",
+    "\u0F9A": "tVt",
+    "\u0F9B": "tVT",
+    "\u0F9C": "dVd",
+    "\u0F9D": "dVD",
+    "\u0F9E": "nVN",
+    "\u0F9F": "Vt",
+    "\u0FA0": "VT",
+    "\u0FA1": "Vd",
+    "\u0FA2": "VD",
+    "\u0FA3": "Vn",
+    "\u0FA4": "Vp",
+    "\u0FA5": "VP",
+    "\u0FA6": "Vb",
+    "\u0FA7": "VB",
+    "\u0FA8": "Vm",
+    "\u0F0D": "\u0964",
+    "\u0F0E": "\u0965"
+  };
+
+  // ../provident-pali/src/indic.js
+  var inverseTable = (tbl) => {
+    const out = {};
+    for (let key in tbl)
+      out[tbl[key]] = key;
+    return out;
+  };
+  var tables = {
+    hi: inverseTable(devanagari),
+    my: inverseTable(myanmar),
+    th: inverseTable(thai),
+    km: inverseTable(khmer),
+    lo: inverseTable(laos),
+    si: inverseTable(sinhala),
+    tb: inverseTable(tibetan)
+    //,    cy:inverseTable(cyrillic),
+  };
+
   // src/references.ts
   var urls = [
     ["\u82F1", "https://raw.githubusercontent.com/accelon/sc/main/off/<>.sc.off"],
-    ["\u5DF4", "https://dhamma.github.io/sc-ro/<>.ms.off"],
+    ["\u5DF4", "https://raw.githubusercontent.com/accelon/sc/main/pli/<>.ms.off"],
     //generated by accelon/sc/gen-ro.js
     ["\u676D", "https://raw.githubusercontent.com/accelon/sutra-mobi/main/cs-hz.offtext/<>.hz.off"],
     ["\u838A", "https://raw.githubusercontent.com/accelon/ccc/main/off/<>.ccc.off"],
@@ -4076,8 +5109,12 @@
     if (!refs.length)
       return;
     selectedRef.set(n);
-    const response = await fetch(refs[n].url);
-    const content = await response.text();
+    const url = refs[n].url;
+    const response = await fetch(url);
+    let content = await response.text();
+    if (~url.indexOf("pli")) {
+      content = toIASTOffText(content);
+    }
     loadCMText(content, 1);
   };
 
