@@ -671,7 +671,7 @@
   var cm2 = writable(null);
   var cursorline = writable(0);
   var selectedRef = writable(0);
-  var APPVER = "2023.9.14";
+  var APPVER = "2023.9.15";
 
   // ../ptk/offtext/constants.ts
   var OFFTAG_REGEX_G = /\^([#@\/\.\:a-z_\-\d~]+)(<(?:\\.|.)*?>)?/g;
