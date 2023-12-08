@@ -671,7 +671,7 @@
   var cm2 = writable(null);
   var cursorline = writable(0);
   var selectedRef = writable(0);
-  var APPVER = "2023.9.27";
+  var APPVER = "2023.10.16";
 
   // ../ptk/offtext/constants.ts
   var OFFTAG_REGEX_G = /\^([#@\/\.\:a-z_\-\d~]+)(<(?:\\.|.)*?>)?/g;
@@ -4328,12 +4328,12 @@
       out += "a";
     return out;
   };
-  var OFFTAG_REGEX = /(\^[a-z_]+[#@\/\.\:~a-z_\-\d]*)(\[(?:\\.|.)*?\])?/;
+  var OFFTAG_REGEX2 = /(\^[a-z_]+[#@\/\.\:~a-z_\-\d]*)(\[(?:\\.|.)*?\])?/;
   var toIASTOffText = (parts) => {
     if (!parts)
       return "";
     if (typeof parts === "string")
-      parts = parts.split(OFFTAG_REGEX);
+      parts = parts.split(OFFTAG_REGEX2);
     return doParts(parts, /([a-zA-Z]+)/, toIASTWord).replace(/।/g, ".").replace(/॥/g, ".");
   };
 
@@ -5198,6 +5198,8 @@
     let a0;
     let t1;
     let a1;
+    let t3;
+    let a2;
     return {
       c() {
         a0 = element("a");
@@ -5205,17 +5207,25 @@
         t1 = space();
         a1 = element("a");
         a1.textContent = "\u65E0\u6CD5\u8BBF\u95EE\u6CB9\u7BA1\u70B9\u6B64";
+        t3 = space();
+        a2 = element("a");
+        a2.textContent = "\u5E94\u5FB5\u5DE5\u4F5C";
         attr(a0, "href", "https://youtu.be/2TskfhLQ9Jk");
         attr(a0, "target", "_new");
         attr(a0, "class", "svelte-2aqs7u");
         attr(a1, "href", "https://nissaya.cn/video/aligner.mp4");
         attr(a1, "target", "_new");
         attr(a1, "class", "svelte-2aqs7u");
+        attr(a2, "href", "outsource.html");
+        attr(a2, "target", "_new");
+        attr(a2, "class", "svelte-2aqs7u");
       },
       m(target, anchor) {
         insert(target, a0, anchor);
         insert(target, t1, anchor);
         insert(target, a1, anchor);
+        insert(target, t3, anchor);
+        insert(target, a2, anchor);
       },
       d(detaching) {
         if (detaching)
@@ -5224,6 +5234,10 @@
           detach(t1);
         if (detaching)
           detach(a1);
+        if (detaching)
+          detach(t3);
+        if (detaching)
+          detach(a2);
       }
     };
   }
